@@ -1287,26 +1287,36 @@ function drawLegend() {
     // POSIZIONE: Sotto il bottone Start Animation + 40px di margine
     const startY = CONFIG.layout.buttonStartY + CONFIG.layout.controlButtonHeight - 200;
     
+    // Box attorno alla legenda - stesso stile del bottone Start Animation
+    const legendWidth = 300;
+    const legendHeight = 120;
+    
+    stroke(CONFIG.colors.accent);
+    strokeWeight(1);
+    noFill();
+    rect(startX, startY, legendWidth, legendHeight, 5);
+    
     // Prima riga della legenda: Eruzione vulcanica
-    const line1Y = startY;
+    const line1Y = startY + 20;
     // Icona: pallino nero con bordo rosso (come i vulcani) - AUMENTATO a 14px
     fill(0); // Nero per il riempimento
-    //stroke(CONFIG.colors.circle); // Rosso per il bordo
-    strokeWeight(8); // Aumentato lo spessore
-    circle(startX + 15, line1Y + 12, 8); // Pallino di 14px di diametro
+    stroke(CONFIG.colors.accent); // Rosso per il bordo
+    strokeWeight(2); // Aumentato lo spessore
+    circle(startX + 20, line1Y + 12, 12); // Pallino di 12px di diametro
     
-    // Testo spiegazione
+    // Testo spiegazione - MODIFICATO: rimossa bold
     fill(CONFIG.colors.text); // Testo nero
     noStroke();
     textSize(16); // Font a 16 punti come richiesto
+    textStyle(NORMAL); // MODIFICATO: non più bold
     textAlign(LEFT, CENTER);
-    text('Volcanic eruption', startX + 40, line1Y + 12);
+    text('Volcanic eruption', startX + 45, line1Y + 12);
     
     // Seconda riga della legenda: Impact range
-    const line2Y = startY + 40; // Aumentato lo spazio tra le righe
+    const line2Y = startY + 55; // Aumentato lo spazio tra le righe
     // Icona: cerchio con freccetta che punta all'interno - AUMENTATO a 18px
     push();
-    translate(startX + 15, line2Y + 12);
+    translate(startX + 20, line2Y + 12);
     // Cerchio vuoto più grande
     noFill();
     stroke(CONFIG.colors.accent); // Rosso per il bordo
@@ -1323,18 +1333,19 @@ function drawLegend() {
     line(1, 0, 3, 2.5);
     pop();
     
-    // Testo spiegazione
+    // Testo spiegazione - MODIFICATO: rimossa bold
     fill(CONFIG.colors.text); // Testo nero
     noStroke();
     textSize(16); // Font a 16 punti come richiesto
+    textStyle(NORMAL); // MODIFICATO: non più bold
     textAlign(LEFT, CENTER);
-    text('Distribution based on impact range', startX + 40, line2Y + 12);
+    text('Distribution based on impact range', startX + 45, line2Y + 12);
     
 // Terza riga della legenda: Ordine temporale
-const line3Y = startY + 80;
+const line3Y = startY + 90;
 
 push();
-translate(startX + 8, line3Y + 22);
+translate(startX + 13, line3Y + 12);
 
 // --- STILE ---
 stroke(CONFIG.colors.accent);
@@ -1366,12 +1377,13 @@ line(ax, ay, ax - 3, ay + 3);
 
 pop();
 
-// Testo
+// Testo - MODIFICATO: rimossa bold
 fill(CONFIG.colors.text);
 noStroke();
 textSize(16);
+textStyle(NORMAL); // MODIFICATO: non più bold
 textAlign(LEFT, CENTER);
-text('Temporal order of eruptions', startX + 40, line3Y + 12);
+text('Temporal order of eruptions', startX + 45, line3Y + 12);
 }
 
 // 24 - Selettore periodo
@@ -1552,6 +1564,43 @@ function drawMainCircle() {
     }
     
     drawImpactCircles();
+    
+    // Aggiungi la scritta "16" sul grafico (in nero bold)
+    fill(0); // Nero
+    noStroke();
+    textSize(20); // Dimensione del testo
+    textStyle(BOLD); // Bold
+    textAlign(CENTER, CENTER);
+    
+    // Posiziona la scritta "16" vicino al centro
+    const radiusFor16 = map(16, 1, 16, CONFIG.layout.maxRadius, CONFIG.layout.minRadius);
+    text("16", 0, -radiusFor16 - 15);
+    
+    // Mantieni anche i numeri rossi esistenti
+    const specialIndices = [0, 4, 8, 12].filter(index => index < impactLevels.length);
+    if (state.circleRevealProgress >= 1) {
+        for (let i = 0; i < impactLevels.length; i++) {
+            if (specialIndices.includes(i)) {
+                const circleNumber = i + 1;
+                const radius = map(i, 0, impactLevels.length - 1, 
+                                  CONFIG.layout.maxRadius, CONFIG.layout.minRadius);
+                const labelX = 0;
+                const labelY = -radius - 15;
+                
+                // Salta il numero 16 (che è già disegnato in nero)
+                if (circleNumber !== 16) {
+                    push();
+                    fill(CONFIG.colors.accent); // Rosso per gli altri numeri
+                    noStroke();
+                    textSize(16);
+                    textAlign(CENTER, CENTER);
+                    text(circleNumber, labelX, labelY+5);
+                    pop();
+                }
+            }
+        }
+    }
+    
     drawContinentDividers();
     
     if (state.filteredData.length > 0) {
