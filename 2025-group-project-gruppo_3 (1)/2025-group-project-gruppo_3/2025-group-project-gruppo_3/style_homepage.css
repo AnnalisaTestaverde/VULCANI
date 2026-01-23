@@ -1,0 +1,163 @@
+/* scroll fluido */
+html {
+    scroll-behavior: smooth;
+}
+
+/* rende cliccabile la freccia */
+.scroll-icon a {
+    text-decoration: none;
+    /* Colore accento: Lava */
+    color: #000000; 
+    font-size: 40px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+/* 1. SFONDO BIANCO GENERALE E TESTO NERO DI BASE */
+body {
+    color: #000000; /* TESTO NERO */
+    background-color: #ffffff; /* SFONDO BIANCO */
+    overflow-x: hidden;
+}
+
+header {
+    width: 100%;
+    padding: 25px 40px;
+    display: flex;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    z-index: 10;
+    background-color: transparent; /* Manteniamo trasparente sopra il canvas */
+}
+
+/* 2. LINK E LOGO NERI */
+header a {
+    text-decoration: none;
+    color: #000000; /* LINK NERI */
+    margin-left: 40px;
+    font-size: 14px;
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 14px;
+    color: #000000; /* LOGO NERO */
+}
+
+.hero {
+    height: 100vh;
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: transparent; /* Manteniamo trasparente per vedere il canvas */
+}
+
+/* 3. TESTO H1 NERO */
+.hero h1 {
+    font-size: 160px;
+    color: #000000; /* TESTO NERO per la mascheratura o visibilità */
+    font-weight: 180%;
+    z-index: 2;
+    margin-bottom: 40px;
+    text-align: center;
+    margin-left: 0px; 
+    padding-left: 0;
+    line-height: 0.85; 
+}
+
+.scroll-icon {
+    font-size: 40px;
+    color: #000000; /* ICONA NERA (o lava #FF2B00 se vuoi contrasto) */
+    opacity: 100%;
+    animation: bounce 2s infinite;
+    z-index: 2;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+}
+
+.content {
+    padding: 200px 200px;
+    text-align: left;
+    /* Ho corretto la sintassi del background-color */
+    background-color: rgb(255, 255, 255); 
+    color: #000000;
+}
+
+.content-flex-container {
+    display: grid; /* Passa a Grid Layout */
+    grid-template-columns: 1fr 1fr; /* Dividi lo spazio in due colonne uguali */
+    gap: 100px; /* Mantiene lo spazio centrale */
+    
+    /* !!! QUESTA È LA CHIAVE !!! */
+    /* Allinea gli elementi lungo l'asse orizzontale in base alla loro ULTIMA linea di base */
+    align-items: last baseline; 
+}
+
+/* Rimuovi flex: 1 dal contenuto, non è più necessario in Grid */
+.content h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #FF2B00;
+    /* Rimuovi: flex: 1; */ 
+}
+
+.content p {
+    font-size: 14px;
+    color: #000000;
+    line-height: 20px;
+    /* Rimuovi: flex: 1; */
+    max-width: none; /* Rimuovi o imposta su 'none' per far occupare l'intera colonna Grid */
+}
+.map-button {
+    display: inline-block;
+    margin-top: 40px;
+    padding: 8px 25px;
+    border-radius: 20px;
+    background-color: #FF2B00; /* Mantenuto accento Lava */
+    color: white; /* Testo del bottone bianco */
+    text-decoration: none;
+    font-size: 14px;
+}
+
+
+
+
+footer {
+    width: 100%;
+    border-top: 1px solid #FF2B00;
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    bottom: 0;
+    color: #000000; /* Testo footer nero */
+    font-size: 12px;
+}
+
+/* LASCIA INVARIATO IL POSIZIONAMENTO DEL CANVAS E DEL CONTENUTO */
+#p5-background-canvas {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+}
+
+header, .hero, .content, footer {
+    position: relative;
+    z-index: 1;
+}

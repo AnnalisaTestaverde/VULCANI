@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About the Graphic</title>
+    <!-- Collegamento al CSS esterno -->
+    <link rel="stylesheet" href="style_learn_more.css">
+    <!-- Libreria p5.js per le animazioni -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+</head>
+<body>
+    <!-- Container per il canvas principale p5.js -->
+    <div id="main-sketch-container"></div>
+    
+    <!-- Container per il testo a sinistra -->
+    <div id="text-container">
+        <!-- Area di scroll per il testo (senza scrollbar visibile) -->
+        <div id="text-scroll-area">
+            <!-- Contenuto testuale completo -->
+            <div id="text-content">
+                <!-- Sezione 1: Il grafico -->
+                <div class="section-title">THE GRAPH: A MAP OF VOLCANIC POWER</div>
+                <div class="section-text">
+                    This visualization transforms volcanic eruption data into an interactive map that tells the story of Earth's destructive power. Each black dot represents a real event, positioned on a large concentric circle. Its position is not random: it is determined by an <span class="bold-white">Impact Score</span>, a score between 1 and 16, calculated by adding five key indicators.
+                </div>
+                
+                <!-- Sezione 2: Sistema di punteggio -->
+                <div class="section-title">THE IMPACT SCORE SYSTEM</div>
+                <div class="section-text">
+                    The <span class="bold-white">Impact Score</span> (from 1 to 16) is calculated by summing five indicators, each rated from 0 to 4:
+                </div>
+                
+                <!-- Elenco puntato degli indicatori (sostituisce i box) -->
+                <ul class="impact-list">
+                    <li><span class="bold-white">DEATHS</span> - From 1 to 4, based on the number of victims (from 1-50 to over 1,000).</li>
+                    <li><span class="bold-white">INJURIES</span> - From 1 to 4, based on injured people (from 1-50 to over 1,000).</li>
+                    <li><span class="bold-white">DESTROYED HOUSES</span> - From 1 to 4, based on lost buildings (from 1-50 to over 1,000).</li>
+                    <li><span class="bold-white">ECONOMIC DAMAGE</span> - From 1 to 4, based on estimated costs (from less than 1 million to over 25 million dollars).</li>
+                    <li><span class="bold-white">MISSING</span> - From 0 to 4, to indicate the number of missing or unidentified people (from 1-50 to over 1,000; 0 if not relevant or not documented).</li>
+                </ul>
+                
+                <div class="section-text">
+                    An eruption with a score of 16 was devastating in all aspects; one with a score of 1, instead, had minimal impact.
+                </div>
+                
+                <!-- Sezione 4: Come leggere il grafico -->
+                <div class="section-title" style="margin-bottom: 1px;">HOW TO READ THE GRAPH</div>
+
+                 <!-- Container per la leggenda p5.js - STILE INLINE PER NON SOVRAPPORSI -->
+                <div id="legend-container" ></div>
+                
+                <div class="section-text">
+                    <span class="bold-white">THE BLACK DOTS </span>: Each dot represents a volcanic eruption. Hovering the mouse over a dot displays a window with the <span class="bold-white">volcano's name</span> and the <span class="bold-white">eruption year</span>. Clicking on the dot directly accesses the event's <span class="bold-white">detail page</span>, where you can explore the data further.
+                </div>
+                
+                <div class="section-text">
+                    <span class="bold-white">THE CONCENTRIC CIRCLES</span>: The <span class="bold-white">outer ring</span> corresponds to score 1 (minimal impact), while the <span class="bold-white">bright red central point</span> represents the maximum score of 16 (maximum devastation). The closer a dot is to the center, the more severe the event was.
+                </div>
+                
+                <div class="section-text"> 
+                    <span class="bold-white">THE CONTINENTAL WEDGES</span>: The circle is divided into five <span class="bold-white">wedges</span>, each representing a continent: <span class="bold-white">Asia</span>, <span class="bold-white">Americas</span>, <span class="bold-white">Europe</span>, <span class="bold-white">Oceania</span>, <span class="bold-white">Africa</span>. Within each wedge, eruptions are arranged <span class="bold-white">clockwise</span>, starting from the oldest event (4200 BC) to <span class="bold-white">today</span>.
+                </div>
+                
+                <!-- Sezione 5: Controlli esterni -->
+                <div class="section-title">EXTERNAL CONTROLS: FILTERS AND ANIMATION</div>
+                
+                <div class="section-text">
+                    On the left side of the page, tools are available to explore the data dynamically.
+                </div>
+                
+                <!-- Elenco puntato dei controlli (sostituisce i box) -->
+                <ul class="controls-list">
+                    <li><span class="bold-white">SELECT TIME FRAME</span> - With the arrows << and >>, you can select a specific time interval (for example, "800 AD - 1800 AD"). The graph updates automatically, showing only eruptions that occurred in that period.</li>
+                    <li><span class="bold-white">SELECT YEAR</span> - With the arrows < and >, you can navigate year by year among those present in the dataset. Not all years are present, as the dataset does not include records for every single year. In recent decades, however, precision increases significantly, allowing analysis of individual years like 2005.</li>
+                    <li><span class="bold-white">START ANIMATION</span> - Starts an automatic animation that scrolls through available years in succession, highlighting eruptions that occurred in each year with a <span class="bold-black">luminous pulsating effect</span> (a red glow that expands around the dot).</li>
+                </ul>
+                
+                <!-- Spazio finale ridotto (per accorciare il box) -->
+                <div style="height: 80px;"></div>
+            </div>
+        </div>
+        
+        <!-- Freccia al centro in basso per indicare lo scroll -->
+        <div id="scroll-hint">V</div>
+    </div>
+    
+      <!-- Bottoni finali (appariranno solo alla fine dello scroll) -->
+    <div id="buttons-container">
+        <div class="buttons-row">
+            <button class="bottom-button" id="back-to-map-btn">Back to map</button>
+            <div class="button-spacer"></div>
+            <button class="bottom-button" id="about-dataset-btn">About the methodology</button>
+        </div>
+    </div>
+    <!-- Codice JavaScript p5.js principale -->
+    <script>
+        // ===== CONFIGURAZIONE IDENTICA ALL'ORIGINALE =====
+        const CONFIG = {
+            colors: {
+                background: '#FF2B00', // Sfondo arancione
+                text: '#000000ff', // Testo nero (per la maggior parte)
+                accent: '#FFFFFF', // Bianco per bordo button e "GRAPHIC"
+                accentLight: '#FF2B00',
+                circle: '#111010b3', // Cerchi come originale
+                continentBase: '#FF2B00',
+                highlightGlow: '#FF2B00',
+                infoBox: '#ffffffff',
+                infoBoxText: '#000000ff',
+                infoBoxStroke: '#FF2B00',
+                timeline: '#FF2B00',
+                selectedContinent: '#b9b9b988'
+            },
+            layout: {
+                centerXRatio: 0.695,
+                maxRadius: 300,
+                minRadius: 29,
+                continentLabelOffset: 15,
+                europeAsiaOffset: 15,
+                infoBoxWidth: 200,
+                infoBoxHeight: 70,
+                bottomControlY: 100,
+                marginX: 40,
+                fontSizeControls: 16,
+                centerYOffset: -10,
+                topOffset: -20,
+                leftPanelWidth: 300,
+                controlButtonHeight: 50,
+                controlButtonWidth: 50,
+                timeframeFontSize: 30,
+                yearFontSize: 30,
+                labelFontSize: 17,
+                titleStartY: 60,
+                buttonStartY: 450,
+                timeframeStartY: 490,
+                yearStartY: 600
+            },
+            animation: {
+                dotEntryDuration: 800,
+                dotStaggerDelay: 30,
+                dotPopScale: 1.4,
+                randomDelayMax: 600,
+                waveDuration: 1000,
+                easingFunction: 'easeOutBack',
+                fastDotEntryDuration: 400,
+                fastRandomDelayMax: 200
+            }
+        };
+
+        let impactLevels = [];
+        let allImpacts = [];
+
+        const CONCENTRIC_YEARS = [-4200, 0, 800, 1800, 1850, 1900, 1950, 2000, 2050];
+
+        // Quanto durano le animazioni
+        const SELECTION_ANIMATION_DURATION = 800;
+        const HOVER_ANIMATION_DURATION = 300;
+        const CIRCLE_REVEAL_DURATION = 1500;
+
+        // ===== STATO APPLICAZIONE =====
+        let state = {
+            volcanoData: [],
+            filteredData: [],
+            selectedCentury: null,
+            selectedContinent: null,
+            hoveredVolcano: null,
+            timelineYear: null,
+            centerX: 0,
+            centerY: 0,
+            continentAngles: {},
+            continentCounts: {},
+            volcanoPositions: new Map(),
+            globalYearRange: { min: 0, max: 0 },
+            
+            // Per le animazioni
+            leftControlAreas: null,
+            rightControlAreas: null,
+            asiaLabelY: 0,
+            
+            // Per le animazioni dei vulcani
+            selectionAnimationStart: new Map(),
+            hoverAnimationStart: new Map(),
+            
+            // Per l'animazione di apertura dei cerchi
+            circleRevealStart: null,
+            circleRevealProgress: 0,
+            
+            // Per l'animazione dei puntini
+            dotAnimationStart: null,
+            dotAnimationProgress: 0,
+            dotAppearTimes: new Map(),
+            
+            // Controlli animazioni
+            disableDotEntryAnimation: false,
+            
+            // Per il back button
+            backButtonArea: null,
+            
+            // Stato per hover sul back button
+            isBackButtonHovered: false
+        };
+
+        // Immagine di sfondo
+        let radialBgImage;
+
+        // ===== MAPPATURA CONTINENTI =====
+        const CONTINENT_MAP = {
+            'Arabia-S': 'Asia', 'Arabia-W': 'Asia', 'China-S': 'Asia', 'Halmahera-Indonesia': 'Asia',
+            'Hokkaido-Japan': 'Asia', 'Honshu-Japan': 'Asia', 'Indonesia': 'Asia', 'Izu Is-Japan': 'Asia',
+            'Java': 'Asia', 'Kamchatka': 'Asia', 'Kuril Is': 'Asia', 'Kyushu-Japan': 'Asia',
+            'Lesser Sunda Is': 'Asia', 'Luzon-Philippines': 'Asia', 'Mindanao-Philippines': 'Asia',
+            'Philippines-C': 'Asia', 'Ryukyu Is': 'Asia', 'Sangihe Is-Indonesia': 'Asia',
+            'Sulawesi-Indonesia': 'Asia', 'Sumatra': 'Asia', 'Turkey': 'Asia',
+            
+            'Alaska Peninsula': 'Americas', 'Alaska-SW': 'Americas', 'Aleutian Is': 'Americas',
+            'Canada': 'Americas', 'Chile-C': 'Americas', 'Chile-S': 'Americas', 'Colombia': 'Americas',
+            'Costa Rica': 'Americas', 'Ecuador': 'Americas', 'El Salvador': 'Americas', 'Galapagos': 'Americas',
+            'Guatemala': 'Americas', 'Hawaiian Is': 'Americas', 'Mexico': 'Americas', 'Nicaragua': 'Americas',
+            'Peru': 'Americas', 'US-Oregon': 'Americas', 'US-Washington': 'Americas', 'US-Wyoming': 'Americas',
+            'W Indies': 'Americas',
+            
+            'Azores': 'Europe', 'Canary Is': 'Europe', 'Greece': 'Europe', 'Iceland-NE': 'Europe',
+            'Iceland-S': 'Europe', 'Iceland-SE': 'Europe', 'Iceland-SW': 'Europe', 'Italy': 'Europe',
+            
+            'Admiralty Is-SW Paci': 'Oceania', 'Banda Sea': 'Oceania', 'Bougainville-SW Paci': 'Oceania',
+            'Kermadec Is': 'Oceania', 'New Britain-SW Pac': 'Oceania', 'New Guinea': 'Oceania',
+            'New Guinea-NE of': 'Oceania', 'New Zealand': 'Oceania', 'Samoa-SW Pacific': 'Oceania',
+            'Santa Cruz Is-SW Pac': 'Oceania', 'Solomon Is-SW Pacifi': 'Oceania', 'Tonga-SW Pacific': 'Oceania',
+            'Vanuatu-SW Pacific': 'Oceania',
+            
+            'Africa-C': 'Africa', 'Africa-E': 'Africa', 'Africa-NE': 'Africa', 'Africa-W': 'Africa',
+            'Cape Verde Is': 'Africa', 'Indian O-W': 'Africa', 'Red Sea': 'Africa'
+        };
+
+        const CONTINENTS = ['Asia', 'Americas', 'Europe', 'Oceania', 'Africa'];
+
+        // ===== FUNZIONI PRINCIPALI P5.JS =====
+        
+        // 1 - Caricamento dati
+        function preload() {
+            loadTable('assets/data_impatto.csv', 'csv', 'header', processTableData);
+            radialBgImage = loadImage('assets/radial_bg.png');
+        }
+
+        // 2 - Processamento dati
+        function processTableData(table) {
+            state.volcanoData = [];
+            allImpacts = [];
+            
+            for (let r = 0; r < table.getRowCount(); r++) {
+                let row = table.getRow(r);
+                let location = row.getString('Location');
+                
+                let deaths = parseInt(row.getString('Deaths')) || 0;
+                let impact = parseInt(row.getString('Impact')) || 1;
+                
+                if (!isNaN(impact)) {
+                    allImpacts.push(impact);
+                }
+                
+                state.volcanoData.push({
+                    year: parseInt(row.getString('Year')) || 0,
+                    name: row.getString('Name'),
+                    location: location,
+                    country: row.getString('Country'),
+                    type: row.getString('Type'),
+                    impact: impact,
+                    deaths: deaths,
+                    continent: CONTINENT_MAP[location] || 'Sconosciuto'
+                });
+            }
+            
+            impactLevels = [...new Set(allImpacts)].sort((a, b) => a - b);
+            
+            if (!impactLevels.includes(15)) {
+                impactLevels.push(15);
+            }
+            
+            impactLevels.sort((a, b) => a - b);
+            
+            state.volcanoData.sort((a, b) => b.year - a.year);
+            initializeData();
+        }
+
+        // 3 - Inizializzazione
+        function initializeData() {
+            state.filteredData = [...state.volcanoData];
+            state.globalYearRange = getGlobalYearRange();
+            calculateContinentData();
+            calculateVolcanoPositions();
+            
+            state.circleRevealStart = millis();
+            state.dotAnimationStart = millis() + 300;
+            state.dotAnimationProgress = 0;
+            
+            state.dotAppearTimes.clear();
+            state.filteredData.forEach(v => {
+                let key = `${v.name}-${v.year}-${v.deaths}`;
+                const randomDelay = Math.random() * CONFIG.animation.randomDelayMax;
+                state.dotAppearTimes.set(key, randomDelay);
+            });
+            
+            state.disableDotEntryAnimation = false;
+        }
+
+        // 4 - Calcolo dati continenti
+        function calculateContinentData() {
+            state.continentCounts = CONTINENTS.reduce((acc, cont) => {
+                acc[cont] = 0;
+                return acc;
+            }, {});
+            
+            state.volcanoData.forEach(v => {
+                if (state.continentCounts[v.continent] !== undefined) {
+                    state.continentCounts[v.continent]++;
+                }
+            });
+            
+            let total = state.volcanoData.length;
+            let startAngle = 0;
+            
+            state.continentAngles = {};
+            CONTINENTS.forEach(cont => {
+                let proportion = total > 0 ? state.continentCounts[cont] / total : 0;
+                let angleSize = proportion * TWO_PI;
+                
+                state.continentAngles[cont] = {
+                    start: startAngle,
+                    end: startAngle + angleSize,
+                    mid: startAngle + angleSize / 2
+                };
+                
+                startAngle += angleSize;
+            });
+        }
+
+        // 5 - Calcolo posizioni vulcani
+        function calculateVolcanoPositions() {
+            state.volcanoPositions.clear();
+            
+            const volcanoesByContinent = {};
+            
+            CONTINENTS.forEach(cont => {
+                volcanoesByContinent[cont] = [];
+            });
+            
+            state.filteredData.forEach(v => {
+                let key = `${v.name}-${v.year}-${v.deaths}`;
+                if (volcanoesByContinent[v.continent]) {
+                    volcanoesByContinent[v.continent].push({
+                        key: key,
+                        volcano: v,
+                        year: v.year
+                    });
+                }
+            });
+            
+            CONTINENTS.forEach(cont => {
+                const angles = state.continentAngles[cont];
+                if (!angles || volcanoesByContinent[cont].length === 0) return;
+                
+                volcanoesByContinent[cont].sort((a, b) => a.year - b.year);
+                
+                const angleRange = angles.end - angles.start;
+                const angleStep = angleRange / Math.max(1, volcanoesByContinent[cont].length);
+                
+                volcanoesByContinent[cont].forEach((item, index) => {
+                    const angle = angles.start + (angleStep * (index + 0.5));
+                    state.volcanoPositions.set(item.key, angle);
+                });
+            });
+        }
+
+        // 6 - Calcolo raggio in base all'impatto
+        function getRadiusForImpact(impact) {
+            if (impactLevels.length <= 1) return CONFIG.layout.minRadius;
+            
+            let idx = impactLevels.indexOf(impact);
+            if (idx === -1) return CONFIG.layout.minRadius;
+            
+            const totalLevels = impactLevels.length;
+            const normalized = idx / (totalLevels - 1);
+            
+            return map(normalized, 0, 1, CONFIG.layout.maxRadius, CONFIG.layout.minRadius);
+        }
+
+        // 7 - Disegno cerchi di impatto (IDENTICO all'originale)
+        function drawImpactCircles() {
+            const specialIndices = [0, 4, 8, 12].filter(index => index < impactLevels.length);
+            
+            if (state.circleRevealStart !== null) {
+                const elapsed = millis() - state.circleRevealStart;
+                state.circleRevealProgress = constrain(elapsed / CIRCLE_REVEAL_DURATION, 0, 1);
+                
+                if (state.circleRevealProgress >= 1) {
+                    state.circleRevealStart = null;
+                }
+            }
+            
+            for (let i = 0; i < impactLevels.length; i++) {
+                let radius = map(i, 0, impactLevels.length - 1, 
+                                CONFIG.layout.maxRadius, CONFIG.layout.minRadius);
+                noFill();
+                
+                const isSpecial = specialIndices.includes(i);
+                
+                if (isSpecial) {
+                    let animatedRadius = radius;
+                    let animatedStrokeWeight = 2.75;
+                    let animatedAlpha = 255;
+                    
+                    if (state.circleRevealProgress < 1) {
+                        const circleProgress = constrain((state.circleRevealProgress * impactLevels.length - i) / 4, 0, 1);
+                        animatedRadius = radius * circleProgress;
+                        animatedStrokeWeight = 2.75 * circleProgress;
+                        animatedAlpha = 255 * circleProgress;
+                    }
+                    
+                    stroke(255, 43, 0, animatedAlpha); // ROSSO come originale
+                    strokeWeight(animatedStrokeWeight);
+                    ellipse(0, 0, animatedRadius * 2);
+                    
+                    if (state.circleRevealProgress >= 1) {
+                        const circleNumber = i + 1;
+                        const labelX = 0;
+                        const labelY = -radius - 15;
+                        
+                        push();
+                        fill(255, 43, 0); // ROSSO
+                        noStroke();
+                        textSize(16);
+                        textAlign(CENTER, CENTER);
+                        text(circleNumber, labelX, labelY+5);
+                        pop();
+                    }
+                } else {
+                    let animatedRadius = radius;
+                    if (state.circleRevealProgress < 1) {
+                        const circleProgress = constrain((state.circleRevealProgress * impactLevels.length - i) / 4, 0, 1);
+                        animatedRadius = radius * circleProgress;
+                    }
+                    
+                    stroke(CONFIG.colors.circle); // Colore originale
+                    strokeWeight(0.5);
+                    ellipse(0, 0, animatedRadius * 2);
+                }
+            }
+        }
+
+        // 8 - Calcolo range anni
+        function getGlobalYearRange() {
+            const years = state.volcanoData.map(v => v.year);
+            return {
+                min: Math.min(...years),
+                max: Math.max(...years)
+            };
+        }
+
+        // 9 - Aggiornamento animazioni punti
+        function updateDotAnimations() {
+            if (state.dotAnimationStart !== null) {
+                const elapsed = millis() - state.dotAnimationStart;
+                state.dotAnimationProgress = constrain(elapsed / CONFIG.animation.dotEntryDuration, 0, 1);
+                
+                if (state.dotAnimationProgress >= 1) {
+                    state.dotAnimationStart = null;
+                }
+            }
+        }
+
+        // 10 - Loop principale del grafico
+        function draw() {
+            // Sfondo arancione fisso
+            background(CONFIG.colors.background);
+            
+            updateLayout();
+            
+            updateDotAnimations();
+            
+            drawTitle();
+            drawBackButton();
+            
+            drawMainCircle();
+            drawContinentLabels();
+            
+            checkHover();
+            drawInfobox();
+
+            updateCursor();
+        }
+
+        // 11 - Titolo (con "GRAPHIC" in bianco) - INVARIATO
+        function drawTitle() {
+            textSize(72);
+            textFont('Helvetica');
+            textStyle(BOLD);
+            textAlign(LEFT, TOP);
+            
+            const titleY = CONFIG.layout.titleStartY + CONFIG.layout.topOffset;
+            
+            // "ABOUT THE" in nero
+            fill(CONFIG.colors.text); // NERO
+            text('ABOUT THE', CONFIG.layout.marginX, titleY);
+
+            // "GRAPHIC" in BIANCO
+            fill(CONFIG.colors.accent); // BIANCO
+            text('INFOGRAPHIC', CONFIG.layout.marginX, titleY + 75);
+            
+            textStyle(NORMAL);
+        }
+
+        // 12 - Back Button con bordo bianco e icona "×" - MODIFICATO PER ANDARE A OVERVIEW.HTML
+        function drawBackButton() {
+            const buttonWidth = 160;
+            const buttonHeight = CONFIG.layout.controlButtonHeight;
+            const buttonX = width - buttonWidth - CONFIG.layout.marginX - 20;
+            const buttonY = CONFIG.layout.titleStartY + CONFIG.layout.topOffset + 10;
+
+            // Bordo BIANCO
+            stroke(CONFIG.colors.accent); // BIANCO
+            strokeWeight(1);
+            noFill();
+            rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
+
+            // Quadrato con "×"
+            const squareSize = 20;
+            const squareX = buttonX + 15;
+            const squareY = buttonY + 15;
+            
+            // Disegna la "×" bianca dentro il quadrato
+            push();
+            translate(squareX + squareSize/2, squareY + squareSize/2);
+            fill(CONFIG.colors.accent); // BIANCO
+            noStroke();
+            textSize(16);
+            textAlign(CENTER, CENTER);
+            text("×", 0, 0);
+            pop();
+
+            // Testo "Back" in nero
+            fill(CONFIG.colors.text); // NERO
+            noStroke();
+            textSize(16);
+            textAlign(LEFT, CENTER);
+            text("Back", buttonX + 50, buttonY + 25);
+
+            // Memorizza l'area per l'interazione
+            state.backButtonArea = {
+                x: buttonX,
+                y: buttonY,
+                width: buttonWidth,
+                height: buttonHeight
+            };
+        }
+
+        // 13 - Info box per hover sui vulcani - INVARIATO
+        function drawInfobox() {
+            if (state.hoveredVolcano) {
+                const volcano = state.hoveredVolcano;
+                const boxWidth = CONFIG.layout.infoBoxWidth;
+                const boxHeight = CONFIG.layout.infoBoxHeight;
+
+                let x = mouseX + 25;
+                let y = mouseY - boxHeight / 2;
+
+                if (x + boxWidth > width) x = mouseX - boxWidth - 20;
+                if (y < 0) y = 0;
+                if (y + boxHeight > height) y = height - boxHeight;
+
+                fill(CONFIG.colors.infoBox);
+                stroke(255, 43, 0); // ROSSO per info box
+                strokeWeight(1);
+                rect(x, y, boxWidth, boxHeight, 5);
+
+                fill(CONFIG.colors.infoBoxText); // NERO
+                noStroke();
+                textSize(16);
+                textStyle(BOLD);
+                textAlign(LEFT, TOP);
+                text(volcano.name, x + 10, y + 10);
+                textSize(16);
+                text('Year: ' + formatYear(volcano.year), x + 10, y + 40);
+            }
+        }
+
+        // 14 - Cerchio principale con cerchi di impatto - INVARIATO
+        function drawMainCircle() {
+            push();
+            translate(state.centerX, state.centerY);
+            
+            if (radialBgImage) {
+                let imageDim = 2 * 0.989;
+                let imageSize = CONFIG.layout.maxRadius * imageDim;
+                imageMode(CENTER);
+                // Immagine normale, senza trasparenza
+                image(radialBgImage, 0, 0, imageSize, imageSize);
+            }
+            
+            drawImpactCircles();
+            drawContinentDividers();
+            
+            if (state.filteredData.length > 0) {
+                drawVolcanoes();
+            }
+            
+            pop();
+        }
+
+        // 15 - Divisori tra continenti - INVARIATO
+        function drawContinentDividers() {
+            stroke(CONFIG.colors.circle); // Colore originale
+            strokeWeight(1);
+            
+            CONTINENTS.forEach(cont => {
+                const angles = state.continentAngles[cont];
+                if (angles) {
+                    line(0, 0, 
+                         cos(angles.start) * CONFIG.layout.maxRadius, 
+                         sin(angles.start) * CONFIG.layout.maxRadius);
+                }
+            });
+        }
+
+        // 16 - Disegna tutti i vulcani - INVARIATO
+        function drawVolcanoes() {
+            state.filteredData.forEach(v => {
+                let key = `${v.name}-${v.year}-${v.deaths}`;
+                let angle = state.volcanoPositions.get(key);
+                const angles = state.continentAngles[v.continent];
+                
+                if (!angle && angles) {
+                    angle = angles.mid;
+                    state.volcanoPositions.set(key, angle);
+                }
+                
+                if (!angle) return; 
+
+                const r = getRadiusForImpact(v.impact);
+                const x = cos(angle) * r;
+                const y = sin(angle) * r;
+
+                const isHovered = (state.hoveredVolcano === v);
+
+                if (isHovered) {
+                    if (!state.hoverAnimationStart.has(key)) {
+                        state.hoverAnimationStart.set(key, millis());
+                    }
+                } else {
+                    state.hoverAnimationStart.delete(key);
+                }
+
+                let hoverProgress = 0;
+                if (isHovered && state.hoverAnimationStart.has(key)) {
+                    const startTime = state.hoverAnimationStart.get(key);
+                    const elapsed = millis() - startTime;
+                    hoverProgress = constrain(elapsed / HOVER_ANIMATION_DURATION, 0, 1);
+                }
+
+                if (isHovered) {
+                    drawVolcanoGlow(v, x, y, hoverProgress);
+                }
+                
+                drawVolcanoDotAnimated(x, y, isHovered, v, key);
+            });
+        }
+
+        // 17 - Puntini dei vulcani con animazione - INVARIATO
+        function drawVolcanoDotAnimated(x, y, isHovered, volcano, key) {
+            let entryProgress = 1;
+            
+            if (!state.disableDotEntryAnimation && state.dotAnimationStart !== null && state.dotAnimationProgress < 1) {
+                const appearTime = state.dotAppearTimes.get(key) || 0;
+                const elapsed = millis() - state.dotAnimationStart;
+                
+                if (elapsed >= appearTime) {
+                    const dotElapsed = elapsed - appearTime;
+                    entryProgress = constrain(dotElapsed / CONFIG.animation.dotEntryDuration, 0, 1);
+                } else {
+                    entryProgress = 0;
+                }
+            }
+            
+            if (entryProgress === 0) return;
+            
+            const baseSize = isHovered ? 8 : 5;
+            const finalSize = baseSize * entryProgress;
+            const alpha = 255 * entryProgress;
+            
+            // NERO come originale
+            fill(0, 0, 0, alpha);
+            if (isHovered) {
+                noStroke();
+            } else {
+                noStroke();
+                strokeWeight(1);
+            }
+            
+            circle(x, y, finalSize);
+        }
+
+        // 18 - Bagliore dei vulcani quando in hover - INVARIATO
+        function drawVolcanoGlow(volcano, x, y, hoverProgress) {
+            let entryProgress = 1;
+            const key = `${volcano.name}-${volcano.year}-${volcano.deaths}`;
+            
+            if (!state.disableDotEntryAnimation && state.dotAnimationStart !== null && state.dotAnimationProgress < 1) {
+                const appearTime = state.dotAppearTimes.get(key) || 0;
+                const elapsed = millis() - state.dotAnimationStart;
+                
+                if (elapsed >= appearTime) {
+                    const dotElapsed = elapsed - appearTime;
+                    entryProgress = constrain(dotElapsed / CONFIG.animation.dotEntryDuration, 0, 1);
+                } else {
+                    entryProgress = 0;
+                }
+            }
+            
+            if (entryProgress === 0) return;
+            
+            let baseSize = map(volcano.impact, 5, 15, 50, 80);
+            let baseAlpha = map(volcano.impact, 5, 15, 60, 90);
+            let glowSize = hoverProgress * baseSize * entryProgress;
+            let alpha = hoverProgress * baseAlpha * entryProgress;
+
+            fill(255, 43, 0, alpha); // ROSSO come originale
+            noStroke();
+            circle(x, y, glowSize);
+        }
+
+        // 19 - Etichette dei continenti in grassetto - INVARIATO
+        function drawContinentLabels() {
+            CONTINENTS.forEach(cont => {
+                const angles = state.continentAngles[cont];
+                if (!angles) return;
+
+                const angle = angles.mid;
+                
+                let r;
+                if (cont === 'Europe' || cont === 'Asia') {
+                    r = CONFIG.layout.maxRadius + CONFIG.layout.europeAsiaOffset;
+                } else {
+                    r = CONFIG.layout.maxRadius + CONFIG.layout.continentLabelOffset;
+                }
+                
+                const x = state.centerX + cos(angle) * r;
+                const y = state.centerY + sin(angle) * r;
+                
+                if (cont === 'Asia') {
+                    state.asiaLabelY = y;
+                }
+
+                fill(CONFIG.colors.text); // NERO
+                noStroke();
+                textSize(16);
+                textStyle(BOLD); // BOLD come richiesto
+                
+                let horizAlign = LEFT;
+                if (cos(angle) < -0.1) {
+                    horizAlign = RIGHT;
+                } else if (cos(angle) > 0.1) {
+                    horizAlign = LEFT;
+                } else {
+                    horizAlign = CENTER;
+                }
+                
+                let vertAlign = CENTER;
+                if (sin(angle) < -0.1) {
+                    vertAlign = BOTTOM;
+                } else if (sin(angle) > 0.1) {
+                    vertAlign = TOP;
+                } else {
+                    vertAlign = CENTER;
+                }
+                
+                textAlign(horizAlign, vertAlign);
+                text(cont, x, y);
+                textStyle(NORMAL);
+            });
+        }
+
+        // 20 - Controllo hover su vulcani e bottoni - INVARIATO
+        function checkHover() {
+            if (state.filteredData.length === 0) {
+                state.hoveredVolcano = null;
+            } else {
+                let newHovered = null;
+                let minDist = Infinity;
+                
+                state.filteredData.forEach(v => {
+                    const angles = state.continentAngles[v.continent];
+                    if (!angles) return;
+
+                    const key = `${v.name}-${v.year}-${v.deaths}`;
+                    const angle = state.volcanoPositions.get(key) || angles.mid;
+                    const r = getRadiusForImpact(v.impact);
+                    const x = state.centerX + cos(angle) * r;
+                    const y = state.centerY + sin(angle) * r;
+
+                    const d = dist(mouseX, mouseY, x, y);
+                    if (d < 15 && d < minDist) {
+                        minDist = d;
+                        newHovered = v;
+                    }
+                });
+                
+                state.hoveredVolcano = newHovered;
+            }
+            
+            // Controllo hover sul back button
+            state.isBackButtonHovered = false;
+            if (state.backButtonArea &&
+                mouseX > state.backButtonArea.x &&
+                mouseX < state.backButtonArea.x + state.backButtonArea.width &&
+                mouseY > state.backButtonArea.y &&
+                mouseY < state.backButtonArea.y + state.backButtonArea.height) {
+                state.isBackButtonHovered = true;
+            }
+        }
+
+        // 21 - Aggiornamento layout in base alle dimensioni della finestra - INVARIATO
+        function updateLayout() {
+            state.centerX = width * CONFIG.layout.centerXRatio;
+            state.centerY = height / 2 + CONFIG.layout.centerYOffset;
+        }
+
+        // 22 - Gestione click del mouse - MODIFICATO PER ANDARE A OVERVIEW.HTML
+        function mousePressed() {
+            // Controllo per il back button
+            if (state.backButtonArea &&
+                mouseX > state.backButtonArea.x &&
+                mouseX < state.backButtonArea.x + state.backButtonArea.width &&
+                mouseY > state.backButtonArea.y &&
+                mouseY < state.backButtonArea.y + state.backButtonArea.height) {
+                
+                // Torna alla pagina overview.html
+                window.location.href = "overview.html";
+                return;
+            }
+        }
+
+        // 23 - Formattazione anno esteso (es: "1500 AD" o "500 BC") - INVARIATO
+        function formatYear(year) {
+            return Math.abs(year) + (year < 0 ? ' BC' : ' AD');
+        }
+
+        // 24 - Ridimensionamento finestra - INVARIATO
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+            updateLayout();
+        }
+
+        // 25 - Setup iniziale del canvas principale - INVARIATO
+        function setup() {
+            let canvas = createCanvas(windowWidth, windowHeight);
+            canvas.parent('main-sketch-container');
+            updateLayout();
+            frameRate(60);
+            console.log("Learn More - Setup completato");
+            
+            // Setup degli event listener per lo scroll e i bottoni
+            setupScrollListeners();
+            
+            // Inizializza anche la leggenda
+            initLegend();
+        }
+
+        // 26 - Aggiorna il cursore in base a cosa c'è sotto il mouse - INVARIATO
+        function updateCursor() {
+            let isOverButton = false;
+
+            // Controlla se il mouse è sopra il back button
+            if (state.backButtonArea &&
+                mouseX > state.backButtonArea.x &&
+                mouseX < state.backButtonArea.x + state.backButtonArea.width &&
+                mouseY > state.backButtonArea.y &&
+                mouseY < state.backButtonArea.y + state.backButtonArea.height) {
+                isOverButton = true;
+            }
+
+            // Controlla se il mouse è sopra un vulcano (puntino)
+            const distFromCenter = dist(mouseX, mouseY, state.centerX, state.centerY);
+            if (distFromCenter < CONFIG.layout.maxRadius * 1.1) {
+                for (let v of state.filteredData) {
+                    let key = `${v.name}-${v.year}-${v.deaths}`;
+                    
+                    if (!state.volcanoPositions.has(key)) continue;
+
+                    const angle = state.volcanoPositions.get(key);
+                    const radius = getRadiusForImpact(v.impact);
+                    const x = state.centerX + cos(angle) * radius;
+                    const y = state.centerY + sin(angle) * radius;
+                    const d = dist(mouseX, mouseY, x, y);
+
+                    if (d < 15) {
+                        isOverButton = true;
+                        break;
+                    }
+                }
+            }
+
+            // Cambia il cursore
+            if (isOverButton) {
+                cursor(HAND);
+            } else {
+                cursor(ARROW);
+            }
+        }
+
+        // ===== FUNZIONI PER LA LEGGENDA =====
+        
+        // 27 - Inizializza la leggenda p5.js
+        function initLegend() {
+            // Crea un nuovo sketch p5.js per la leggenda
+            new p5(legendSketch, 'legend-container');
+        }
+
+        // 28 - Sketch p5.js per la leggenda (MODIFICATO secondo le richieste)
+        function legendSketch(sketch) {
+            sketch.setup = function() {
+                const container = document.getElementById('legend-container');
+                const canvas = sketch.createCanvas(400, 200);
+                canvas.parent('legend-container');
+                sketch.textSize(16);
+                sketch.textFont('Helvetica');
+                sketch.textStyle(sketch.BOLD);
+            };
+
+            sketch.draw = function() {
+                sketch.clear(); // Sfondo trasparente invece che bianco
+                
+                // Configurazione della leggenda con modifiche richieste
+                const legendConfig = {
+                    colors: {
+                        text: '#FFFFFF', // Testo bianco
+                        accent: '#FFFFFF' // Icone bianche invece che rosse
+                    },
+                    position: {
+                        x: 40,
+                        y: 50,
+                        spacing: 40
+                    }
+                };
+
+                // Prima riga: Eruzione vulcanica
+                const line1Y = legendConfig.position.y;
+                
+                // Icona: pallino nero SENZA bordo (come richiesto)
+                sketch.fill(0);
+                sketch.noStroke(); // NO stroke attorno al pallino
+                sketch.circle(legendConfig.position.x + 15, line1Y + 12, 14);
+                
+                // Testo
+                sketch.fill(legendConfig.colors.text);
+                sketch.noStroke();
+                sketch.textAlign(sketch.LEFT, sketch.CENTER);
+                sketch.text('Volcanic eruptions', legendConfig.position.x + 40, line1Y + 12);
+                
+                // Seconda riga: Impact range
+                const line2Y = legendConfig.position.y + legendConfig.position.spacing;
+                
+                // Icona: cerchio con freccetta - BIANCA
+                sketch.push();
+                sketch.translate(legendConfig.position.x + 15, line2Y + 12);
+                sketch.noFill();
+                sketch.stroke(legendConfig.colors.accent); // BIANCO
+                sketch.strokeWeight(1);
+                sketch.circle(0, 0, 25);
+                
+                sketch.stroke(legendConfig.colors.accent); // BIANCO
+                sketch.strokeWeight(1);
+                sketch.line(12.5, 0, 1, 0);
+                sketch.line(1, 0, 3, -2.5);
+                sketch.line(1, 0, 3, 2.5);
+                sketch.pop();
+                
+                // Testo
+                sketch.fill(legendConfig.colors.text);
+                sketch.text('Distribution based on impact range', legendConfig.position.x + 40, line2Y + 12);
+                
+                // Terza riga: Ordine temporale
+                const line3Y = legendConfig.position.y + legendConfig.position.spacing * 2;
+                
+                sketch.push();
+                sketch.translate(legendConfig.position.x + 8, line3Y + 22);
+                sketch.stroke(legendConfig.colors.accent); // BIANCO
+                sketch.strokeWeight(1);
+                sketch.noFill();
+                
+                const R = 20;
+                sketch.line(0, 0, R, 0);
+                sketch.line(0, 0, 0, -R);
+                sketch.arc(0, 0, R * 2, R * 2, sketch.PI + sketch.HALF_PI, sketch.TWO_PI);
+                
+                const ang = sketch.TWO_PI;
+                const ax = sketch.cos(ang) * R;
+                const ay = sketch.sin(ang) * R;
+                
+                sketch.line(ax - 5, ay, ax, ay);
+                sketch.line(ax, ay, ax - 3, ay - 3);
+                sketch.line(ax, ay, ax - 3, ay + 3);
+                sketch.pop();
+                
+                sketch.fill(legendConfig.colors.text);
+                sketch.text('Temporal order of eruptions', legendConfig.position.x + 40, line3Y + 12);
+                
+                // Ripristina lo stile normale per il testo
+                sketch.textStyle(sketch.NORMAL);
+            };
+        }
+
+        // ===== FUNZIONI PER LO SCROLL E I BOTTONI =====
+
+        // 29 - Setup degli event listener per lo scroll e i bottoni - MODIFICATO
+        function setupScrollListeners() {
+            const scrollContainer = document.getElementById('text-scroll-area');
+            const buttonsContainer = document.getElementById('buttons-container');
+            const scrollHint = document.getElementById('scroll-hint');
+            
+            if (scrollContainer && scrollHint) {
+                // Funzione per gestire lo scroll della freccia
+                scrollHint.addEventListener('click', function() {
+                    // Scorri di una quantità fissa (simile allo scroll del mouse)
+                    scrollContainer.scrollTop += 300;
+                    
+                    // Controlla se siamo alla fine dello scroll
+                    checkScrollEnd();
+                });
+                
+                // Funzione per controllare la fine dello scroll
+                function checkScrollEnd() {
+                    const scrollPercentage = (scrollContainer.scrollTop / (scrollContainer.scrollHeight - scrollContainer.clientHeight)) * 100;
+                    
+                    // Nasconde la freccia quando si è vicini alla fine (90%)
+                    if (scrollPercentage > 90) {
+                        scrollHint.style.display = 'none';
+                    } else {
+                        scrollHint.style.display = 'block';
+                    }
+                    
+                    // Mostra i bottoni quando si è arrivati alla fine (95%)
+                    if (scrollPercentage > 95) {
+                        buttonsContainer.style.display = 'flex';
+                    } else {
+                        buttonsContainer.style.display = 'none';
+                    }
+                }
+                
+                // Controlla anche lo scroll normale del contenitore
+                scrollContainer.addEventListener('scroll', checkScrollEnd);
+                
+                // Controlla inizialmente
+                checkScrollEnd();
+            }
+            
+            // Setup dei bottoni finali - MODIFICATO
+            const backToMapBtn = document.getElementById('back-to-map-btn');
+            const aboutDatasetBtn = document.getElementById('about-dataset-btn');
+            
+            if (backToMapBtn) {
+                backToMapBtn.addEventListener('click', function() {
+                    window.location.href = "overview.html"; // Torna alla overview
+                });
+                
+                // Aggiungi gestione hover per cursore
+                backToMapBtn.addEventListener('mouseenter', function() {
+                    backToMapBtn.style.cursor = 'pointer';
+                });
+                
+                backToMapBtn.addEventListener('mouseleave', function() {
+                    backToMapBtn.style.cursor = 'default';
+                });
+            }
+            
+            if (aboutDatasetBtn) {
+                aboutDatasetBtn.addEventListener('click', function() {
+                    window.location.href = "methodology.html"; // Pagina della metodologia
+                });
+                
+                // Aggiungi gestione hover per cursore
+                aboutDatasetBtn.addEventListener('mouseenter', function() {
+                    aboutDatasetBtn.style.cursor = 'pointer';
+                });
+                
+                aboutDatasetBtn.addEventListener('mouseleave', function() {
+                    aboutDatasetBtn.style.cursor = 'default';
+                });
+            }
+        }
+    </script>
+</body>
+</html>

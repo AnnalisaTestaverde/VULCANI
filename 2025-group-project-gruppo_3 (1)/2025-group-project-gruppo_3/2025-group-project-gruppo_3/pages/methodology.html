@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Methodology</title>
+
+    <style>
+      * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Helvetica, Arial, sans-serif;
+    }
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      header {
+      width: 100%;
+      padding: 25px 40px;
+      display: flex;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      z-index: 10;
+      background-color: transparent; /* Manteniamo trasparente sopra il canvas */
+      }
+
+      /* 2. LINK E LOGO NERI */
+      header a {
+          text-decoration: none;
+          color: #000000; /* LINK NERI */
+          margin-left: 40px;
+          font-size: 14px;
+      }
+
+      .logo {
+          font-weight: bold;
+          font-size: 14px;
+          color: #000000; /* LOGO NERO */
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+    <script src="sketch_methodology.js"></script>
+  </head>
+
+  <body style="margin:0; padding:0; overflow:hidden;">
+    <header>
+        <div class="logo">Significant Volcanic Eruptions</div>
+        <nav>
+            <a href="../index.html">Homepage</a>
+            <a href="team.html">Team</a>
+            <a href="methodology.html">Methodology</a>
+            <a href="overview.html">Map</a>
+        </nav>
+    </header>
+  </body>
+</html>
