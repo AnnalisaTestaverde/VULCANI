@@ -407,7 +407,7 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   textSize(mainTextSize);
   textStyle(BOLD);
   textAlign(LEFT, TOP);
-  text("Date: " + fullDate, margin, dateY);
+  text("DATA MODIFICA: " + fullDate, margin, dateY);
   pop();
 
   // --- TITOLO TIPO VULCANO ---
