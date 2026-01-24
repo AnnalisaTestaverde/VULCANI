@@ -1,57 +1,14 @@
 <!DOCTYPE html>
 <html lang="it">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Methodology</title>
-
-    <style>
-      * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Helvetica, Arial, sans-serif;
-    }
-      html, body {
-        margin: 0;
-        padding: 0;
-      }
-
-      html {
-        scroll-behavior: smooth;
-      }
-
-      header {
-      width: 100%;
-      padding: 25px 40px;
-      display: flex;
-      justify-content: space-between;
-      position: fixed;
-      top: 0;
-      z-index: 10;
-      background-color: transparent; /* Manteniamo trasparente sopra il canvas */
-      }
-
-      /* 2. LINK E LOGO NERI */
-      header a {
-          text-decoration: none;
-          color: #000000; /* LINK NERI */
-          margin-left: 40px;
-          font-size: 14px;
-      }
-
-      .logo {
-          font-weight: bold;
-          font-size: 14px;
-          color: #000000; /* LOGO NERO */
-      }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
-    <script src="sketch_methodology.js"></script>
-  </head>
-
-  <body style="margin:0; padding:0; overflow:hidden;">
-    <header>
+    <link rel="stylesheet" href="methodology.css">
+</head>
+<body>
+    <!-- Navbar FISSA - non scompare -->
+    <header id="navbar">
         <div class="logo">Significant Volcanic Eruptions</div>
         <nav>
             <a href="../index.html">Homepage</a>
@@ -60,5 +17,93 @@
             <a href="overview.html">Map</a>
         </nav>
     </header>
-  </body>
+
+    <!-- Schermata 1 -->
+    <section id="screen1" class="screen active">
+        <!-- Titolo della schermata -->
+        <div class="screen-title">METHODOLOGY</div>
+        <div class="screen-subtitle">HOW WE BUILT OUR VISUAL STORY.</div>
+        
+        <!-- Container per il testo -->
+        <div id="text-container"></div>
+        
+        <!-- Container per immagine a destra -->
+        <div class="image-container">
+            <img src="../assets/foto_screen_3.png" alt="Methodology overview" class="methodology-image" id="methodology-image-1">
+        </div>
+        
+        <!-- Bottone Learn More -->
+        <button class="learn-more-btn">Learn More</button>
+        
+        <!-- Indicatore schermata -->
+        <div class="screen-indicator">
+            <div class="screen-dot active" data-screen="0"></div>
+            <div class="screen-dot" data-screen="1"></div>
+            <div class="screen-dot" data-screen="2"></div>
+        </div>
+        
+        <!-- Testo sopra la freccia di scroll -->
+        <div class="scroll-text">Scroll to continue</div>
+        
+        <!-- Freccia di scroll al CENTRO dello schermo -->
+        <div class="scroll-hint center-hint" id="center-scroll-hint">V</div>
+    </section>
+
+    <!-- Schermata 2 -->
+    <section id="screen2" class="screen">
+        <!-- Titolo della schermata -->
+        <div class="screen-title">OVERVIEW VISUALIZATION</div>
+        
+        <!-- Container per il testo -->
+        <div id="text-container"></div>
+        
+        <!-- Container per immagine a destra -->
+        <div class="image-container">
+            <img src="../assets/foto_screen_2.png" alt="Overview visualization" class="methodology-image" id="methodology-image-2">
+        </div>
+        
+        <!-- Bottone Learn More -->
+        <button class="learn-more-btn">Learn More</button>
+        
+        <!-- Indicatore schermata -->
+        <div class="screen-indicator">
+            <div class="screen-dot" data-screen="0"></div>
+            <div class="screen-dot active" data-screen="1"></div>
+            <div class="screen-dot" data-screen="2"></div>
+        </div>
+        
+        <!-- Testo sopra la freccia di scroll -->
+        <div class="scroll-text">Scroll to continue</div>
+        
+        <!-- Freccia di scroll al CENTRO dello schermo -->
+        <div class="scroll-hint center-hint" id="center-scroll-hint">V</div>
+    </section>
+
+    <!-- Schermata 3 -->
+    <section id="screen3" class="screen">
+        <!-- Titolo della schermata -->
+        <div class="screen-title">DATA INTERPRETATION</div>
+        
+        <!-- Container per il testo -->
+        <div id="text-container"></div>
+        
+        <!-- Container per immagine a destra -->
+        <div class="image-container">
+            <img src="../assets/foto_screen_1.png" alt="Data interpretation visualization" class="methodology-image" id="methodology-image-3">
+        </div>
+        
+        <!-- Bottone Learn More -->
+        <button class="learn-more-btn">Learn More</button>
+        
+        <!-- Indicatore schermata -->
+        <div class="screen-indicator">
+            <div class="screen-dot" data-screen="0"></div>
+            <div class="screen-dot" data-screen="1"></div>
+            <div class="screen-dot active" data-screen="2"></div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="methodology.js"></script>
+</body>
 </html>

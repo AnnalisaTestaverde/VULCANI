@@ -1,0 +1,819 @@
+/* 
+ * STILE PER LA PAGINA METHODOLOGY
+ * ================================
+ */
+
+/* Reset e stili base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Helvetica', Arial, sans-serif;
+    height: 100%;
+    width: 100%;
+}
+
+/* Navbar FISSA - non scompare più */
+header {
+    width: 100%;
+    padding: 25px 40px;
+    display: flex;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+    background-color: white;
+}
+
+header a {
+    text-decoration: none;
+    color: #000000;
+    margin-left: 40px;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+header a:hover {
+    color: #FF2B00;
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 14px;
+    color: #000000;
+}
+
+/* Schermate sovrapposte con transizione FLUIDA */
+.screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1;
+    transition: opacity 0.8s ease-out;
+}
+
+.screen.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+}
+
+/* Sfondo per ogni schermata */
+#screen1 {
+    background-color: #FF2B00;
+}
+
+#screen2 {
+    background-color: #FFFFFF;
+}
+
+#screen3 {
+    background-color: #FF2B00;
+}
+
+/* Titolo della schermata - ANIMAZIONE */
+.screen-title {
+    position: absolute;
+    top: 120px;
+    left: 80px;
+    font-size: 72px;
+    font-weight: bold;
+    line-height: 1.1;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s 0.3s ease-out, 
+                transform 0.8s 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.screen.active .screen-title {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#screen1 .screen-title {
+    color: #000000;
+}
+
+#screen2 .screen-title {
+    color: #FF2B00;
+}
+
+#screen3 .screen-title {
+    color: #000000;
+}
+
+.screen-subtitle {
+    font-size: 24px;
+    line-height: 1.4;
+    position: absolute;
+    top: 220px;
+    left: 80px;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s 0.4s ease-out, 
+                transform 0.8s 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.screen.active .screen-subtitle {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#screen1 .screen-subtitle {
+    color: #000000;
+}
+
+/* Container per il testo - ANIMAZIONE */
+#text-container {
+    position: absolute;
+    top: 280px;
+    left: 80px;
+    width: 700px;
+    height: 450px;
+    z-index: 3;
+    background-color: transparent;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s 0.5s ease-out, 
+                transform 0.8s 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.screen.active #text-container {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Area di scroll per il testo */
+.text-scroll-area {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 8px;
+    
+    /* Nasconde la scrollbar in tutti i browser */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+/* Nasconde la scrollbar in WebKit */
+.text-scroll-area::-webkit-scrollbar {
+    display: none;
+}
+
+/* Contenuto testuale */
+.text-content {
+    width: 100%;
+    color: #000000;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.6;
+    padding-bottom: 80px;
+}
+
+/* Titoli delle sezioni - ANIMAZIONE */
+.section-title {
+    font-size: 24px;
+    color: #FFFFFF;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s 0.7s ease-out, 
+                transform 0.6s 0.7s ease-out;
+}
+
+.screen.active .section-title {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.section-title:first-child {
+    margin-top: 0;
+}
+
+#screen2 .section-title {
+    color: #FF2B00;
+}
+
+#screen3 .section-title {
+    color: #FFFFFF;
+}
+
+/* Testo normale - ANIMAZIONE */
+.section-text {
+    margin-bottom: 20px;
+    color: #000000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s 0.8s ease-out, 
+                transform 0.6s 0.8s ease-out;
+}
+
+.screen.active .section-text {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Testo in grassetto bianco */
+.bold-white {
+    font-weight: bold;
+    color: #FFFFFF;
+}
+
+#screen2 .bold-white {
+    color: #000000;
+}
+
+/* Liste - ANIMAZIONE */
+.impact-list, .controls-list {
+    margin: 25px 0;
+    padding-left: 20px;
+    color: #000000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s 0.9s ease-out, 
+                transform 0.6s 0.9s ease-out;
+}
+
+.screen.active .impact-list,
+.screen.active .controls-list {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.impact-list li, .controls-list li {
+    margin-bottom: 15px;
+    line-height: 1.6;
+    list-style-type: disc;
+}
+
+/* Tabella impatti - ANIMAZIONE */
+.impact-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0 30px 0;
+    font-size: 14px;
+    border: 2px solid #FF2B00;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s 1.0s ease-out, 
+                transform 0.6s 1.0s ease-out;
+}
+
+.screen.active .impact-table {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.impact-table th {
+    background-color: #FF2B00;
+    color: white;
+    text-align: center;
+    padding: 12px;
+    font-weight: bold;
+}
+
+.impact-table td {
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
+    text-align: center;
+}
+
+.impact-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.impact-table tr:nth-child(odd) {
+    background-color: white;
+}
+
+.impact-table td:first-child {
+    font-weight: bold;
+    text-align: left;
+    padding-left: 20px;
+}
+
+/* Note a piè di tabella - ANIMAZIONE */
+.table-note {
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+    line-height: 1.4;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s 1.1s ease-out, 
+                transform 0.6s 1.1s ease-out;
+}
+
+.screen.active .table-note {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Freccia di scroll AL CENTRO DELLO SCHERMO con testo sopra - ANIMAZIONE MODIFICATA */
+.scroll-hint.center-hint {
+    position: fixed;
+    bottom: 40px; /* MODIFICATO: 60px → 40px (più in basso) */
+    left: 50%;
+    transform: translateX(-50%);
+    color: #000000; /* Nera solida */
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    z-index: 4;
+    width: 40px;
+    height: 40px;
+    animation: bounce 2s infinite;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity 0.6s 1.3s ease-out;
+}
+
+.screen.active .scroll-hint.center-hint {
+    opacity: 1; /* MODIFICATO: piena opacità */
+}
+
+/* Testo sopra la freccia - ANIMAZIONE MODIFICATA */
+.scroll-text {
+    position: fixed;
+    bottom: 80px; /* MODIFICATO: 100px → 80px (più in basso) */
+    left: 50%;
+    transform: translateX(-50%);
+    color: #000000;
+    font-size: 14px;
+    font-weight: normal;
+    text-align: center;
+    z-index: 4;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s 1.2s ease-out;
+}
+
+.screen.active .scroll-text {
+    opacity: 1; /* MODIFICATO: piena opacità */
+}
+
+/* Solo nella schermata 3 nascondi freccia e testo */
+#screen3 .scroll-hint,
+#screen3 .scroll-text {
+    display: none;
+}
+
+/* Animazione bounce MODIFICATA (rimbalzo ridotto) */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateX(-50%) translateY(0);
+    }
+    40% {
+        transform: translateX(-50%) translateY(-10px); /* MODIFICATO: -15px → -10px */
+    }
+    60% {
+        transform: translateX(-50%) translateY(-5px); /* MODIFICATO: -7px → -5px */
+    }
+}
+
+/* Bottone Learn More - ANIMAZIONE MODIFICATA (più in alto) */
+.learn-more-btn {
+    background-color: transparent;
+    color: white;
+    border: 3px solid white;
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: fixed;
+    bottom: 150px; /* MODIFICATO: 40px → 150px (molto più in alto) */
+    right: 40px;
+    z-index: 4;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s 1.4s ease-out, 
+                transform 0.6s 1.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.screen.active .learn-more-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.learn-more-btn:hover {
+    background-color: white;
+    color: #FF2B00;
+}
+
+#screen2 .learn-more-btn {
+    color: #FF2B00;
+    border-color: #FF2B00;
+}
+
+#screen2 .learn-more-btn:hover {
+    background-color: #FF2B00;
+    color: white;
+}
+
+#screen3 .learn-more-btn {
+    color: #000000;
+    border-color: #000000;
+}
+
+#screen3 .learn-more-btn:hover {
+    background-color: #000000;
+    color: #FF2B00;
+}
+
+/* Container immagine per TUTTE le schermate - ANIMAZIONE */
+.image-container {
+    position: fixed;
+    top: 50%;
+    right: 40px;
+    transform: translateY(-50%);
+    width: calc(50% - 120px);
+    height: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+    overflow: hidden;
+    z-index: 2;
+    opacity: 0;
+    transform: translateY(-50%) translateX(50px);
+    transition: opacity 0.8s 0.6s ease-out, 
+                transform 0.8s 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.screen.active .image-container {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+/* Immagine nelle schermate - ANIMAZIONE */
+.methodology-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.8s 0.8s ease-out, 
+                transform 0.8s 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.screen.active .methodology-image {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Indicatore visivo delle schermate a sinistra */
+.screen-indicator {
+    position: fixed;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 3;
+}
+
+.screen-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+/* Schermata 1: pallini BIANCHI */
+#screen1 .screen-dot {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+#screen1 .screen-dot.active {
+    background-color: white;
+    transform: scale(1.2);
+    border-color: white;
+}
+
+#screen1 .screen-dot:hover {
+    background-color: rgba(255, 255, 255, 0.7);
+    border-color: white;
+    transform: scale(1.3);
+}
+
+/* Schermata 2: pallini ROSSI */
+#screen2 .screen-dot {
+    background-color: rgba(255, 43, 0, 0.3);
+}
+
+#screen2 .screen-dot.active {
+    background-color: #FF2B00;
+    transform: scale(1.2);
+    border-color: #FF2B00;
+}
+
+#screen2 .screen-dot:hover {
+    background-color: rgba(255, 43, 0, 0.7);
+    border-color: #FF2B00;
+    transform: scale(1.3);
+}
+
+/* Schermata 3: pallini BIANCHI */
+#screen3 .screen-dot {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+#screen3 .screen-dot.active {
+    background-color: white;
+    transform: scale(1.2);
+    border-color: white;
+}
+
+#screen3 .screen-dot:hover {
+    background-color: rgba(255, 255, 255, 0.7);
+    border-color: white;
+    transform: scale(1.3);
+}
+
+/* Animazione di entrata per i pallini */
+.screen-dot {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.5s 1.5s ease-out, 
+                transform 0.5s 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                background-color 0.3s ease,
+                border-color 0.3s ease;
+}
+
+.screen.active .screen-dot {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Bottone Learn More per ogni schermata - POSIZIONI SPECIFICHE */
+#screen1 .learn-more-btn {
+    bottom: 90px;
+}
+
+#screen2 .learn-more-btn {
+    bottom: 90px;
+}
+
+#screen3 .learn-more-btn {
+    bottom: 90px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    #text-container {
+        width: 600px;
+        left: 60px;
+    }
+    
+    .screen-title, .screen-subtitle {
+        left: 60px;
+    }
+    
+    .image-container {
+        width: calc(50% - 80px);
+        right: 30px;
+    }
+    
+    .screen-title {
+        font-size: 60px;
+    }
+    
+    .learn-more-btn {
+        bottom: 140px;
+    }
+    
+    #screen1 .learn-more-btn,
+    #screen2 .learn-more-btn,
+    #screen3 .learn-more-btn {
+        bottom: 140px;
+    }
+}
+
+@media (max-width: 1024px) {
+    #text-container {
+        width: 550px;
+        left: 50px;
+    }
+    
+    .screen-title, .screen-subtitle {
+        left: 50px;
+    }
+    
+    .image-container {
+        right: 30px;
+        width: calc(50% - 70px);
+    }
+    
+    .learn-more-btn {
+        right: 30px;
+        bottom: 130px;
+    }
+    
+    #screen1 .learn-more-btn,
+    #screen2 .learn-more-btn,
+    #screen3 .learn-more-btn {
+        bottom: 130px;
+    }
+}
+
+@media (max-height: 800px) {
+    #text-container {
+        height: 400px;
+        top: 240px;
+    }
+    
+    .screen-title {
+        top: 100px;
+    }
+    
+    .screen-subtitle {
+        top: 180px;
+    }
+    
+    .scroll-hint.center-hint {
+        bottom: 30px; /* MODIFICATO */
+    }
+    
+    .scroll-text {
+        bottom: 65px; /* MODIFICATO */
+    }
+    
+    .learn-more-btn {
+        bottom: 120px;
+    }
+    
+    #screen1 .learn-more-btn,
+    #screen2 .learn-more-btn,
+    #screen3 .learn-more-btn {
+        bottom: 120px;
+    }
+}
+
+@media (max-width: 768px) {
+    #text-container {
+        width: 90%;
+        left: 5%;
+        top: 200px;
+        height: 350px;
+    }
+    
+    .screen-title {
+        font-size: 48px;
+        left: 5%;
+        top: 100px;
+    }
+    
+    .screen-subtitle {
+        font-size: 18px;
+        left: 5%;
+        top: 170px;
+    }
+    
+    .image-container {
+        display: none;
+    }
+    
+    .learn-more-btn {
+        right: 5%;
+        bottom: 100px; /* MODIFICATO: 20px → 100px */
+    }
+    
+    #screen1 .learn-more-btn,
+    #screen2 .learn-more-btn,
+    #screen3 .learn-more-btn {
+        bottom: 100px;
+    }
+    
+    .screen-indicator {
+        left: 10px;
+        gap: 12px;
+    }
+    
+    .screen-dot {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .scroll-hint.center-hint {
+        bottom: 25px; /* MODIFICATO: 40px → 25px */
+        font-size: 32px;
+    }
+    
+    .scroll-text {
+        bottom: 55px; /* MODIFICATO: 70px → 55px */
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .screen-title {
+        font-size: 36px;
+        top: 90px;
+    }
+    
+    .screen-subtitle {
+        font-size: 16px;
+        top: 150px;
+    }
+    
+    #text-container {
+        top: 180px;
+        height: 300px;
+    }
+    
+    .section-title {
+        font-size: 20px;
+    }
+    
+    .section-text, .impact-list li {
+        font-size: 14px;
+    }
+    
+    .impact-table {
+        font-size: 12px;
+    }
+    
+    .impact-table th,
+    .impact-table td {
+        padding: 8px 5px;
+    }
+    
+    .learn-more-btn {
+        bottom: 80px;
+        padding: 10px 20px;
+        font-size: 12px;
+    }
+    
+    #screen1 .learn-more-btn,
+    #screen2 .learn-more-btn,
+    #screen3 .learn-more-btn {
+        bottom: 80px;
+    }
+    
+    .scroll-hint.center-hint {
+        bottom: 20px;
+        font-size: 28px;
+    }
+    
+    .scroll-text {
+        bottom: 45px;
+        font-size: 11px;
+    }
+}
+
+/* Schermi alti - ottimizzazione */
+@media (min-height: 900px) {
+    .learn-more-btn {
+        bottom: 180px;
+    }
+    
+    #screen1 .learn-more-btn,
+    #screen2 .learn-more-btn,
+    #screen3 .learn-more-btn {
+        bottom: 180px;
+    }
+    
+    .scroll-hint.center-hint {
+        bottom: 50px;
+    }
+    
+    .scroll-text {
+        bottom: 90px;
+    }
+}
+
+@media (min-height: 1080px) {
+    .learn-more-btn {
+        bottom: 200px;
+    }
+    
+    #screen1 .learn-more-btn,
+    #screen2 .learn-more-btn,
+    #screen3 .learn-more-btn {
+        bottom: 200px;
+    }
+}
