@@ -11,7 +11,7 @@ const sections = [
         title: "METHODOLOGY",
         subtitle: "HOW WE BUILT OUR VISUAL STORY.",
         imageId: "methodology-image-1",
-        buttonText: "Learn More About Methodology",
+        buttonText: "Explore the dataset",
         threshold: 0
     },
     {
@@ -19,7 +19,7 @@ const sections = [
         title: "OVERVIEW VISUALIZATION",
         subtitle: "HOW WE VISUALIZE ERUPTION DATA.",
         imageId: "methodology-image-2",
-        buttonText: "Learn More About Overview",
+        buttonText: "Explore all eruptions",
         threshold: 500
     },
     {
@@ -27,16 +27,19 @@ const sections = [
         title: "DATA INTERPRETATION",
         subtitle: "HOW WE INTERPRET AND PRESENT DATA.",
         imageId: "methodology-image-3",
-        buttonText: "Learn More About Data Interpretation",
+        buttonText: "Explore the detail graphs",
         threshold: 1400
     }
 ];
 
 let currentSectionId = 1;
 let isScrolling = false;
+let isAtFooter = false;
 let textScrollArea = null;
+let mainContent = null;
+let footer = null;
 let scrollHint = null;
-let isAtButtons = false;
+let isPageScrollMode = false; // Nuovo flag per controllare se stiamo scorrendo la pagina
 
 // Inizializzazione
 document.addEventListener('DOMContentLoaded', function() {
@@ -51,13 +54,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Salva riferimenti agli elementi
     textScrollArea = document.querySelector('.text-content');
+    mainContent = document.getElementById('main-content');
+    footer = document.getElementById('main-footer');
     scrollHint = document.getElementById('text-scroll-hint');
     
     // Inizializza la freccia di scroll
     updateScrollHint();
-    
-    // Configura event listener per i nuovi bottoni
-    setupButtonListeners();
 });
 
 // Configura tutti gli event listener
@@ -74,7 +76,7 @@ function setupEventListeners() {
     document.querySelectorAll('.screen-dot').forEach(dot => {
         dot.addEventListener('click', function() {
             const sectionId = parseInt(this.getAttribute('data-section'));
-            if (sectionId !== currentSectionId) {
+            if (sectionId !== currentSectionId && !isAtFooter) {
                 scrollToSection(sectionId);
             }
         });
@@ -96,56 +98,49 @@ function setupEventListeners() {
     window.addEventListener('resize', calculateScrollThresholds);
     
     // Controlla la posizione dello scroll
-    textScrollArea.addEventListener('scroll', checkScrollPosition);
+    window.addEventListener('scroll', checkScrollPosition);
 }
 
-// Configura event listener per i nuovi bottoni
-function setupButtonListeners() {
-    const viewDatasetBtn = document.getElementById('view-dataset-btn');
-    const exploreEruptionsBtn = document.getElementById('explore-eruptions-btn');
-    const exploreGraphsBtn = document.getElementById('explore-graphs-btn');
-    
-    if (viewDatasetBtn) {
-        viewDatasetBtn.addEventListener('click', function() {
-            alert('Opening dataset view...');
-            // Qui puoi aggiungere la logica per aprire il dataset
-            // window.location.href = 'dataset.html';
-        });
-    }
-    
-    if (exploreEruptionsBtn) {
-        exploreEruptionsBtn.addEventListener('click', function() {
-            alert('Navigating to all eruptions overview...');
-            // Qui puoi aggiungere la logica per aprire la mappa delle eruzioni
-            // window.location.href = 'overview.html';
-        });
-    }
-    
-    if (exploreGraphsBtn) {
-        exploreGraphsBtn.addEventListener('click', function() {
-            alert('Opening detailed graphs...');
-            // Qui puoi aggiungere la logica per aprire i grafici dettagliati
-            // window.location.href = 'detail-graphs.html';
-        });
+// Gestione click sulla freccia di scroll
+function handleScrollHintClick() {
+    if (isAtFooter) {
+        // Dal footer torna su
+        scrollBackFromFooter();
+    } else {
+        // Dal testo, scendi di una sezione o vai al footer
+        const scrollTop = textScrollArea.scrollTop;
+        const scrollHeight = textScrollArea.scrollHeight - textScrollArea.clientHeight;
+        const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+        
+        if (scrollPercentage >= 95) {
+            // Fine del testo, vai al footer
+            goToFooter();
+        } else {
+            // Scendi nel testo
+            scrollTextContent(400);
+        }
     }
 }
 
 // Controlla la posizione dello scroll
 function checkScrollPosition() {
-    if (!textScrollArea) return;
+    if (!footer || !textScrollArea) return;
     
-    const scrollTop = textScrollArea.scrollTop;
-    const scrollHeight = textScrollArea.scrollHeight - textScrollArea.clientHeight;
-    const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+    const footerRect = footer.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
     
-    // Verifica se siamo arrivati ai bottoni (ultimi 20% dello scroll)
-    if (scrollPercentage >= 80 && !isAtButtons) {
-        // Siamo arrivati ai bottoni
-        isAtButtons = true;
+    // Verifica se il footer è visibile
+    const isFooterVisible = footerRect.top < windowHeight && footerRect.bottom > 0;
+    
+    if (isFooterVisible && !isAtFooter) {
+        // Siamo entrati nel footer
+        isAtFooter = true;
+        isPageScrollMode = true; // Passiamo allo scroll della pagina
         updateScrollHint();
-    } else if (scrollPercentage < 80 && isAtButtons) {
-        // Siamo tornati sopra ai bottoni
-        isAtButtons = false;
+    } else if (!isFooterVisible && isAtFooter) {
+        // Siamo usciti dal footer
+        isAtFooter = false;
+        isPageScrollMode = false; // Torniamo allo scroll del testo
         updateScrollHint();
     }
 }
@@ -154,59 +149,80 @@ function checkScrollPosition() {
 function handleGlobalWheel(e) {
     e.preventDefault();
     
-    if (!textScrollArea) return;
+    if (!textScrollArea || !footer) return;
     
     const delta = e.deltaY;
     
+    // Se stiamo scorrendo la pagina (footer visibile)
+    if (isPageScrollMode || isAtFooter) {
+        // Controlla se siamo tornati completamente su
+        if (delta < 0 && window.scrollY <= mainContent.offsetTop + mainContent.offsetHeight) {
+            // Siamo tornati al contenuto principale
+            isPageScrollMode = false;
+            isAtFooter = false;
+            updateScrollHint();
+        }
+        // Altrimenti lascia che la pagina scroli normalmente
+        return;
+    }
+    
+    // Se siamo nel testo
+    const scrollTop = textScrollArea.scrollTop;
+    const scrollHeight = textScrollArea.scrollHeight - textScrollArea.clientHeight;
+    const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+    
     // Scrolling verso il basso
     if (delta > 0) {
-        scrollTextContent(delta * 0.5);
+        if (scrollPercentage >= 95) {
+            // Fine del testo, vai al footer
+            goToFooter();
+        } else {
+            // Scrolla il testo
+            textScrollArea.scrollTop += delta * 0.5;
+            detectCurrentSection(textScrollArea.scrollTop);
+            updateScrollHint();
+        }
     }
     // Scrolling verso l'alto
     else if (delta < 0) {
-        scrollTextContent(delta * 0.5);
-    }
-}
-
-// Gestione click sulla freccia di scroll
-function handleScrollHintClick() {
-    if (isAtButtons) {
-        // Torna all'inizio del testo
-        scrollToTop();
-    } else {
-        // Scendi nel testo
-        scrollTextContent(400);
-    }
-}
-
-// Scrolla all'inizio del testo
-function scrollToTop() {
-    if (!textScrollArea) return;
-    
-    smoothScrollTo(textScrollArea, 0, 600);
-    isAtButtons = false;
-    
-    // Aggiorna sezione corrente
-    setTimeout(() => {
+        // Scrolla il testo verso l'alto
+        textScrollArea.scrollTop += delta * 0.5;
         detectCurrentSection(textScrollArea.scrollTop);
         updateScrollHint();
-    }, 100);
+    }
 }
 
-// Vai ai bottoni (fine del testo)
-function goToButtons() {
-    if (!textScrollArea) return;
+// Vai al footer (fine del testo)
+function goToFooter() {
+    isAtFooter = true;
+    isPageScrollMode = true;
     
-    const buttonsContainer = document.querySelector('.buttons-container');
-    if (buttonsContainer) {
-        const targetPosition = buttonsContainer.offsetTop - textScrollArea.clientHeight * 0.2;
-        smoothScrollTo(textScrollArea, targetPosition, 600);
-        
-        setTimeout(() => {
-            isAtButtons = true;
-            updateScrollHint();
-        }, 300);
+    // Scorri la pagina per mostrare il footer
+    if (footer) {
+        footer.scrollIntoView({ behavior: 'smooth' });
     }
+    
+    updateScrollHint();
+}
+
+// Torna indietro dal footer
+function scrollBackFromFooter() {
+    isAtFooter = false;
+    isPageScrollMode = false;
+    
+    // Torna al contenuto principale
+    if (mainContent) {
+        mainContent.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Imposta lo scroll del testo in fondo
+    setTimeout(() => {
+        if (textScrollArea) {
+            textScrollArea.scrollTop = textScrollArea.scrollHeight - textScrollArea.clientHeight;
+            detectCurrentSection(textScrollArea.scrollTop);
+        }
+        updateScrollHint();
+    }, 500);
 }
 
 // Calcola le soglie di scroll in base all'altezza reale
@@ -315,20 +331,22 @@ function updateIndicators(sectionId) {
 
 // Aggiorna visibilità e testo della freccia di scroll
 function updateScrollHint() {
-    if (!scrollHint || !textScrollArea) return;
+    if (!scrollHint) return;
     
-    if (isAtButtons) {
-        // Quando siamo ai bottoni, freccia verso l'alto
-        scrollHint.textContent = "↑";
+    if (isAtFooter) {
+        // Quando siamo al footer, freccia verso l'alto
+        scrollHint.textContent = "V";
         scrollHint.classList.add('up-arrow');
         scrollHint.classList.remove('hidden');
     } else {
         // Quando siamo nel testo
+        if (!textScrollArea) return;
+        
         const scrollTop = textScrollArea.scrollTop;
         const scrollHeight = textScrollArea.scrollHeight - textScrollArea.clientHeight;
         const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
         
-        scrollHint.textContent = "↓";
+        scrollHint.textContent = "V";
         scrollHint.classList.remove('up-arrow');
         scrollHint.classList.remove('hidden');
         
@@ -339,7 +357,7 @@ function updateScrollHint() {
 
 // Scroll del contenuto testo
 function scrollTextContent(pixels) {
-    if (!textScrollArea) return;
+    if (!textScrollArea || isAtFooter) return;
     
     textScrollArea.scrollTop += pixels;
     detectCurrentSection(textScrollArea.scrollTop);
@@ -348,7 +366,7 @@ function scrollTextContent(pixels) {
 
 // Scrolla a una sezione specifica
 function scrollToSection(sectionId) {
-    if (!textScrollArea) return;
+    if (!textScrollArea || isAtFooter) return;
     
     const section = sections.find(s => s.id === sectionId);
     if (!section) return;
@@ -357,7 +375,6 @@ function scrollToSection(sectionId) {
     
     // Aggiorna sezione corrente
     updateCurrentSection(sectionId);
-    isAtButtons = false;
 }
 
 // Animazione scroll fluida
@@ -413,26 +430,39 @@ function handleKeyDown(e) {
         case 'ArrowDown':
         case 'PageDown':
             e.preventDefault();
-            scrollTextContent(100);
+            if (isAtFooter) {
+                // Rimani al footer
+                return;
+            } else {
+                scrollTextContent(100);
+            }
             break;
             
         case 'ArrowUp':
         case 'PageUp':
             e.preventDefault();
-            scrollTextContent(-100);
+            if (isAtFooter) {
+                scrollBackFromFooter();
+            } else {
+                scrollTextContent(-100);
+            }
             break;
             
         case 'ArrowRight':
             e.preventDefault();
-            if (currentSectionId < 3) {
-                scrollToSection(currentSectionId + 1);
+            if (!isAtFooter) {
+                if (currentSectionId < 3) {
+                    scrollToSection(currentSectionId + 1);
+                }
             }
             break;
             
         case 'ArrowLeft':
             e.preventDefault();
-            if (currentSectionId > 1) {
-                scrollToSection(currentSectionId - 1);
+            if (!isAtFooter) {
+                if (currentSectionId > 1) {
+                    scrollToSection(currentSectionId - 1);
+                }
             }
             break;
             
@@ -440,20 +470,28 @@ function handleKeyDown(e) {
         case '2':
         case '3':
             e.preventDefault();
-            const sectionId = parseInt(e.key);
-            if (sectionId >= 1 && sectionId <= 3 && sectionId !== currentSectionId) {
-                scrollToSection(sectionId);
+            if (!isAtFooter) {
+                const sectionId = parseInt(e.key);
+                if (sectionId >= 1 && sectionId <= 3 && sectionId !== currentSectionId) {
+                    scrollToSection(sectionId);
+                }
             }
             break;
             
         case 'End':
             e.preventDefault();
-            goToButtons();
+            if (!isAtFooter) {
+                goToFooter();
+            }
             break;
             
         case 'Home':
             e.preventDefault();
-            scrollToTop();
+            if (isAtFooter) {
+                scrollBackFromFooter();
+            } else {
+                scrollToSection(1);
+            }
             break;
     }
 }
@@ -482,6 +520,6 @@ function setupImageErrorHandler() {
 window.methodology = {
     scrollToSection,
     currentSection: () => currentSectionId,
-    goToButtons,
-    scrollToTop
+    goToFooter,
+    scrollBackFromFooter
 };

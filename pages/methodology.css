@@ -60,7 +60,7 @@ header a:hover {
     margin-top: 90px;
     padding: 40px 80px;
     position: relative;
-    min-height: calc(100vh - 90px); /* Modificato per rimuovere spazio footer */
+    min-height: calc(100vh - 200px);
 }
 
 /* Titolo della pagina - POSIZIONATI MOLTO PIÙ IN ALTO */
@@ -95,7 +95,7 @@ header a:hover {
     display: flex;
     position: relative;
     margin-top: 150px;
-    height: calc(100vh - 250px); /* Modificato per rimuovere spazio footer */
+    height: calc(100vh - 320px);
     min-height: 600px;
 }
 
@@ -104,12 +104,12 @@ header a:hover {
     flex: 1;
     position: relative;
     width: 600px; /* Ridotta da 700px a 600px */
-    height: 100%;
+    height: 86%;
     margin-right: 40px;
     margin-top: 10px;
     background-color: transparent;
     /* Margine inferiore AUMENTATO */
-    margin-bottom: 40px;
+    margin-bottom: 80px; /* Aumentato da 40px a 80px */
 }
 
 .text-content {
@@ -118,7 +118,7 @@ header a:hover {
     overflow-y: auto;
     padding: 20px;
     padding-top: 10px;
-    padding-bottom: 70px; /* Spazio per la freccia aumentato */
+    padding-bottom: 100px; /* Spazio per la freccia aumentato */
     
     /* Nasconde la scrollbar in tutti i browser */
     scrollbar-width: none;
@@ -221,43 +221,15 @@ header a:hover {
     line-height: 1.4;
 }
 
-/* Container per i bottoni */
-.buttons-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 60px;
-    margin-bottom: 80px;
-    padding: 20px 0;
-    border-top: 1px solid #eee;
-}
-
-/* Stile bottoni (simile al Learn More) */
-.methodology-btn {
-    background-color: transparent;
-    color: #FF2B00;
-    border: 3px solid #FF2B00;
-    border-radius: 25px;
-    padding: 12px 30px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-.methodology-btn:hover {
-    background-color: #FF2B00;
-    color: white;
+/* Spazio per il footer */
+.footer-space {
+    height: 200px;
 }
 
 /* Freccia di scroll - STILE ESATTO COME NEL CODICE FORNITO */
 .text-scroll-hint {
     position: absolute;
-    bottom: 30px; /* Più in alto dentro l'area del testo */
+    bottom: - 2000px; /* Più in alto dentro l'area del testo */
     left: 50%;
     transform: translateX(-50%);
     color: #000000 !important;
@@ -330,7 +302,7 @@ header a:hover {
     cursor: pointer;
     transition: all 0.3s ease;
     position: absolute;
-    bottom: 40px; /* Modificato per essere più in alto */
+    bottom: 90px;
     right: 40px;
     z-index: 4;
 }
@@ -400,6 +372,61 @@ header a:hover {
     }
 }
 
+/* Footer */
+#main-footer {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    padding: 60px 40px;
+    border-top: 3px solid #FF2B00;
+    position: relative;
+    z-index: 2;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.footer-logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+.footer-text {
+    font-size: 16px;
+    color: #cccccc;
+    max-width: 600px;
+    margin: 0 auto 30px;
+    line-height: 1.6;
+}
+
+.footer-nav {
+    margin-bottom: 30px;
+}
+
+.footer-nav a {
+    color: #ffffff;
+    text-decoration: none;
+    margin: 0 25px;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.footer-nav a:hover {
+    color: #FF2B00;
+}
+
+.footer-copyright {
+    font-size: 13px;
+    color: #999999;
+    border-top: 1px solid #333;
+    padding-top: 30px;
+    margin-top: 30px;
+}
+
 /* Transizioni per titolo */
 .title-transition {
     animation: fadeInUp 0.4s ease-out;
@@ -445,12 +472,12 @@ header a:hover {
     }
     
     .learn-more-btn {
-        bottom: 40px;
+        bottom: 80px;
     }
     
     .main-container {
         margin-top: 140px;
-        height: calc(100vh - 230px);
+        height: calc(100vh - 310px);
     }
     
     .text-scroll-hint {
@@ -489,7 +516,7 @@ header a:hover {
     
     .learn-more-btn {
         right: 30px;
-        bottom: 40px;
+        bottom: 70px;
     }
     
     .main-container {
@@ -506,9 +533,9 @@ header a:hover {
     
     .text-scroll-container {
         width: 100%;
-        height: 500px;
+        height: 400px;
         margin-right: 0;
-        margin-bottom: 40px;
+        margin-bottom: 100px; /* Aumentato ulteriormente */
     }
     
     .image-container {
@@ -536,11 +563,6 @@ header a:hover {
     .text-scroll-hint {
         font-size: 32px;
         bottom: 20px;
-    }
-    
-    .buttons-container {
-        margin-top: 40px;
-        margin-bottom: 40px;
     }
 }
 
@@ -579,7 +601,7 @@ header a:hover {
     .text-scroll-container {
         height: 450px;
         margin-top: 0;
-        margin-bottom: 40px;
+        margin-bottom: 80px;
     }
     
     .section-title {
@@ -615,8 +637,12 @@ header a:hover {
         margin-top: 20px;
     }
     
-    .methodology-btn {
-        padding: 10px 20px;
+    #main-footer {
+        padding: 40px 25px;
+    }
+    
+    .footer-nav a {
+        margin: 0 15px;
         font-size: 13px;
     }
 }
@@ -638,7 +664,7 @@ header a:hover {
     
     .text-scroll-container {
         height: 400px;
-        margin-bottom: 30px;
+        margin-bottom: 60px;
     }
     
     .section-title {
@@ -657,15 +683,14 @@ header a:hover {
         bottom: 10px;
     }
     
-    .buttons-container {
-        gap: 10px;
-        margin-top: 30px;
-        margin-bottom: 30px;
+    .footer-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
     
-    .methodology-btn {
-        padding: 10px 15px;
-        font-size: 12px;
+    .footer-nav a {
+        margin: 0;
     }
 }
 
@@ -683,11 +708,10 @@ header a:hover {
     
     .main-container {
         margin-top: 180px;
-        height: calc(100vh - 280px);
+        height: calc(100vh - 350px);
     }
     
-    .buttons-container {
-        margin-top: 80px;
+    .text-scroll-container {
         margin-bottom: 100px;
     }
 }
@@ -707,8 +731,7 @@ header a:hover {
         margin-top: 200px;
     }
     
-    .buttons-container {
-        margin-top: 100px;
+    .text-scroll-container {
         margin-bottom: 120px;
     }
 }
