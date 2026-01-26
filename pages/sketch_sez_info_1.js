@@ -7,8 +7,11 @@ let typingSpeed = 1.5;
 let frameCounter = 0;
 
 // Bounds per frecce
-let vBounds = { x: 0, y: 0, w: 0, h: 0 };      // freccia giù
 let upBounds = { x: 0, y: 0, w: 0, h: 0 };    // freccia su
+let downBounds = { x: 0, y: 0, w: 0, h: 0 };  // freccia giù
+
+// Stato hover
+let isHovering = false;
 
 // Array di slide con le parole da evidenziare in BIANCO
 let slides = [
@@ -34,13 +37,38 @@ let slides = [
   }
 ];
 
-// Stato hover per il bottone
-let isHovering = false;
+// Aggiungi HTML per gli indicatori e le frecce di scroll
+function addHTMLStructure() {
+  // Aggiungi gli indicatori delle schermate (pallini)
+  const indicatorContainer = document.createElement('div');
+  indicatorContainer.className = 'screen-indicator';
+  indicatorContainer.innerHTML = `
+    <div class="screen-dot active" data-screen="0"></div>
+    <div class="screen-dot" data-screen="1"></div>
+    <div class="screen-dot" data-screen="2"></div>
+  `;
+  document.body.appendChild(indicatorContainer);
+  
+  // Contenitore per le frecce (solo visualizzazione)
+  const arrowsContainer = document.createElement('div');
+  arrowsContainer.className = 'arrows-container';
+  document.body.appendChild(arrowsContainer);
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  
+  // PRIMA inizializza le frecce
+  updateArrowsVisibility();
+  
+  // POI inizia la digitazione
   startTyping();
-  window.addEventListener('wheel', handleScroll, { passive: false });
+  
+  // Aggiungi struttura HTML
+  addHTMLStructure();
+  
+  // Setup event listeners
+  setupEventListeners();
 }
 
 function draw() {
@@ -60,12 +88,16 @@ function draw() {
             typedCaption = 0;
           } else {
             isTyping = false;
+            // Quando finisce la digitazione, aggiorna le frecce
+            updateArrowsVisibility();
           }
         }
       } else if (typingPhase === "caption") {
         typedCaption++;
         if (typedCaption >= fullCaption.length) {
           isTyping = false;
+          // Quando finisce la digitazione, aggiorna le frecce
+          updateArrowsVisibility();
         }
       }
     }
@@ -76,19 +108,9 @@ function draw() {
   let displayCaption = fullCaption.substring(0, typedCaption);
   drawMultilineText(displayMain, displayCaption, width / 2);
 
-  // Freccia SU (solo se non siamo alla prima slide)
-  if (!isTyping && currentSlide > 0) {
-    drawBouncingUpArrow();
-  }
-
-  // Freccia GIÙ (sempre visibile, tranne nell'ultima slide)
-  if (!isTyping && currentSlide < slides.length - 1) {
-    drawBouncingV();
-  }
-
-  // Bottone "Go to the map" nell'ultima slide
+  // Bottone finale "Explore all eruptions"
   if (currentSlide === slides.length - 1 && !isTyping) {
-    drawGoToMapButton();
+    drawExploreButton();
   }
 }
 
@@ -226,45 +248,9 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
   }
 }
 
-// Freccia GIÙ (V) - NERA
-function drawBouncingV() {
-  let x = width / 2;
-  let baseY = height - 120;
-  let bounce = sin(frameCount * 0.12) * 8;
-  let y = baseY + bounce;
-
-  textStyle(BOLD);
-  textSize(40);
-  fill(0); // Freccia NERA
-  text("V", x, y);
-
-  vBounds.w = 40;
-  vBounds.h = 40;
-  vBounds.x = x - vBounds.w / 2;
-  vBounds.y = y - vBounds.h / 2;
-}
-
-// Freccia SU (Λ) - NERA
-function drawBouncingUpArrow() {
-  let x = width / 2;
-  let baseY = 120;
-  let bounce = sin(frameCount * 0.12 + PI) * 8;
-  let y = baseY + bounce;
-
-  textStyle(BOLD);
-  textSize(40);
-  fill(0); // Freccia NERA
-  text("Λ", x, y);
-
-  upBounds.w = 40;
-  upBounds.h = 40;
-  upBounds.x = x - upBounds.w / 2;
-  upBounds.y = y - upBounds.h / 2;
-}
-
-// Bottone "Go to the map" - NERO con testo BIANCO e ombra diffusa
-function drawGoToMapButton() {
-  let buttonW = 200;
+// Bottone "Explore all eruptions" - STILE MODIFICATO: solo stroke e testo bianco
+function drawExploreButton() {
+  let buttonW = 220;
   let buttonH = 50;
   let buttonX = width / 2 - buttonW / 2;
   let buttonY = height - 100;
@@ -276,126 +262,254 @@ function drawGoToMapButton() {
   let scaledX = buttonX - (scaledW - buttonW) / 2;
   let scaledY = buttonY - (scaledH - buttonH) / 2;
 
-  // OMBRA DIFFUSA - Disegna più strati per un effetto blur
-  noStroke();
-  
-  // Strato 1: più diffuso e trasparente
-  for (let i = 0; i < 5; i++) {
-    let blurRadius = i * 2;
-    let alpha = 20 - i * 3;
-    fill(0, 0, 0, alpha);
-    rect(
-      scaledX + 4, 
-      scaledY + 4 + blurRadius/2, 
-      scaledW, 
-      scaledH, 
-      25
-    );
-  }
-  
-  // Strato 2: ombra principale più morbida
-  for (let i = 0; i < 3; i++) {
-    let offset = i * 1.5;
-    let alpha = 30 - i * 8;
-    fill(0, 0, 0, alpha);
-    rect(
-      scaledX + offset, 
-      scaledY + offset, 
-      scaledW, 
-      scaledH, 
-      25
-    );
-  }
-
-  // Sfondo bottone — NERO
-  fill(0);
-  noStroke();
+  // STILE MODIFICATO: Solo contorno bianco (stroke) e testo bianco
+  noFill();
+  stroke(255); // Stroke bianco
+  strokeWeight(2);
   rect(scaledX, scaledY, scaledW, scaledH, 25);
 
   // Testo bottone — BIANCO
   fill(255);
-  textSize(20);
+  noStroke();
+  textSize(18);
   textStyle(BOLD);
   textAlign(CENTER, CENTER);
-  text("Go to the map", scaledX + scaledW / 2, scaledY + scaledH / 2);
+  text("Explore all eruptions", scaledX + scaledW / 2, scaledY + scaledH / 2);
 
   // Aggiorna bounds per il click
-  vBounds.x = buttonX;
-  vBounds.y = buttonY;
-  vBounds.w = buttonW;
-  vBounds.h = buttonH;
+  downBounds.x = buttonX;
+  downBounds.y = buttonY;
+  downBounds.w = buttonW;
+  downBounds.h = buttonH;
 }
 
-function mousePressed() {
+// Configura tutti gli event listener
+function setupEventListeners() {
+  // Scroll del mouse
+  window.addEventListener('wheel', handleScroll, { passive: false });
+  
+  // Tasti freccia
+  document.addEventListener('keydown', handleKeyDown);
+  
+  // Click sugli indicatori delle schermate
+  document.querySelectorAll('.screen-dot').forEach(dot => {
+    dot.addEventListener('click', function() {
+      const slideIndex = parseInt(this.getAttribute('data-screen'));
+      if (slideIndex !== currentSlide) {
+        goToSlide(slideIndex);
+      }
+    });
+  });
+}
+
+// Completa la digitazione del testo corrente
+function completeTyping() {
   if (isTyping) {
     let current = slides[currentSlide];
     typedMain = current.lines.join('\n').length;
     typedCaption = (current.caption || "").length;
     isTyping = false;
     frameCounter = 0;
-  } else {
-    // Clic sulla freccia SU
-    if (
-      currentSlide > 0 &&
-      mouseX >= upBounds.x &&
-      mouseX <= upBounds.x + upBounds.w &&
-      mouseY >= upBounds.y &&
-      mouseY <= upBounds.y + upBounds.h
-    ) {
-      currentSlide--;
-      startTyping();
-    }
-    // Clic sulla freccia GIÙ o sul bottone "Go to the map"
-    else if (
-      mouseX >= vBounds.x &&
-      mouseX <= vBounds.x + vBounds.w &&
-      mouseY >= vBounds.y &&
-      mouseY <= vBounds.y + vBounds.h
-    ) {
-      if (currentSlide < slides.length - 1) {
-        currentSlide++;
-        startTyping();
-      } else if (currentSlide === slides.length - 1) {
-        // VAI ALLA MAPPA
-        window.location.href = "overview.html";
+    // Aggiorna le frecce quando si completa la digitazione
+    updateArrowsVisibility();
+  }
+}
+
+// Gestione tasti freccia - MODIFICATA per completare l'animazione
+function handleKeyDown(e) {
+  switch(e.key) {
+    case 'ArrowDown':
+    case 'PageDown':
+      e.preventDefault();
+      if (isTyping) {
+        completeTyping();
+      } else if (currentSlide < slides.length - 1) {
+        goToSlide(currentSlide + 1);
       }
+      break;
+      
+    case 'ArrowUp':
+    case 'PageUp':
+      e.preventDefault();
+      if (isTyping) {
+        completeTyping();
+      } else if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+      }
+      break;
+      
+    case 'ArrowRight':
+      e.preventDefault();
+      if (isTyping) {
+        completeTyping();
+      } else if (currentSlide < slides.length - 1) {
+        goToSlide(currentSlide + 1);
+      }
+      break;
+      
+    case 'ArrowLeft':
+      e.preventDefault();
+      if (isTyping) {
+        completeTyping();
+      } else if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+      }
+      break;
+      
+    case ' ':
+    case 'Enter':
+      e.preventDefault();
+      if (isTyping) {
+        completeTyping();
+      } else if (currentSlide < slides.length - 1) {
+        goToSlide(currentSlide + 1);
+      }
+      break;
+      
+    case '1':
+    case '2':
+    case '3':
+      e.preventDefault();
+      const slideIndex = parseInt(e.key) - 1;
+      if (slideIndex >= 0 && slideIndex < slides.length && slideIndex !== currentSlide) {
+        if (isTyping) {
+          completeTyping();
+        }
+        goToSlide(slideIndex);
+      }
+      break;
+  }
+}
+
+// Vai a una slide specifica
+function goToSlide(slideIndex) {
+  if (slideIndex < 0 || slideIndex >= slides.length || slideIndex === currentSlide) return;
+  
+  currentSlide = slideIndex;
+  startTyping();
+  updateScreenIndicator();
+  // Le frecce vengono aggiornate in startTyping() e quando finisce la digitazione
+  
+  // Forza il redraw per mostrare immediatamente il cambiamento
+  redraw();
+}
+
+// Gestione scroll del mouse
+function handleScroll(e) {
+  e.preventDefault();
+  
+  const delta = e.deltaY;
+  
+  if (delta > 0 && currentSlide < slides.length - 1) {
+    if (!isTyping) {
+      goToSlide(currentSlide + 1);
+    }
+  } else if (delta < 0 && currentSlide > 0) {
+    if (!isTyping) {
+      goToSlide(currentSlide - 1);
     }
   }
 }
 
-// SCROLL BIDIREZIONALE
-function handleScroll(event) {
-  if (isTyping) return;
-
-  let delta = event.deltaY;
-  event.preventDefault();
-
-  if (delta > 0 && currentSlide < slides.length - 1) {
-    currentSlide++;
-    startTyping();
-  } else if (delta < 0 && currentSlide > 0) {
-    currentSlide--;
-    startTyping();
+function mousePressed() {
+  if (isTyping) {
+    // Completa la digitazione
+    completeTyping();
+    return;
+  }
+  
+  // Clic sulla freccia SU (area approssimativa in alto)
+  if (currentSlide > 0 && mouseY < 100) {
+    goToSlide(currentSlide - 1);
+  }
+  // Clic sulla freccia GIÙ (area approssimativa in basso, ma non sul bottone)
+  else if (currentSlide < slides.length - 1 && mouseY > height - 120 && mouseY < height - 80) {
+    goToSlide(currentSlide + 1);
+  }
+  // Click sul bottone finale
+  else if (currentSlide === slides.length - 1) {
+    if (
+      mouseX >= downBounds.x &&
+      mouseX <= downBounds.x + downBounds.w &&
+      mouseY >= downBounds.y &&
+      mouseY <= downBounds.y + downBounds.h
+    ) {
+      // VAI ALLA MAPPA
+      window.location.href = "overview.html";
+    }
   }
 }
 
 // Rileva hover sul bottone
 function mouseMoved() {
+  // Hover sul bottone finale
   if (currentSlide === slides.length - 1 && !isTyping) {
     if (
-      mouseX >= vBounds.x &&
-      mouseX <= vBounds.x + vBounds.w &&
-      mouseY >= vBounds.y &&
-      mouseY <= vBounds.y + vBounds.h
+      mouseX >= downBounds.x &&
+      mouseX <= downBounds.x + downBounds.w &&
+      mouseY >= downBounds.y &&
+      mouseY <= downBounds.y + downBounds.h
     ) {
       isHovering = true;
-      cursor(HAND);
+      document.body.style.cursor = 'pointer';
+      return;
     } else {
       isHovering = false;
-      cursor(ARROW);
     }
-  } else {
-    cursor(ARROW);
+  }
+  
+  // Hover sulle aree delle frecce (solo quando non si sta digitando)
+  if (!isTyping) {
+    if (currentSlide > 0 && mouseY < 100) {
+      // Area freccia su (in alto)
+      document.body.style.cursor = 'pointer';
+      return;
+    } else if (currentSlide < slides.length - 1 && mouseY > height - 120 && mouseY < height - 80) {
+      // Area freccia giù (in basso, sopra il bottone)
+      document.body.style.cursor = 'pointer';
+      return;
+    }
+  }
+  
+  document.body.style.cursor = 'default';
+}
+
+// Aggiorna gli indicatori delle schermate
+function updateScreenIndicator() {
+  const dots = document.querySelectorAll('.screen-dot');
+  dots.forEach((dot, index) => {
+    if (index === currentSlide) {
+      dot.classList.add('active');
+    } else {
+      dot.classList.remove('active');
+    }
+  });
+}
+
+// Aggiorna visibilità delle frecce - MODIFICATA per mostrare sempre se non si sta digitando
+function updateArrowsVisibility() {
+  const arrows = document.querySelector('.arrows-container');
+  if (arrows) {
+    arrows.innerHTML = '';
+    
+    // Mostra frecce solo se non si sta digitando o siamo all'ultima slide (per il bottone)
+    if (!isTyping || currentSlide === slides.length - 1) {
+      // Freccia SU (solo se non siamo alla prima slide)
+      if (currentSlide > 0) {
+        const upArrow = document.createElement('div');
+        upArrow.className = 'scroll-hint up-arrow';
+        upArrow.innerHTML = 'V';
+        arrows.appendChild(upArrow);
+      }
+      
+      // Freccia GIÙ (solo se non siamo all'ultima slide)
+      if (currentSlide < slides.length - 1) {
+        const downArrow = document.createElement('div');
+        downArrow.className = 'scroll-hint down-arrow';
+        downArrow.innerHTML = 'V';
+        arrows.appendChild(downArrow);
+      }
+    }
   }
 }
 
@@ -405,8 +519,153 @@ function startTyping() {
   typedMain = 0;
   typedCaption = 0;
   frameCounter = 0;
+  // Aggiorna le frecce (che ora gestiscono la visibilità in base a isTyping)
+  updateArrowsVisibility();
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  redraw();
 }
+
+// Aggiungi CSS inline per gli elementi HTML
+function addInlineStyles() {
+  const style = document.createElement('style');
+  style.textContent = `
+    /* Indicatore schermate a sinistra */
+    .screen-indicator {
+      position: fixed;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 1000;
+    }
+    
+    .screen-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .screen-dot.active {
+      background-color: white;
+      transform: scale(1.2);
+      border-color: white;
+    }
+    
+    .screen-dot:hover {
+      background-color: rgba(255, 255, 255, 0.7);
+      border-color: white;
+      transform: scale(1.3);
+    }
+    
+    /* Contenitore frecce */
+    .arrows-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    
+    /* Stile frecce - NERO SOLIDO PER ENTRAMBE */
+    .scroll-hint {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #000000 !important;
+      font-size: 40px;
+      font-weight: 900 !important;
+      text-align: center;
+      cursor: pointer;
+      z-index: 1000;
+      width: 40px;
+      height: 40px;
+      animation: bounce 2s infinite;
+      pointer-events: auto;
+      opacity: 1 !important;
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+      text-shadow: 0 0 0 #000000 !important;
+      font-family: 'Helvetica', Arial, sans-serif !important;
+    }
+    
+    /* Freccia SU - posizionata in alto, ruotata di 180 gradi */
+    .up-arrow {
+      top: 40px;
+      left: 49.585%;
+      transform: translateX(-50%) rotate(180deg);
+    }
+    
+    /* Freccia GIÙ - posizionata in basso */
+    .down-arrow {
+      bottom: 40px;
+      left: 50%;
+    }
+    
+    /* Animazione bounce ESATTAMENTE COME NEL CODICE DI RIFERIMENTO */
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateX(-50%) translateY(0);
+      }
+      40% {
+        transform: translateX(-50%) translateY(-10px);
+      }
+      60% {
+        transform: translateX(-50%) translateY(-5px);
+      }
+    }
+    
+    /* Animazione per freccia su (ruotata) */
+    .up-arrow {
+      animation: bounceUp 2s infinite;
+    }
+    
+    @keyframes bounceUp {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateX(-50%) rotate(180deg) translateY(0);
+      }
+      40% {
+        transform: translateX(-50%) rotate(180deg) translateY(10px);
+      }
+      60% {
+        transform: translateX(-50%) rotate(180deg) translateY(5px);
+      }
+    }
+    
+    /* Reset canvas position */
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    
+    /* Body e HTML per coprire tutto */
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      background-color: #FF2B00;
+      font-family: 'Helvetica', Arial, sans-serif;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Esegui il setup degli stili all'avvio
+addInlineStyles();
+
+// Inizializza le frecce SUBITO
+updateArrowsVisibility();
