@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="methodology.css">
 </head>
 <body>
-    <!-- Navbar FISSA - non scompare -->
+    <!-- Navbar FISSA -->
     <header id="navbar">
         <div class="logo">Significant Volcanic Eruptions</div>
         <nav>
@@ -18,92 +18,195 @@
         </nav>
     </header>
 
-    <!-- Schermata 1 -->
-    <section id="screen1" class="screen active">
-        <!-- Titolo della schermata -->
-        <div class="screen-title">METHODOLOGY</div>
-        <div class="screen-subtitle">HOW WE BUILT OUR VISUAL STORY.</div>
+    <!-- Contenuto principale - Layout simile a prima -->
+    <main id="main-content">
+        <!-- Titolo della pagina - CAMBIA DINAMICAMENTE - POSIZIONATI PIÙ IN ALTO -->
+        <div class="screen-title" id="dynamic-title">METHODOLOGY</div>
+        <div class="screen-subtitle" id="dynamic-subtitle">HOW WE BUILT OUR VISUAL STORY.</div>
         
-        <!-- Container per il testo -->
-        <div id="text-container"></div>
-        
-        <!-- Container per immagine a destra -->
-        <div class="image-container">
-            <img src="../assets/foto_screen_3.png" alt="Methodology overview" class="methodology-image" id="methodology-image-1">
+        <!-- Container principale per testo e immagine -->
+        <div class="main-container">
+            <!-- Fascia di testo a sinistra -->
+            <div class="text-scroll-container">
+                <!-- Contenuto del testo UNICO -->
+                <div class="text-content" id="text-content">
+                    <div class="text-section" data-section="1">
+                        <div class="section-title">OUR DESIGN METHODOLOGY</div>
+                        <div class="section-text">
+                            To tell the story of volcanic eruptions in a meaningful and accessible way, we began with a trusted scientific source: the volcano dataset provided by <span class="bold-text">NOAA – National Centers for Environmental Information (National Oceanic and Atmospheric Administration)</span>.
+                        </div>
+                        
+                        <div class="section-title">DATA ORGANIZATION</div>
+                        <div class="section-text">
+                            We first restructured the dataset into three thematic macro-categories:
+                        </div>
+                        
+                        <ul class="impact-list">
+                            <li><span class="bold-text">CORE INFORMATION</span> - Volcano name, eruption date, geographic location</li>
+                            <li><span class="bold-text">SECONDARY DETAILS</span> - Volcano type, historical context</li>
+                            <li><span class="bold-text">IMPACT METRICS</span> - Human, structural, and economic effects</li>
+                        </ul>
+                        
+                        <div class="section-text">
+                            Based on this structure, we defined two complementary levels of visualization:
+                        </div>
+                        
+                        <ul class="impact-list">
+                            <li>An <span class="bold-text">OVERVIEW</span> to quickly compare eruptions at a glance</li>
+                            <li>A <span class="bold-text">DETAILED VIEW</span> to explore individual events in depth</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-section" data-section="2">
+                        <div class="section-title">OVERVIEW VISUALIZATION</div>
+                        <div class="section-text">
+                            In the overview, each eruption is represented by four key elements:
+                        </div>
+                        
+                        <ul class="impact-list">
+                            <li><span class="bold-text">YEAR AND TIME PERIOD</span> of the event</li>
+                            <li><span class="bold-text">NAME OF THE VOLCANO</span></li>
+                            <li><span class="bold-text">VEI (VOLCANIC EXPLOSIVITY INDEX)</span></li>
+                            <li><span class="bold-text">OVERALL IMPACT SCORE</span>, derived from five standardized impact categories</li>
+                        </ul>
+                        
+                        <div class="section-text">
+                            Each eruption receives a <span class="bold-text">TOTAL IMPACT SCORE</span> by summing the values across all five categories. This score ranges from <span class="bold-text">1 (MINIMAL IMPACT)</span> to <span class="bold-text">20 (MAXIMUM SEVERITY)</span>, enabling direct comparison between events.
+                        </div>
+                        
+                        <div class="section-title">IMPACT CATEGORIES</div>
+                        <div class="section-text">
+                            The impact categories are defined as follows:
+                        </div>
+                        
+                        <table class="impact-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Level 1</th>
+                                    <th>Level 2</th>
+                                    <th>Level 3</th>
+                                    <th>Level 4</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Deaths</td>
+                                    <td>1–50</td>
+                                    <td>51–100</td>
+                                    <td>101–1,000</td>
+                                    <td>1,001+</td>
+                                </tr>
+                                <tr>
+                                    <td>Injuries</td>
+                                    <td>1–50</td>
+                                    <td>51–100</td>
+                                    <td>101–1,000</td>
+                                    <td>1,001+</td>
+                                </tr>
+                                <tr>
+                                    <td>Houses Destroyed</td>
+                                    <td>1–50</td>
+                                    <td>51–100</td>
+                                    <td>101–1,000</td>
+                                    <td>1,001+</td>
+                                </tr>
+                                <tr>
+                                    <td>Missing</td>
+                                    <td>1–50</td>
+                                    <td>51–100</td>
+                                    <td>101–1,000</td>
+                                    <td>1,001+</td>
+                                </tr>
+                                <tr>
+                                    <td>Economic Damage*</td>
+                                    <td>&lt; $1 million - NONE</td>
+                                    <td>$1–5 million - LIMITED</td>
+                                    <td>$5–24 million - SEVERE</td>
+                                    <td>≥ $25 million -</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="table-note">
+                            *For those events not offering a monetary evaluation of damage, the following five-level scale was used to classify damage (1990 dollars) and was listed in the Damage De column. If the actual dollar amount of damage was listed, a descriptor was also added for search purposes. When possible, a rough estimate was made of the dollar amount of damage based upon the description provided, in order to choose the damage category. In many cases, only a single descriptive term was available. These terms were converted to the damage categories based upon the authors apparent use of the term elsewhere. In the absence of other information, LIMITED is considered synonymous with slight, minor, and light, SEVERE as synonymous with major, extensive, and heavy, and EXTREME as synonymous with catastrophic. Note: The descriptive terms relate approximately to current dollar values.
+                        </div>
+                    </div>
+                    
+                    <div class="text-section" data-section="3">
+                        <div class="section-title">DATA INTERPRETATION</div>
+                        <div class="section-text">
+                            In this chart, some segments may appear in gray with a hover label reading <span class="bold-text">"NO DATA AVAILABLE."</span> This indicates that, for this specific eruption, the original dataset lacks reliable information for that impact category—not that no impact occurred, but that it was not documented or quantified in the source.
+                        </div>
+                        
+                        <div class="section-text">
+                            Our approach to data interpretation emphasizes <span class="bold-text">TRANSPARENCY</span> about data limitations. When information is missing or uncertain, we clearly indicate this to users rather than making assumptions or interpolating values.
+                        </div>
+                        
+                        <div class="section-text">
+                            This methodology ensures that our visualizations remain both <span class="bold-text">SCIENTIFICALLY ACCURATE</span> and <span class="bold-text">ETHICALLY RESPONSIBLE</span>, providing users with a clear understanding of both what we know and what we don't know about each volcanic event.
+                        </div>
+                        
+                        <div class="section-title">VISUALIZATION PRINCIPLES</div>
+                        
+                        <ul class="impact-list">
+                            <li><span class="bold-text">CLARITY OVER COMPLEXITY</span> - Prioritize understandable representations</li>
+                            <li><span class="bold-text">ACCURACY OVER AESTHETICS</span> - Never sacrifice truth for visual appeal</li>
+                            <li><span class="bold-text">TRANSPARENCY OVER ASSUMPTION</span> - Clearly indicate data gaps and limitations</li>
+                            <li><span class="bold-text">CONTEXT OVER ISOLATION</span> - Show data in historical and geographical context</li>
+                        </ul>
+                        
+                        <div class="section-text">
+                            By adhering to these principles, we create visualizations that are not only informative but also honest about the limitations of the underlying data, allowing users to draw meaningful conclusions while understanding the boundaries of what can be known from the available information.
+                        </div>
+                    </div>
+                    
+                    <!-- Spazio per il footer -->
+                    <div class="footer-space"></div>
+                </div>
+                
+                <!-- Freccia di scroll SOLO per il testo -->
+                <div class="text-scroll-hint" id="text-scroll-hint">↓</div>
+            </div>
+            
+            <!-- Container immagine a destra -->
+            <div class="image-container">
+                <img src="../assets/foto_screen_3.png" alt="Methodology overview" class="methodology-image active" id="methodology-image-1">
+                <img src="../assets/foto_screen_2.png" alt="Overview visualization" class="methodology-image" id="methodology-image-2">
+                <img src="../assets/foto_screen_1.png" alt="Data interpretation visualization" class="methodology-image" id="methodology-image-3">
+            </div>
         </div>
         
         <!-- Bottone Learn More -->
-        <button class="learn-more-btn">Learn More</button>
+        <button class="learn-more-btn" id="learn-more-btn">Learn More About Methodology</button>
         
-        <!-- Indicatore schermata -->
+        <!-- Indicatore delle sezioni a sinistra (come prima) -->
         <div class="screen-indicator">
-            <div class="screen-dot active" data-screen="0"></div>
-            <div class="screen-dot" data-screen="1"></div>
-            <div class="screen-dot" data-screen="2"></div>
+            <div class="screen-dot active" data-section="1"></div>
+            <div class="screen-dot" data-section="2"></div>
+            <div class="screen-dot" data-section="3"></div>
         </div>
-        
-        <!-- Testo sopra la freccia di scroll -->
-        <div class="scroll-text">Scroll to continue</div>
-        
-        <!-- Freccia di scroll al CENTRO dello schermo -->
-        <div class="scroll-hint center-hint" id="center-scroll-hint">V</div>
-    </section>
+    </main>
 
-    <!-- Schermata 2 -->
-    <section id="screen2" class="screen">
-        <!-- Titolo della schermata -->
-        <div class="screen-title">OVERVIEW VISUALIZATION</div>
-        
-        <!-- Container per il testo -->
-        <div id="text-container"></div>
-        
-        <!-- Container per immagine a destra -->
-        <div class="image-container">
-            <img src="../assets/foto_screen_2.png" alt="Overview visualization" class="methodology-image" id="methodology-image-2">
+    <!-- Footer in fondo -->
+    <footer id="main-footer">
+        <div class="footer-content">
+            <div class="footer-logo">Significant Volcanic Eruptions</div>
+            <div class="footer-text">
+                A comprehensive data visualization project exploring volcanic activity and its impacts throughout history.
+            </div>
+            <div class="footer-nav">
+                <a href="../index.html">Homepage</a>
+                <a href="team.html">Team</a>
+                <a href="methodology.html">Methodology</a>
+                <a href="overview.html">Interactive Map</a>
+            </div>
+            <div class="footer-copyright">
+                © 2024 Significant Volcanic Eruptions Project | Data source: NOAA
+            </div>
         </div>
-        
-        <!-- Bottone Learn More -->
-        <button class="learn-more-btn">Learn More</button>
-        
-        <!-- Indicatore schermata -->
-        <div class="screen-indicator">
-            <div class="screen-dot" data-screen="0"></div>
-            <div class="screen-dot active" data-screen="1"></div>
-            <div class="screen-dot" data-screen="2"></div>
-        </div>
-        
-        <!-- Testo sopra la freccia di scroll -->
-        <div class="scroll-text">Scroll to continue</div>
-        
-        <!-- Freccia di scroll al CENTRO dello schermo -->
-        <div class="scroll-hint center-hint" id="center-scroll-hint">V</div>
-    </section>
+    </footer>
 
-    <!-- Schermata 3 -->
-    <section id="screen3" class="screen">
-        <!-- Titolo della schermata -->
-        <div class="screen-title">DATA INTERPRETATION</div>
-        
-        <!-- Container per il testo -->
-        <div id="text-container"></div>
-        
-        <!-- Container per immagine a destra -->
-        <div class="image-container">
-            <img src="../assets/foto_screen_1.png" alt="Data interpretation visualization" class="methodology-image" id="methodology-image-3">
-        </div>
-        
-        <!-- Bottone Learn More -->
-        <button class="learn-more-btn">Learn More</button>
-        
-        <!-- Indicatore schermata -->
-        <div class="screen-indicator">
-            <div class="screen-dot" data-screen="0"></div>
-            <div class="screen-dot" data-screen="1"></div>
-            <div class="screen-dot active" data-screen="2"></div>
-        </div>
-    </section>
-
-    <!-- Scripts -->
     <script src="methodology.js"></script>
 </body>
 </html>
