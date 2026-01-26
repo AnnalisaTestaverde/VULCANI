@@ -24,6 +24,9 @@ function setup() {
       lines[i].push(x);
     }
   }
+  
+  // Imposta la freccia di scroll DOPO aver creato il canvas
+  setupScrollHint();
 }
 
 function draw() {
@@ -63,8 +66,6 @@ function draw() {
   }
 }
 
-
-
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   
@@ -77,3 +78,29 @@ function windowResized() {
     }
   }
 }
+
+// FUNZIONE PER LO SCROLL SMOOTH VERSO IL CONTENT
+function setupScrollHint() {
+  const scrollHint = document.querySelector('.scroll-hint.center-hint');
+  if (scrollHint) {
+    scrollHint.addEventListener('click', function(e) {
+      e.preventDefault();
+      const contentSection = document.getElementById('content');
+      if (contentSection) {
+        contentSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  }
+}
+
+// Imposta la freccia di scroll anche quando il DOM è caricato
+// (per sicurezza, nel caso setup() venga chiamato prima che il DOM sia pronto)
+document.addEventListener('DOMContentLoaded', function() {
+  // Se p5.js non ha ancora chiamato setup(), chiamiamo setupScrollHint qui
+  // Se p5.js ha già chiamato setup(), setupScrollHint sarà già stata chiamata,
+  // ma non fa male chiamarla di nuovo
+  setupScrollHint();
+});
