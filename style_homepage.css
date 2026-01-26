@@ -36,12 +36,19 @@ header {
     background-color: transparent; /* Manteniamo trasparente sopra il canvas */
 }
 
-/* 2. LINK E LOGO NERI */
+/* 2. LINK E LOGO NERI - MODIFICATO PER "EXPLORE" ROSSO */
 header a {
     text-decoration: none;
-    color: #000000; /* LINK NERI */
+    color: #000000; /* LINK NERI di default */
     margin-left: 40px;
     font-size: 14px;
+    font-weight: normal; /* Grassetto solo per Explore */
+}
+
+/* SELEZIONA SOLO IL LINK "EXPLORE" */
+header a[href="pages/overview.html"] {
+    color: #FF2B00; /* Colore rosso lava */
+    font-weight: bold; /* Grassetto */
 }
 
 .logo {
@@ -75,17 +82,47 @@ header a {
     line-height: 0.85; 
 }
 
-.scroll-icon {
+/* NUOVA FRECCIA COME IN METHODOLOGY - MODIFICATO: SPOSTATA PIÙ IN ALTO */
+.scroll-hint.center-hint {
+    position: absolute;
+    bottom: 120px; /* MODIFICATO: da 40px a 60px (più in alto) */
+    left: 50%;
+    transform: translateX(-50%);
+    color: #000000;
     font-size: 40px;
-    color: #000000; /* ICONA NERA (o lava #FF2B00 se vuoi contrasto) */
-    opacity: 100%;
+    font-weight: bold;
+    text-align: center;
+    z-index: 4;
+    width: 40px;
+    height: 40px;
     animation: bounce 2s infinite;
-    z-index: 2;
+    pointer-events: auto;
+    cursor: pointer;
+    text-decoration: none;
+    opacity: 1;
 }
 
+
+/* RIMUOVI IL VECCHIO STILE DELLA FRECCIA */
+.scroll-icon {
+    display: none;
+}
+
+.scroll-icon a {
+    display: none;
+}
+
+/* ANIMAZIONE BOUNCE (mantenuta, ma puoi usare quella di methodology se preferisci) */
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(8px); }
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateX(-50%) translateY(0);
+    }
+    40% {
+        transform: translateX(-50%) translateY(-10px);
+    }
+    60% {
+        transform: translateX(-50%) translateY(-5px);
+    }
 }
 
 .content {
@@ -115,25 +152,32 @@ header a {
 }
 
 .content p {
-    font-size: 14px;
+    font-size: 16px;
     color: #000000;
-    line-height: 20px;
+    line-height: 24px;
     /* Rimuovi: flex: 1; */
     max-width: none; /* Rimuovi o imposta su 'none' per far occupare l'intera colonna Grid */
 }
+
 .map-button {
     display: inline-block;
     margin-top: 40px;
     padding: 8px 25px;
     border-radius: 20px;
-    background-color: #FF2B00; /* Mantenuto accento Lava */
-    color: white; /* Testo del bottone bianco */
+    background-color: transparent; /* Sfondo trasparente */
+    border: 2px solid #FF2B00; /* Stroke/bordo color lava */
+    color: #FF2B00; /* Testo color lava */
     text-decoration: none;
     font-size: 14px;
+    font-weight: bold; /* Testo in grassetto */
+    transition: all 0.3s ease; /* Transizione fluida per hover */
 }
 
-
-
+/* Opzionale: aggiungi un effetto hover al bottone */
+.map-button:hover {
+    background-color: #FF2B00; /* Sfondo lava al passaggio del mouse */
+    color: white; /* Testo bianco al passaggio del mouse */
+}
 
 footer {
     width: 100%;

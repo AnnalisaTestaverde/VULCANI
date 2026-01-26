@@ -373,41 +373,72 @@ function drawVolcanoTypeBackground(typeRaw) {
   pop();
 }
 
+function getOrdinalSuffix(day) {
+  if (day > 3 && day < 21) return "th";
+  switch (day % 10) {
+    case 1: return "st";
+    case 2: return "nd";
+    case 3: return "rd";
+    default: return "th";
+  }
+}
+
+function getMonthName(mo) {
+  const months = [
+    "January", "February", "March", "April",
+    "May", "June", "July", "August",
+    "September", "October", "November", "December"
+  ];
+  let m = int(mo);
+  return (m >= 1 && m <= 12) ? months[m - 1] : "???";
+}
+
 // ---------- DESCRIZIONE ----------
 function drawVolcanoDescription(typeRaw, y, mo, dy) {
   let margin = 60;
   
   // Spostiamo tutto leggermente in giù per far spazio alla data
-  let dateY = 350; 
-  let titleY = 395; 
-  let descriptionY = 440;
+  let dateY = 340; 
+  let titleY = 365; 
+  let descriptionY = 410;
 
   // INIZIO: il testo è allineato al punto d'inizio della mappa
   let mapW = 320;
   // LARGHEZZA: il testo va a capo quando raggiunge il bordo della mappa
   let textWidthValue = mapW;
 
-  // --- DATA COMPLETA ---
-  // Gestione dati mancanti: se giorno o mese sono vuoti o "0", metto "?"
-  let dayStr = (dy && dy !== "0" && dy !== "") ? dy : "?";
-  let moStr = (mo && mo !== "0" && mo !== "") ? mo : "?";
-  
-  // MODIFICA QUI: Se l'anno è negativo (BC), aggiungi " BC" alla fine
-  let yearDisplay;
-  if (y < 0) {
-    yearDisplay = Math.abs(y) + " BC"; // Es: 4350 BC
-  } else {
-    yearDisplay = y.toString(); // Es: 2023
-  }
-  
-  let fullDate = dayStr + " / " + moStr + " / " + yearDisplay;
+  // --- DATA COMPLETA (estesa) ---
+  let dayAvailable = (dy && dy !== "0" && dy !== "");
+  let monthAvailable = (mo && mo !== "0" && mo !== "");
+
+  let dayText = dayAvailable ? dy + getOrdinalSuffix(int(dy)) : "??";
+  let monthText = monthAvailable ? getMonthName(mo) : "???";
+
+  // Anno con BC
+  let yearText = (y < 0) ? Math.abs(y) + " BC" : y.toString();
+
+  let fullDate = `${dayText} ${monthText} ${yearText}`;
+
 
   push();
   fill(chartMainColor);
   textSize(mainTextSize);
   textStyle(BOLD);
   textAlign(LEFT, TOP);
-  text("DATA MODIFICA: " + fullDate, margin, dateY);
+  push();
+  textSize(mainTextSize);
+  textAlign(LEFT, TOP);
+  textStyle(BOLD);
+
+  // Label rossa
+  fill(chartMainColor);
+  text("Date: ", margin, dateY);
+
+  // Valore nero
+  fill(0);
+  text(fullDate, margin + textWidth("Date: "), dateY);
+  pop();
+
   pop();
 
   // --- TITOLO TIPO VULCANO ---
@@ -423,10 +454,9 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   push();
   fill(0);
   textSize(mainTextSize);
-  textStyle(NORMAL);
-  textLeading(16);
+  textStyle(BOLD);
+  textLeading(20);
   textAlign(LEFT, TOP);
-  // TESTO / DIM. = larghezza fissa pari alla larghezza della mappa
   text(description, margin, descriptionY, textWidthValue);
   pop();
 }
@@ -618,11 +648,23 @@ function drawMap(lat, lon, country) {
   textStyle(BOLD);
   textAlign(LEFT, TOP);
   
-  if (country && country.trim() !== "") {
-    text(`Location: ${country}`, mapX, titleY);
-  } else {
-    text("Location", mapX, titleY);
-  }
+  let label = "Location: ";
+  let value = country && country.trim() !== "" ? country : "Unknown";
+
+  push();
+  textSize(mainTextSize);
+  textStyle(BOLD);
+  textAlign(LEFT, TOP);
+
+  // Label rossa
+  fill(chartMainColor);
+  text(label, mapX, titleY);
+
+  // Valore nero
+  fill(0);
+  text(value, mapX + textWidth(label), titleY);
+  pop();
+
   pop();
 
   // Cornice e sfondo
@@ -765,6 +807,13 @@ function drawBackButton() {
 
 /* NAVIGATORE ANNI */
 function drawYearNavigator(year) {
+
+  let hasMultipleEruptions = eruptions.length > 1;
+  let activeColor = color(chartMainColor);
+  let inactiveColor = color(180);
+  let arrowColor = hasMultipleEruptions ? activeColor : inactiveColor;
+
+
   let margin = 82;
   let y = 230;
   let navigatorX = margin;
@@ -795,7 +844,7 @@ function drawYearNavigator(year) {
 
   // FRECCIA SINISTRA: cornice
   push();
-  stroke(245, 40, 0);
+  stroke(arrowColor);
   strokeWeight(1);
   noFill();
   rect(leftFrameX, leftFrameY, leftArrowWidth + framePadding*2, frameHeight, 10);
@@ -803,11 +852,13 @@ function drawYearNavigator(year) {
 
   // FRECCIA SINISTRA: disegno "<"
   push();
-  fill(245, 40, 0);
+  fill(arrowColor);
   textSize(48);
   textStyle(NORMAL);
   text("<", leftArrowX, y);
   pop();
+
+
 
   // TESTO: anno
   push();
@@ -825,7 +876,7 @@ function drawYearNavigator(year) {
 
   // FRECCIA DESTRA: cornice
   push();
-  stroke(245, 40, 0);
+  stroke(arrowColor);
   strokeWeight(1);
   noFill();
   rect(rightFrameX, rightFrameY, rightArrowWidth + framePadding*2, frameHeight, 10);
@@ -833,11 +884,12 @@ function drawYearNavigator(year) {
 
   // FRECCIA DESTRA: disegno ">"
   push();
-  fill(245, 40, 0);
+  fill(arrowColor);
   textSize(48);
   textStyle(NORMAL);
   text(">", rightArrowX, y);
   pop();
+
 
   // ---- COUNTER ------
   if (eruptions.length > 0) {
@@ -851,7 +903,22 @@ function drawYearNavigator(year) {
     
     let counterText = (currentIndex + 1) + " / " + eruptions.length;
     
-    text("Eruption count: "+ counterText, margin - 22, counterY);
+    let label = "Eruption count: ";
+    let value = counterText;
+
+    push();
+    textSize(mainTextSize);
+    textAlign(LEFT);
+
+    // Label rossa
+    fill(chartMainColor);
+    text(label, margin - 22, counterY);
+
+    // Valore nero (subito dopo la label)
+    fill(0);
+    text(value, margin - 22 + textWidth(label), counterY);
+    pop();
+
     pop();
   }
 }
@@ -885,6 +952,12 @@ function mousePressed() {
     window.open("learn_more_detail.html", "_blank");
     return;
   }
+
+  // Se c'è una sola eruzione, disabilita la navigazione
+  if (eruptions.length <= 1) {
+    return;
+  }
+
 
   // NAV. ANNI / DIM: calcolo posizione (AGGIORNATO con i nuovi valori)
   let margin = 82; // Aggiornato da 60 a 82 (come in drawYearNavigator)
@@ -1065,7 +1138,7 @@ function getDetailText(value, descCode, type) {
   let code = parseInt(descCode);
 
   if (isNaN(code) || code < 1 || code > 4) {
-    return "No data available";
+    return "Impact unknown";
   }
 
   const tables = {
@@ -1162,7 +1235,7 @@ function drawImpactChart(d) {
 
   // valori e labels
   const values = [d.death, d.inj, d.dmg, d.house, d.missing];
-  const labels = ["Deaths", "Injuries", "Damage ($Mil)", "Houses Destroyed", "Missing"];
+  const labels = ["Deaths", "Injuries", "Damage", "Houses Destroyed", "Missing"];
   const rawValues = [d.rawDeath, d.rawInj, d.rawDmg, d.rawHouse, d.rawMissing];
   
   // Controlla se i dati sono disponibili
@@ -1313,13 +1386,15 @@ function drawImpactChart(d) {
   }
 
   // Disegna tutte le label
+  let detailMaxWidth = 110; // larghezza massima testo (puoi regolarla)
+
   for (let i = 0; i < 5; i++) {
     let start = sectionAngle * i + gapAngle / 2;
     let end = sectionAngle * (i + 1) - gapAngle / 2;
 
     textStyle(NORMAL);
-    
     noStroke();
+    
     if (!isDataAvailable[i]) {
       fill(150, 150, 150);
     } else {
@@ -1333,22 +1408,35 @@ function drawImpactChart(d) {
     let ly = sin(ang) * (chartSize / 2 + 50);
     
     // Disegna il titolo principale (Deaths, Injuries, ecc.)
-    text(labels[i], lx, ly - 8);
+    text(labels[i], lx, ly - 14);
     
     // AGGIUNTA: Disegna "Lvl. x" sotto ogni etichetta
     if (isDataAvailable[i]) {
-      // Il valore può essere 1, 2, 3 o 4
       let levelValue = values[i];
       let levelText = "Impact: " + levelValue;
-      
-      fill(245, 40, 0); // Rosso
-      textSize(chartLabelSize); // Leggermente più piccolo del testo sopra
+
+      // --- Impact: x ---
+      fill(chartMainColor);
+      textSize(chartLabelSize);
       textStyle(BOLD);
-      text(levelText, lx, ly + 10);
-      
-      // Ripristina stile normale
+      text(levelText, lx, ly + 3);
+
+      // --- Valore completo descrittivo ---
+      let detailText = "";
+      if (i === 0) detailText = getDetailText(d.rawDeath, d.death, "deaths");
+      if (i === 1) detailText = getDetailText(d.rawInj, d.inj, "injuries");
+      if (i === 2) detailText = getDetailText(d.rawDmg, d.dmg, "damage");
+      if (i === 3) detailText = getDetailText(d.rawHouse, d.house, "houses");
+      if (i === 4) detailText = getDetailText(d.rawMissing, d.missing, "missing");
+
+      fill(0); // nero
+      textSize(chartLabelSize);
       textStyle(NORMAL);
+      textAlign(CENTER, TOP);
+      text(detailText, lx - detailMaxWidth / 2, ly + 14, detailMaxWidth);
+
     }
+
   }
 
   // MODIFICA: Abbassa la posizione di "Total impact level" per non interferire con i pulsanti
@@ -1372,19 +1460,19 @@ function drawImpactChart(d) {
   // hover tooltip content
   if (hoveredSection !== -1) {
     if (hoveredSection === 0) {
-      tooltipText = "Deaths: " + getDetailText(d.rawDeath, d.death, "deaths");
+      tooltipText = getDetailText(d.rawDeath, d.death, "deaths");
     }
     else if (hoveredSection === 1) {
-      tooltipText = "Injuries: " + getDetailText(d.rawInj, d.inj, "injuries");
+      tooltipText = getDetailText(d.rawInj, d.inj, "injuries");
     }
     else if (hoveredSection === 2) {
-      tooltipText = "Damage: " + getDetailText(d.rawDmg, d.dmg, "damage");
+      tooltipText = getDetailText(d.rawDmg, d.dmg, "damage");
     }
     else if (hoveredSection === 3) {
-      tooltipText = "Houses: " + getDetailText(d.rawHouse, d.house, "houses");
+      tooltipText = getDetailText(d.rawHouse, d.house, "houses");
     }
     else if (hoveredSection === 4) {
-      tooltipText = "Missing: " + getDetailText(d.rawMissing, d.missing, "missing");
+      tooltipText = getDetailText(d.rawMissing, d.missing, "missing");
     }
   }
 
