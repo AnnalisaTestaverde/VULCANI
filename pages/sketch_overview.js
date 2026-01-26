@@ -1138,7 +1138,6 @@ function drawLegend() {
     // cerchio centrale
     circle(0, -1, r * 2);
 
- stroke(CONFIG.colors.text);
     // linea verticale
     line(0, R - 2, 0, 2);
    
@@ -1174,7 +1173,6 @@ function drawLegend() {
     line(0, 0, cos(a1) * A, sin(a1) * A);
     line(0, 0, cos(a2) * A, sin(a2) * A);
 
-    stroke(CONFIG.colors.text);
 
     // arco
     arc(0, 0, A * 2, A * 2, a1, a2);
@@ -1190,7 +1188,7 @@ function drawLegend() {
 
     noStroke();
     fill(CONFIG.colors.text);
-    text('Temporal order of eruptions', startX + 45, y3 + 12);
+    text('Eruption order: from oldest to most recent within each continent. ', startX + 45, y3 + 12);
 }
 
 function drawTemporalRangeSelector() {
