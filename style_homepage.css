@@ -1,68 +1,182 @@
+/* ===== RESET E STILI BASE ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
 /* scroll fluido */
 html {
     scroll-behavior: smooth;
 }
 
-/* rende cliccabile la freccia */
-.scroll-icon a {
-    text-decoration: none;
-    /* Colore accento: Lava */
-    color: #000000; 
-    font-size: 40px;
-}
-
-html {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Helvetica, Arial, sans-serif;
-}
-
 /* 1. SFONDO BIANCO GENERALE E TESTO NERO DI BASE */
 body {
-    color: #000000; /* TESTO NERO */
-    background-color: #ffffff; /* SFONDO BIANCO */
+    color: #000000;
+    background-color: #ffffff;
     overflow-x: hidden;
 }
 
+/* ===== HEADER E NAVIGATION ===== */
 header {
     width: 100%;
     padding: 25px 40px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     position: fixed;
     top: 0;
     z-index: 1000;
     background-color: white;
-}
-
-header a {
-    text-decoration: none;
-    color: #000000;
-    margin-left: 40px;
-    font-size: 15px;
-    transition: color 0.2s;
-}
-
-header a.explore {
-    text-decoration: none;
-    color:#FF2B00 ;
-    font-weight: bold;
-    margin-left: 40px;
-    font-size: 15px;
-    transition: color 0.2s;
-}
-
-header a:hover {
-    color: #FF2B00;
+    transition: all 0.3s ease;
 }
 
 .logo {
     font-weight: bold;
     font-size: 15px;
-    color: #000000; /* LOGO NERO */
+    color: #000000;
+    z-index: 1001;
 }
 
+/* Navigation Desktop */
+.nav-desktop {
+    display: flex;
+    gap: 40px;
+}
+
+.nav-desktop a {
+    text-decoration: none;
+    color: #000000;
+    font-size: 15px;
+    transition: color 0.2s;
+    position: relative;
+}
+
+.nav-desktop a.explore {
+    color: #FF2B00;
+    font-weight: bold;
+}
+
+.nav-desktop a:hover {
+    color: #FF2B00;
+}
+
+/* Hamburger Menu Button (Mobile) */
+.hamburger-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1001;
+    position: relative;
+}
+
+.hamburger-btn span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background-color: #000;
+    transition: all 0.3s ease;
+    position: absolute;
+    left: 11px;
+}
+
+.hamburger-btn span:nth-child(1) { top: 15px; }
+.hamburger-btn span:nth-child(2) { top: 21px; }
+.hamburger-btn span:nth-child(3) { top: 27px; }
+
+/* Hamburger Animation to X */
+.hamburger-btn.active span:nth-child(1) {
+    transform: rotate(45deg);
+    top: 21px;
+}
+
+.hamburger-btn.active span:nth-child(2) {
+    opacity: 0;
+    transform: translateX(-10px);
+}
+
+.hamburger-btn.active span:nth-child(3) {
+    transform: rotate(-45deg);
+    top: 21px;
+}
+
+/* Mobile Navigation Overlay */
+.nav-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(255, 255, 255, 0.98);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.nav-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.nav-mobile {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    width: 100%;
+    padding: 20px;
+}
+
+.nav-mobile a {
+    text-decoration: none;
+    color: #000000;
+    font-size: 22px;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.nav-mobile a.explore {
+    color: #FF2B00;
+}
+
+.nav-mobile a:hover {
+    color: #FF2B00;
+    transform: translateY(-2px);
+}
+
+/* ===== PAGE CONTENT ===== */
+.page-content {
+    padding-top: 90px;
+    position: relative;
+    z-index: 1;
+    min-height: calc(100vh - 320px);
+}
+
+/* ===== HERO SECTION ===== */
 .hero {
     height: 100vh;
     width: 100%;
@@ -72,26 +186,27 @@ header a:hover {
     justify-content: center;
     align-items: center;
     text-align: center;
-    background-color: transparent; /* Manteniamo trasparente per vedere il canvas */
+    background-color: transparent;
 }
 
-/* 3. TESTO H1 NERO */
+/* Titolo centrato rispetto all'animazione */
 .hero h1 {
     font-size: 160px;
-    color: #000000; /* TESTO NERO per la mascheratura o visibilità */
-    font-weight: 180%;
+    color: #000000;
+    font-weight: 800;
     z-index: 2;
     margin-bottom: 40px;
     text-align: center;
-    margin-left: 0px; 
-    padding-left: 0;
-    line-height: 0.85; 
+    line-height: 0.85;
+    position: relative;
+    width: 100%;
+    padding: 0 20px;
 }
 
-/* NUOVA FRECCIA COME IN METHODOLOGY - MODIFICATO: SPOSTATA PIÙ IN ALTO */
-.scroll-hint.center-hint {
+/* NUOVA FRECCIA PER SCORRIMENTO */
+.scroll-hint {
     position: absolute;
-    bottom: 120px; /* MODIFICATO: da 40px a 60px (più in alto) */
+    bottom: 60px;
     left: 50%;
     transform: translateX(-50%);
     color: #000000;
@@ -102,23 +217,23 @@ header a:hover {
     width: 40px;
     height: 40px;
     animation: bounce 2s infinite;
-    pointer-events: auto;
     cursor: pointer;
     text-decoration: none;
     opacity: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none;
+    border: none;
 }
 
-
-/* RIMUOVI IL VECCHIO STILE DELLA FRECCIA */
-.scroll-icon {
-    display: none;
+.scroll-hint span {
+    display: block;
+    font-size: 40px;
+    line-height: 1;
 }
 
-.scroll-icon a {
-    display: none;
-}
-
-/* ANIMAZIONE BOUNCE (mantenuta, ma puoi usare quella di methodology se preferisci) */
+/* ANIMAZIONE BOUNCE */
 @keyframes bounce {
     0%, 20%, 50%, 80%, 100% {
         transform: translateX(-50%) translateY(0);
@@ -131,38 +246,33 @@ header a:hover {
     }
 }
 
+/* ===== CONTENT SECTION ===== */
 .content {
     padding: 200px 200px;
     text-align: left;
-    /* Ho corretto la sintassi del background-color */
-    background-color: rgb(255, 255, 255); 
+    background-color: rgb(255, 255, 255);
     color: #000000;
+    position: relative;
+    z-index: 1;
 }
 
 .content-flex-container {
-    display: grid; /* Passa a Grid Layout */
-    grid-template-columns: 1fr 1fr; /* Dividi lo spazio in due colonne uguali */
-    gap: 100px; /* Mantiene lo spazio centrale */
-    
-    /* !!! QUESTA È LA CHIAVE !!! */
-    /* Allinea gli elementi lungo l'asse orizzontale in base alla loro ULTIMA linea di base */
-    align-items: last baseline; 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 100px;
+    align-items: last baseline;
 }
 
-/* Rimuovi flex: 1 dal contenuto, non è più necessario in Grid */
 .content h2 {
     font-size: 32px;
     margin-bottom: 20px;
     color: #FF2B00;
-    /* Rimuovi: flex: 1; */ 
 }
 
 .content p {
     font-size: 16px;
     color: #000000;
     line-height: 24px;
-    /* Rimuovi: flex: 1; */
-    max-width: none; /* Rimuovi o imposta su 'none' per far occupare l'intera colonna Grid */
 }
 
 .map-button {
@@ -170,41 +280,40 @@ header a:hover {
     margin-top: 40px;
     padding: 8px 25px;
     border-radius: 20px;
-    background-color: transparent; /* Sfondo trasparente */
-    border: 2px solid #FF2B00; /* Stroke/bordo color lava */
-    color: #FF2B00; /* Testo color lava */
+    background-color: transparent;
+    border: 2px solid #FF2B00;
+    color: #FF2B00;
     text-decoration: none;
     font-size: 14px;
-    font-weight: bold; /* Testo in grassetto */
-    transition: all 0.3s ease; /* Transizione fluida per hover */
+    font-weight: bold;
+    transition: all 0.3s ease;
 }
 
-/* Opzionale: aggiungi un effetto hover al bottone */
 .map-button:hover {
-    background-color: #FF2B00; /* Sfondo lava al passaggio del mouse */
-    color: white; /* Testo bianco al passaggio del mouse */
+    background-color: #FF2B00;
+    color: white;
 }
 
+/* ===== FOOTER (IDENTICO ALLA PAGINA TEAM) ===== */
 footer {
     width: 100%;
     border-top: 2px solid #FF2B00;
-    padding: 80px 0 80px 180px;
+    padding: 80px 0px 70px 230px;
     margin: 0;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 80px;
     position: relative;
-    bottom: 0;
     color: #000000;
     font-size: 14px;
     background: #fff;
     line-height: 1.5;
     min-height: 320px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
     box-sizing: border-box;
+    z-index: 2;
+    transition: all 0.3s ease;
 }
 
-/* COLONNE */
 .footer-col {
     display: flex;
     flex-direction: column;
@@ -256,14 +365,11 @@ footer {
 .polimi-logo {
     max-height: 105px;
     max-width: 200px;
+    width: 100%;
+    height: auto;
     opacity: 0.9;
     transition: opacity 0.2s;
-    display: block;
-    /* Rimuovi ogni spazio interno dell'immagine */
     object-fit: contain;
-    object-position: left top; /* Allinea in alto a sinistra */
-    /* Sposta a sinistra per compensare spazio bianco */
-    transform: translateX(-10px);
 }
 
 .polimi-logo:hover {
@@ -325,7 +431,6 @@ footer {
     border: 1px solid #ddd;
     padding: 4px 8px;
     border-radius: 3px;
-    font-family: 'Helvetica Neue', sans-serif;
     font-size: 12px;
     margin: 0 4px;
     text-decoration: none;
@@ -356,12 +461,7 @@ footer {
     color: #FF2B00;
     font-weight: 500;
     font-size: 13px;
-}
-
-.license-separator {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
+    word-break: break-all;
 }
 
 .license-spacer {
@@ -432,7 +532,8 @@ footer {
 .design-logo {
     max-height: 95px;
     max-width: 130px;
-    width: auto;
+    width: 100%;
+    height: auto;
     opacity: 0.9;
     transition: opacity 0.2s;
     margin-bottom: 5px;
@@ -441,29 +542,24 @@ footer {
 .designnecst-logo {
     max-height: 95px;
     max-width: 130px;
-    width: auto;
+    width: 100%;
+    height: auto;
     opacity: 0.9;
     transition: opacity 0.2s;
     margin-bottom: 5px;
-     display: block;
-    /* Rimuovi ogni spazio interno dell'immagine */
+    display: block;
     object-fit: contain;
-    object-position: left top; /* Allinea in alto a sinistra */
-    /* Sposta a sinistra per compensare spazio bianco */
-    transform: translateX(-10px);
 }
 
-.design-logo:hover {
-    opacity: 1;
-}
-
+.design-logo:hover,
 .designnecst-logo:hover {
     opacity: 1;
 }
 
-/* LASCIA INVARIATO IL POSIZIONAMENTO DEL CANVAS E DEL CONTENUTO */
-#p5-background-canvas {
-    position: fixed; 
+/* CANVAS P5.JS */
+canvas {
+    display: block;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
@@ -471,7 +567,291 @@ footer {
     z-index: 0;
 }
 
-header, .hero, .content, footer {
-    position: relative;
-    z-index: 1;
+#p5-background-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
 }
+
+/* ===== RESPONSIVE DESIGN (FOOTER IDENTICO ALLA PAGINA TEAM) ===== */
+
+/* Large Tablets (1024px - 768px) */
+@media (max-width: 1024px) {
+    .content {
+        padding: 150px 100px;
+    }
+    
+    .hero h1 {
+        font-size: 120px;
+    }
+    
+    footer {
+        padding: 60px 0 60px 80px;
+        gap: 60px;
+    }
+    
+    .page-content {
+        padding-top: 80px;
+    }
+}
+
+/* Tablet (768px) */
+@media (max-width: 768px) {
+    /* Header */
+    header {
+        padding: 15px 20px;
+    }
+    
+    .nav-desktop {
+        display: none;
+    }
+    
+    .hamburger-btn {
+        display: flex;
+    }
+    
+    .nav-overlay {
+        display: block;
+    }
+    
+    /* Page Content */
+    .page-content {
+        padding-top: 70px;
+    }
+    
+    /* Hero */
+    .hero h1 {
+        font-size: 70px;
+        line-height: 0.9;
+        margin-bottom: 25px;
+        padding: 0 20px;
+    }
+    
+    .scroll-hint {
+        bottom: 50px;
+        font-size: 35px;
+    }
+    
+    /* Content */
+    .content {
+        padding: 100px 40px;
+    }
+    
+    .content-flex-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    
+    .content h2 {
+        font-size: 28px;
+    }
+    
+    /* Footer - STESSO DELLA PAGINA TEAM */
+    footer {
+        grid-template-columns: 1fr 1fr;
+        padding: 50px 80px;
+        gap: 50px;
+    }
+    
+    .footer-col:nth-child(3) {
+        grid-column: span 2;
+        margin-top: 30px;
+    }
+    
+    /* Adjust footer content for tablet */
+    .license-content {
+        max-width: 100%;
+    }
+    
+    .polimi-logo {
+        max-width: 150px;
+        max-height: 80px;
+    }
+    
+    .design-logo,
+    .designnecst-logo {
+        max-width: 100px;
+        max-height: 70px;
+    }
+}
+
+/* Mobile Landscape (600px - 480px) */
+@media (max-width: 600px) {
+    .hero h1 {
+        font-size: 60px;
+    }
+    
+    .content {
+        padding: 80px 30px;
+    }
+    
+    footer {
+        padding: 40px 30px;
+        gap: 40px;
+    }
+    
+    .studio-title {
+        font-size: 15px;
+    }
+    
+    .license-text {
+        font-size: 12px;
+        margin-top: 20px;
+    }
+}
+
+/* Mobile Portrait (480px) */
+@media (max-width: 480px) {
+    /* Header */
+    header {
+        padding: 12px 15px;
+    }
+    
+    .logo {
+        font-size: 14px;
+    }
+    
+    .hamburger-btn {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .hamburger-btn span {
+        width: 20px;
+        left: 10px;
+    }
+    
+    .hamburger-btn span:nth-child(1) { top: 13px; }
+    .hamburger-btn span:nth-child(2) { top: 19px; }
+    .hamburger-btn span:nth-child(3) { top: 25px; }
+    
+    .hamburger-btn.active span:nth-child(1),
+    .hamburger-btn.active span:nth-child(3) {
+        top: 19px;
+    }
+    
+    .nav-mobile a {
+        font-size: 18px;
+        padding: 6px 12px;
+    }
+    
+    /* Page Content */
+    .page-content {
+        padding-top: 60px;
+    }
+    
+    /* Hero */
+    .hero h1 {
+        font-size: 50px;
+        padding: 0 15px;
+    }
+    
+    .scroll-hint {
+        bottom: 40px;
+        font-size: 30px;
+    }
+    
+    /* Content */
+    .content {
+        padding: 60px 20px;
+    }
+    
+    .content h2 {
+        font-size: 24px;
+    }
+    
+    .content p {
+        font-size: 15px;
+    }
+    
+    /* Footer - single column for mobile - STESSO DELLA PAGINA TEAM */
+    footer {
+        grid-template-columns: 1fr;
+        padding: 40px 20px;
+        gap: 40px;
+    }
+    
+    .footer-col:nth-child(3) {
+        grid-column: span 1;
+        margin-top: 0;
+    }
+    
+    .footer-col {
+        min-height: auto;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .footer-col:last-child {
+        border-bottom: none;
+    }
+    
+    /* Adjust text sizes for mobile */
+    .studio-title {
+        font-size: 14px;
+    }
+    
+    .academic-year,
+    .degree-link,
+    .member-name,
+    .faculty-name,
+    .assistant-name {
+        font-size: 13px;
+    }
+    
+    .team-label,
+    .faculty-title,
+    .assistants-title {
+        font-size: 12px;
+    }
+    
+    .contact-email {
+        font-size: 12px;
+    }
+}
+
+/* Small Mobile (360px) */
+@media (max-width: 360px) {
+    .hero h1 {
+        font-size: 42px;
+    }
+    
+    footer {
+        padding: 30px 15px;
+        gap: 30px;
+    }
+    
+    .nav-mobile a {
+        font-size: 16px;
+        padding: 5px 10px;
+    }
+    
+    .scroll-hint {
+        font-size: 28px;
+    }
+}
+
+/* Menu Link Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.nav-mobile a {
+    animation: fadeInUp 0.4s ease forwards;
+    opacity: 0;
+}
+
+.nav-mobile a:nth-child(1) { animation-delay: 0.1s; }
+.nav-mobile a:nth-child(2) { animation-delay: 0.2s; }
+.nav-mobile a:nth-child(3) { animation-delay: 0.3s; }
+.nav-mobile a:nth-child(4) { animation-delay: 0.4s; }

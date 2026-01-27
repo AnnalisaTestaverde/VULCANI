@@ -1,83 +1,71 @@
+// ===== VARIABILI PER ANIMAZIONE =====
 let lines = [];
 const numLines = 100;
 const noiseScale = 0.008;
 let timeOffset = 0;
-// Rallentato da 0.01 a 0.003 per un movimento più lento e fluido
-const noiseSpeed = 0.003; 
+const noiseSpeed = 0.003;
 
-
+// ===== SETUP P5.JS =====
 function setup() {
-  const canvas = createCanvas(windowWidth, windowHeight);
-  // Assegna l'ID per il CSS
-  canvas.id("p5-background-canvas"); 
-  canvas.position(0, 0);
-  // Usa z-index 0 o -1 nel CSS per posizionare dietro il contenuto
-  canvas.style('z-index', '-1'); 
-  canvas.style('pointer-events', 'none'); 
-  
-  // Non chiamiamo background qui, lo facciamo in draw() con la trasparenza
+    const canvas = createCanvas(windowWidth, windowHeight);
+    canvas.id("p5-background-canvas");
+    canvas.position(0, 0);
+    canvas.style('z-index', '-1');
+    canvas.style('pointer-events', 'none');
 
-  // Genera linee iniziali
-  for (let i = 0; i < numLines; i++) {
-    lines[i] = [];
-    // Pre-popola le coordinate x (non necessario, ma mantenuto dalla struttura originale)
-    for (let x = 0; x < width; x += 8) {
-      lines[i].push(x);
+    // Genera linee iniziali
+    for (let i = 0; i < numLines; i++) {
+        lines[i] = [];
+        for (let x = 0; x < width; x += 8) {
+            lines[i].push(x);
+        }
     }
-  }
-  
-  // Imposta la freccia di scroll DOPO aver creato il canvas
-  setupScrollHint();
 }
 
+// ===== DRAW LOOP =====
 function draw() {
-  // Sfondo Bianco (o quasi bianco) con effetto di trascinamento/dissolvenza (15)
-  // Questo crea l'effetto "ghosting" delle linee, rendendo l'animazione più fluida
-  background(255, 255, 255, 15);
-  
-  // Rallentamento applicato qui
-  timeOffset += noiseSpeed; 
+    // Sfondo con effetto ghosting
+    background(255, 255, 255, 15);
+    
+    // Incrementa tempo per animazione
+    timeOffset += noiseSpeed;
 
-  for (let i = 0; i < lines.length; i++) {
-    // Colore Lava
-    stroke('#ff2a00ff');
-    strokeWeight(2);
-    noFill();
+    // Disegna tutte le linee
+    for (let i = 0; i < lines.length; i++) {
+        stroke('#ff2a00ff');
+        strokeWeight(2);
+        noFill();
 
-    beginShape();
-    for (let j = 0; j < lines[i].length; j++) {
-      const x = lines[i][j];
-      const yBase = map(i, 0, lines.length - 1, height * 0.1, height * 0.9);
-      
-      // Calcola il valore del noise per la posizione y
-      const noiseVal = noise(
-        x * noiseScale,
-        yBase * noiseScale,
-        timeOffset + i * 0.05 // timeOffset controlla la velocità, i*0.05 differenzia le linee
-      );
-      
-      // Mappa il noise per l'offset verticale
-      const yOffset = map(noiseVal, 0, 1, -40, 50);
-      const y = yBase + yOffset;
-      
-      // Disegna il punto per la curva
-      vertex(x, y);
+        beginShape();
+        for (let j = 0; j < lines[i].length; j++) {
+            const x = lines[i][j];
+            const yBase = map(i, 0, lines.length - 1, height * 0.1, height * 0.9);
+            
+            const noiseVal = noise(
+                x * noiseScale,
+                yBase * noiseScale,
+                timeOffset + i * 0.05
+            );
+            
+            const yOffset = map(noiseVal, 0, 1, -40, 50);
+            const y = yBase + yOffset;
+            
+            vertex(x, y);
+        }
+        endShape();
     }
-    endShape();
-  }
 }
 
+// ===== WINDOW RESIZE =====
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-  
-  // Ricalcola solo le linee x se il canvas è ridimensionato, 
-  // le yBase sono calcolate in draw()
-  for (let i = 0; i < numLines; i++) {
-    lines[i] = [];
-    for (let x = 0; x < width; x += 8) {
-      lines[i].push(x);
+    resizeCanvas(windowWidth, windowHeight);
+    
+    for (let i = 0; i < numLines; i++) {
+        lines[i] = [];
+        for (let x = 0; x < width; x += 8) {
+            lines[i].push(x);
+        }
     }
-  }
 }
 
 // FUNZIONE PER LO SCROLL SMOOTH VERSO IL CONTENT
@@ -96,12 +84,3 @@ function setupScrollHint() {
     });
   }
 }
-
-// Imposta la freccia di scroll anche quando il DOM è caricato
-// (per sicurezza, nel caso setup() venga chiamato prima che il DOM sia pronto)
-document.addEventListener('DOMContentLoaded', function() {
-  // Se p5.js non ha ancora chiamato setup(), chiamiamo setupScrollHint qui
-  // Se p5.js ha già chiamato setup(), setupScrollHint sarà già stata chiamata,
-  // ma non fa male chiamarla di nuovo
-  setupScrollHint();
-});
