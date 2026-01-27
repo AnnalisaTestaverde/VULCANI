@@ -229,7 +229,7 @@ header a:hover {
 /* Freccia di scroll - STILE ESATTO COME NEL CODICE FORNITO */
 .text-scroll-hint {
     position: absolute;
-    bottom: - 2000px; /* Più in alto dentro l'area del testo */
+    bottom: -80px; /* Più in alto dentro l'area del testo */
     left: 50%;
     transform: translateX(-50%);
     color: #000000 !important;
@@ -265,7 +265,7 @@ header a:hover {
 .image-container {
     position: relative;
     width: calc(50% - 120px);
-    height: 100%;
+    height: 80%;
     background-color: transparent;
     overflow: hidden;
     margin-top: 10px;
@@ -293,11 +293,11 @@ header a:hover {
 /* Bottone Learn More */
 .learn-more-btn {
     background-color: transparent;
-    color: #FF2B00;
-    border: 3px solid #FF2B00;
-    border-radius: 25px;
+    color: #000000;
+    border: 2px solid #FF2B00;
+    border-radius: 5px;
     padding: 12px 30px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
