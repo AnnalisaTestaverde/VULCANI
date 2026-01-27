@@ -453,6 +453,7 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   textSize(mainTextSize);
   textStyle(BOLD);
   textAlign(LEFT, TOP);
+  pop();
   push();
   textSize(mainTextSize);
   textAlign(LEFT, TOP);
@@ -464,6 +465,7 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
 
   // Valore nero
   fill(0);
+  textStyle(NORMAL);
   text(fullDate, margin + textWidth("Date: "), dateY);
   pop();
 
@@ -482,7 +484,7 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   push();
   fill(0);
   textSize(mainTextSize);
-  textStyle(BOLD);
+  textStyle(NORMAL);
   textLeading(20);
   textAlign(LEFT, TOP);
   text(description, margin, descriptionY, textWidthValue);
@@ -690,7 +692,8 @@ function drawMap(lat, lon, country) {
 
   // Valore nero
   fill(0);
-  text(value, mapX + textWidth(label), titleY);
+  textStyle(NORMAL);
+  text(value, mapX + 7 + textWidth(label), titleY);
   pop();
 
   pop();
@@ -944,7 +947,8 @@ function drawYearNavigator(year) {
 
     // Valore nero (subito dopo la label)
     fill(0);
-    text(value, margin - 22 + textWidth(label), counterY);
+    textStyle(NORMAL);
+    text(value, margin - 11.25 + textWidth(label), counterY);
     pop();
 
     pop();
