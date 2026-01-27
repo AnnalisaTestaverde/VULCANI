@@ -309,8 +309,8 @@ header a:hover {
     cursor: pointer;
     transition: all 0.3s ease;
     position: absolute;
-    bottom: 110px;
-    right: 40px;
+    bottom: 150px;
+    right: 80px;
     z-index: 4;
 }
 
@@ -523,7 +523,7 @@ header a:hover {
     
     .text-scroll-container {
         width: 500px;
-        height: 80%;
+        height: 70%;
         margin-right: 30px;
         margin-bottom: 70px;
     }
