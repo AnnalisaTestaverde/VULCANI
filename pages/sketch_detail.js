@@ -11,6 +11,7 @@ let chartTitleSize = 28;       // dimensione testo titolo centro
 let mainTextSize = 17;
 let chartLabelSize = 14;       // dimensione label esterne
 let chartTooltipTextSize = 17; // dimensione tooltip
+const INFLATION_FACTOR = 2.4;
 
 // ---------- VARIABILI GLOBALI ----------
 let data;
@@ -49,7 +50,7 @@ let homeIcon; // Aggiunta icona per Home
 function preload() {
   // CSV e mappa
   data = loadTable("../assets/data_impatto.csv", "csv", "header");
-  worldMap = loadImage("../assets/Equirectangular_projection_SW_BW.jpg");
+  worldMap = loadImage("../assets/Equirectangular_projection.jpg");
 
   // preload illustrazioni (stesso set che avevi)
   stratoImg = loadImage("../assets/stratovolcano.png");
@@ -73,6 +74,33 @@ function preload() {
 
   bookIcon = loadImage("../assets/book_icon.png");
   homeIcon = loadImage("../assets/home_icon.png"); 
+}
+
+// Funzione per convertire i danni da dollari 1990 a dollari 2026
+function convertTo2026Dollars(damageValue) {
+  if (!damageValue || damageValue === 0 || isNaN(damageValue)) {
+    return 0;
+  }
+  return damageValue * INFLATION_FACTOR;
+}
+
+// Funzione per formattare i valori monetari in modo leggibile
+function formatDamageValue(damageValue) {
+  if (damageValue === undefined || damageValue === null || damageValue === 0 || isNaN(damageValue)) {
+    return "Details not available";
+  }
+  
+  // Converti sempre a dollari 2026
+  let value = convertTo2026Dollars(damageValue);
+  
+  // Mostra solo "2026 dollars" senza menzionare il 1990
+  if (value < 1) {
+    return `Less than $1 million (2026 dollars)`;
+  } else if (value < 1000) {
+    return `$${Math.round(value * 10) / 10} million (2026 dollars)`;
+  } else {
+    return `$${(value / 1000).toFixed(1)} billion (2026 dollars)`;
+  }
 }
 
 // ---------- SETUP ----------
@@ -425,6 +453,7 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   textSize(mainTextSize);
   textStyle(BOLD);
   textAlign(LEFT, TOP);
+  pop();
   push();
   textSize(mainTextSize);
   textAlign(LEFT, TOP);
@@ -436,6 +465,7 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
 
   // Valore nero
   fill(0);
+  textStyle(NORMAL);
   text(fullDate, margin + textWidth("Date: "), dateY);
   pop();
 
@@ -454,7 +484,7 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   push();
   fill(0);
   textSize(mainTextSize);
-  textStyle(BOLD);
+  textStyle(NORMAL);
   textLeading(20);
   textAlign(LEFT, TOP);
   text(description, margin, descriptionY, textWidthValue);
@@ -662,7 +692,8 @@ function drawMap(lat, lon, country) {
 
   // Valore nero
   fill(0);
-  text(value, mapX + textWidth(label), titleY);
+  textStyle(NORMAL);
+  text(value, mapX + 7 + textWidth(label), titleY);
   pop();
 
   pop();
@@ -916,7 +947,8 @@ function drawYearNavigator(year) {
 
     // Valore nero (subito dopo la label)
     fill(0);
-    text(value, margin - 22 + textWidth(label), counterY);
+    textStyle(NORMAL);
+    text(value, margin - 11.25 + textWidth(label), counterY);
     pop();
 
     pop();
@@ -1052,7 +1084,6 @@ function findDataRowIndex(name, number) {
 
 /**
  * Costruisce l'oggetto chartData dalla riga CSV (index)
- * Usa le stesse colonne citate nel codice che mi hai fornito.
  */
 function buildChartDataFromRow(i) {
   // prende le stringhe raw per i tooltip/testo
@@ -1062,7 +1093,7 @@ function buildChartDataFromRow(i) {
   let strHouse = data.getString(i, "Houses Destroyed");
   let strMissing = data.getString(i, "Missing");
 
-  // parse dei valori (usiamo colonne "Death Description" ecc. come nella versione originale)
+  // parse dei valori
   let deathVal = Number(data.getString(i, "Death Description"));
   let injVal = Number(data.getString(i, "Injuries Description"));
   let dmgVal = Number(data.getString(i, "Damage Description"));
@@ -1072,6 +1103,15 @@ function buildChartDataFromRow(i) {
   // prendi il valore "Impact" dal CSV
   let impactVal = Number(data.getString(i, "Impact"));
 
+  // DEBUG: Controlla se ci sono dati
+  console.log(`Row ${i}: dmgVal = ${dmgVal}, strDmg = "${strDmg}"`);
+
+  // Calcola il valore convertito per i danni (SOLO PER GRAFICO)
+  let dmgValForChart = 0;
+  if (!isNaN(dmgVal) && dmgVal > 0) {
+    dmgValForChart = constrain(Math.round(convertTo2026Dollars(dmgVal)), 0, chartLevels);
+  }
+
   // normalizzazione: se NaN => 0
   deathVal = isNaN(deathVal) ? 0 : deathVal;
   injVal = isNaN(injVal) ? 0 : injVal;
@@ -1080,14 +1120,21 @@ function buildChartDataFromRow(i) {
   missingVal = isNaN(missingVal) ? 0 : missingVal;
   impactVal = isNaN(impactVal) ? 0 : impactVal;
 
-  // clamp fra 0 e chartLevels (ora 4 invece di 5) - SOLO PER I VALORI DEL GRAFICO
+  // clamp fra 0 e chartLevels
   deathVal = constrain(Math.round(deathVal), 0, chartLevels);
   injVal = constrain(Math.round(injVal), 0, chartLevels);
-  dmgVal = constrain(Math.round(dmgVal), 0, chartLevels);
   houseVal = constrain(Math.round(houseVal), 0, chartLevels);
   missingVal = constrain(Math.round(missingVal), 0, chartLevels);
-  // IMPACT: NON applicare constrain, lascia il valore originale
-  // impactVal = constrain(Math.round(impactVal), 0, chartLevels); // RIMUOVI QUESTA RIGA
+
+  // Formatta i dati raw
+  let formattedDamage = "Details not available";
+  if (strDmg && strDmg.trim() !== "") {
+    // Se c'è una stringa nel CSV, usala
+    formattedDamage = strDmg;
+  } else if (dmgVal > 0) {
+    // Altrimenti formatta il valore numerico
+    formattedDamage = formatDamageValue(dmgVal);
+  }
 
   return {
     index: i,
@@ -1095,15 +1142,16 @@ function buildChartDataFromRow(i) {
     country: data.getString(i, "Country") || "",
     death: deathVal,
     inj: injVal,
-    dmg: dmgVal,
+    dmg: dmgValForChart, // Valore convertito per il grafico
     house: houseVal,
-    missing: missingVal, // AGGIUNGI QUESTA RIGA
-    impact: impactVal, // AGGIUNGI QUESTA RIGA - valore originale (es. 10)
+    missing: missingVal,
+    impact: impactVal,
     rawDeath: (strDeath === "" ? "Details not available" : strDeath),
-    rawInj:   (strInj   === "" ? "Details not available" : strInj),
-    rawDmg:   (strDmg   === "" ? "Details not available" : strDmg),
+    rawInj: (strInj === "" ? "Details not available" : strInj),
+    rawDmg: formattedDamage, // Usa il valore formattato
     rawHouse: (strHouse === "" ? "Details not available" : strHouse),
-    rawMissing: (strMissing === "" ? "Details not available" : strMissing)
+    rawMissing: (strMissing === "" ? "Details not available" : strMissing),
+    originalDmgValue: dmgVal // Mantieni il valore originale per debug
   };
 }
 
@@ -1128,7 +1176,7 @@ function drawChartPlaceholder() {
   pop();
 }
 
-function getDetailText(value, descCode, type) {
+function getDetailText(value, descCode, type, chartData = null) {
   // Se il valore numerico esiste, restituiamo quello
   if (value !== "" && value !== 0 && !isNaN(value)) {
     return value;
@@ -1157,8 +1205,8 @@ function getDetailText(value, descCode, type) {
     damage: {
       1: "Limited (less than $1 million)",
       2: "Moderate (~$1 to $5 million)",
-      3: "Severe (~>$5 to $24 million)",
-      4: "Extreme (~$25 million or more)"
+      3: "Severe (~$5 to $24 million)",
+      4: "Extreme ($25 million or more)"
     },
     houses: {
       1: "Few (~1 to 50 houses)",
@@ -1206,6 +1254,12 @@ function getAnimationProgress() {
  * Disegna il grafico d'impatto con animazione
  */
 function drawImpactChart(d) {
+  // DEBUG: Controlla i dati
+  console.log("Chart data:", d);
+  console.log("d.rawDmg:", d.rawDmg);
+  console.log("d.dmg (converted):", d.dmg);
+  console.log("originalDmgValue:", d.originalDmgValue);
+
   // Tooltip text
   let tooltipText = "";
 
@@ -1246,6 +1300,10 @@ function drawImpactChart(d) {
     !(d.house === 0 && d.rawHouse === "Details not available"),
     !(d.missing === 0 && d.rawMissing === "Details not available")
   ];
+
+  // DEBUG: Controlla disponibilità dati
+  console.log("isDataAvailable:", isDataAvailable);
+  console.log("Damage check - d.dmg:", d.dmg, "d.rawDmg:", d.rawDmg);
 
   // Calcola il progresso dell'animazione
   let animationProgress = getAnimationProgress();
@@ -1386,7 +1444,8 @@ function drawImpactChart(d) {
   }
 
   // Disegna tutte le label
-  let detailMaxWidth = 110; // larghezza massima testo (puoi regolarla)
+  let detailMaxWidth = 130; // Aumenta la larghezza massima
+  let lineHeight = 16; // Altezza di ogni linea di testo
 
   for (let i = 0; i < 5; i++) {
     let start = sectionAngle * i + gapAngle / 2;
@@ -1404,11 +1463,11 @@ function drawImpactChart(d) {
     textAlign(CENTER, CENTER);
 
     let ang = (start + end) / 2;
-    let lx = cos(ang) * (chartSize / 2 + 50);
-    let ly = sin(ang) * (chartSize / 2 + 50);
+    let lx = cos(ang) * (chartSize / 2 + 60);
+    let ly = sin(ang) * (chartSize / 2 + 55);
     
     // Disegna il titolo principale (Deaths, Injuries, ecc.)
-    text(labels[i], lx, ly - 14);
+    text(labels[i], lx, ly - 25);
     
     // AGGIUNTA: Disegna "Lvl. x" sotto ogni etichetta
     if (isDataAvailable[i]) {
@@ -1419,27 +1478,33 @@ function drawImpactChart(d) {
       fill(chartMainColor);
       textSize(chartLabelSize);
       textStyle(BOLD);
-      text(levelText, lx, ly + 3);
+      text(levelText, lx, ly - 5);
 
       // --- Valore completo descrittivo ---
       let detailText = "";
       if (i === 0) detailText = getDetailText(d.rawDeath, d.death, "deaths");
-      if (i === 1) detailText = getDetailText(d.rawInj, d.inj, "injuries");
-      if (i === 2) detailText = getDetailText(d.rawDmg, d.dmg, "damage");
-      if (i === 3) detailText = getDetailText(d.rawHouse, d.house, "houses");
-      if (i === 4) detailText = getDetailText(d.rawMissing, d.missing, "missing");
+      else if (i === 1) detailText = getDetailText(d.rawInj, d.inj, "injuries");
+      else if (i === 2) detailText = d.rawDmg;
+      else if (i === 3) detailText = getDetailText(d.rawHouse, d.house, "houses");
+      else if (i === 4) detailText = getDetailText(d.rawMissing, d.missing, "missing");
 
       fill(0); // nero
       textSize(chartLabelSize);
       textStyle(NORMAL);
       textAlign(CENTER, TOP);
-      text(detailText, lx - detailMaxWidth / 2, ly + 14, detailMaxWidth);
-
+      
+      // Calcola quante linee di testo ci sono
+      let numLines = 1;
+      if (detailText.includes('\n')) {
+        numLines = 2;
+      }
+      
+      // Posiziona il testo in base al numero di linee
+      let textY = ly + 7;
+      text(detailText, lx - detailMaxWidth / 2, textY, detailMaxWidth);
     }
-
   }
 
-  // MODIFICA: Abbassa la posizione di "Total impact level" per non interferire con i pulsanti
   push();
   noStroke();
   fill(245, 40, 0); // Rosso
@@ -1457,7 +1522,7 @@ function drawImpactChart(d) {
   textStyle(NORMAL);
   pop();  
 
-  // hover tooltip content
+    // hover tooltip content
   if (hoveredSection !== -1) {
     if (hoveredSection === 0) {
       tooltipText = getDetailText(d.rawDeath, d.death, "deaths");
@@ -1466,7 +1531,7 @@ function drawImpactChart(d) {
       tooltipText = getDetailText(d.rawInj, d.inj, "injuries");
     }
     else if (hoveredSection === 2) {
-      tooltipText = getDetailText(d.rawDmg, d.dmg, "damage");
+      tooltipText = d.rawDmg; // Usa il valore già convertito
     }
     else if (hoveredSection === 3) {
       tooltipText = getDetailText(d.rawHouse, d.house, "houses");

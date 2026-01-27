@@ -8,6 +8,177 @@
     <link rel="stylesheet" href="style_learn_more.css">
     <!-- Libreria p5.js per le animazioni -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    
+    <!-- Stile CSS aggiuntivo per i bottoni e scroll -->
+    <style>
+        /* Stile per i bottoni in basso - MODIFICATO: MESSI PIÙ IN ALTO */
+        #buttons-container {
+            display: none; /* NASCOSTO INIZIALMENTE */
+            position: fixed;
+            bottom: 100px; /* PIÙ IN ALTO */
+            left: 0;
+            right: 0;
+            justify-content: center;
+            z-index: 1000;
+            padding: 0 40px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .buttons-row {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .bottom-button {
+            background-color: transparent;
+            color: #FFFFFF; /* Testo bianco */
+            border: 2px solid #FFFFFF; /* Stroke bianco */
+            border-radius: 5px; /* Squadrato come la methodology */
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Helvetica', Arial, sans-serif;
+            cursor: default; /* Default cursor, cambia in pointer su hover */
+            text-align: center;
+            flex: 1;
+            transition: all 0.3s ease;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.5px;
+        }
+        
+        .bottom-button:hover {
+            background-color: #FFFFFF !important; /* Bianco su hover */
+            color: #FF2B00 !important; /* Testo rosso su hover */
+            cursor: pointer !important; /* Manina su hover */
+        }
+        
+        .button-spacer {
+            width: 30px;
+        }
+        
+        /* Rimuovi lo stile predefinito dei bottoni */
+        .bottom-button:focus {
+            outline: none;
+        }
+        
+        /* Stile per la freccia di scroll - COME ORIGINALE */
+        #scroll-hint {
+            position: absolute;
+            bottom: -70px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #000000 !important;
+            font-size: 40px !important;
+            font-weight: 900 !important;
+            cursor: pointer;
+            z-index: 100;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            animation: bounce 2s infinite;
+            pointer-events: auto;
+            opacity: 1 !important;
+            transition: opacity 0.3s ease-out;
+            -webkit-font-smoothing: antialiased !important;
+            -moz-osx-font-smoothing: grayscale !important;
+            text-shadow: none !important;
+            font-family: 'Helvetica', Arial, sans-serif !important;
+            line-height: 40px;
+        }
+        
+        .text-scroll-hint.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+        
+        /* Stile per il contenitore del testo */
+        #text-scroll-area {
+            position: relative;
+            height: 100%;
+        }
+        
+        /* Stile per lo scroll automatico del mouse */
+        .scroll-enabled {
+            overflow-y: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        .scroll-enabled::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+        
+        /* Più spazio per la leggenda */
+        #legend-container {
+            margin-top: 15px !important; /* PIÙ SPAZIO SOPRA */
+            margin-bottom: 25px !important; /* PIÙ SPAZIO SOTTO */
+        }
+        
+        /* Bottone About the methodology centrato nel box del testo */
+        #about-methodology-btn-container {
+            position: absolute;
+            bottom: 40px; /* Posizione dal basso del text container */
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px); /* Stessa larghezza del text container con margini */
+            max-width: 800px;
+            display: none; /* Nascondi inizialmente */
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        #about-methodology-btn {
+            background-color: transparent;
+            color: #FFFFFF; /* Testo bianco */
+            border: 2px solid #FFFFFF; /* Stroke bianco */
+            border-radius: 5px; /* Squadrato come la methodology */
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Helvetica', Arial, sans-serif;
+            cursor: default; /* Default cursor, cambia in pointer su hover */
+            text-align: center;
+            transition: all 0.3s ease;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.5px;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        #about-methodology-btn:hover {
+            background-color: #FFFFFF !important; /* Bianco su hover */
+            color: #FF2B00 !important; /* Testo rosso su hover */
+            cursor: pointer !important; /* Manina su hover */
+        }
+        
+        #about-methodology-btn:focus {
+            outline: none;
+        }
+    </style>
 </head>
 <body>
     <!-- Container per il canvas principale p5.js -->
@@ -16,7 +187,7 @@
     <!-- Container per il testo a sinistra -->
     <div id="text-container">
         <!-- Area di scroll per il testo (senza scrollbar visibile) -->
-        <div id="text-scroll-area">
+        <div id="text-scroll-area" class="scroll-enabled">
             <!-- Contenuto testuale completo -->
             <div id="text-content">
                 <!-- Sezione 1: Il grafico -->
@@ -47,8 +218,8 @@
                 <!-- Sezione 4: Come leggere il grafico -->
                 <div class="section-title" style="margin-bottom: 1px;">HOW TO READ THE GRAPH</div>
 
-                 <!-- Container per la leggenda p5.js - STILE INLINE PER NON SOVRAPPORSI -->
-                <div id="legend-container" ></div>
+                <!-- Container per la leggenda p5.js - CON PIÙ SPAZIO -->
+                <div id="legend-container" style="width: 100%; height: 130px; margin: 15px auto 25px auto;"></div>
                 
                 <div class="section-text">
                     <span class="bold-white">THE BLACK DOTS </span>: Each dot represents a volcanic eruption. Hovering the mouse over a dot displays a window with the <span class="bold-white">volcano's name</span> and the <span class="bold-white">eruption year</span>. Clicking on the dot directly accesses the event's <span class="bold-white">detail page</span>, where you can explore the data further.
@@ -76,23 +247,29 @@
                     <li><span class="bold-white">START ANIMATION</span> - Starts an automatic animation that scrolls through available years in succession, highlighting eruptions that occurred in each year with a <span class="bold-black">luminous pulsating effect</span> (a red glow that expands around the dot).</li>
                 </ul>
                 
+                <!-- Bottone About the methodology centrato nel box del testo -->
+                <div id="about-methodology-btn-container">
+                    <button id="about-methodology-btn">About the methodology</button>
+                </div>
+                
                 <!-- Spazio finale ridotto (per accorciare il box) -->
-                <div style="height: 80px;"></div>
+                <div style="height: 150px;"></div>
             </div>
         </div>
         
-        <!-- Freccia al centro in basso per indicare lo scroll -->
-        <div id="scroll-hint">V</div>
+        <!-- Freccia al centro in basso per indicare lo scroll - STILE ORIGINALE -->
+        <div id="scroll-hint" class="text-scroll-hint">V</div>
     </div>
     
-      <!-- Bottoni finali (appariranno solo alla fine dello scroll) -->
+    <!-- Bottoni finali - SEMPRE VISIBILI E PIÙ IN ALTO -->
     <div id="buttons-container">
         <div class="buttons-row">
-            <button class="bottom-button" id="back-to-map-btn">Back to map</button>
+            <button class="bottom-button" id="back-to-map-btn">Back to Eruptions</button>
             <div class="button-spacer"></div>
             <button class="bottom-button" id="about-dataset-btn">About the methodology</button>
         </div>
     </div>
+    
     <!-- Codice JavaScript p5.js principale -->
     <script>
         // ===== CONFIGURAZIONE IDENTICA ALL'ORIGINALE =====
@@ -102,7 +279,7 @@
                 text: '#000000ff', // Testo nero (per la maggior parte)
                 accent: '#FFFFFF', // Bianco per bordo button e "GRAPHIC"
                 accentLight: '#FF2B00',
-                circle: '#111010b3', // Cerchi come originale
+                circle: '#111010b3',
                 continentBase: '#FF2B00',
                 highlightGlow: '#FF2B00',
                 infoBox: '#ffffffff',
@@ -117,8 +294,8 @@
                 minRadius: 29,
                 continentLabelOffset: 15,
                 europeAsiaOffset: 15,
-                infoBoxWidth: 200,
-                infoBoxHeight: 70,
+                infoBoxWidth: 220,
+                infoBoxHeight: 90,
                 bottomControlY: 100,
                 marginX: 40,
                 fontSizeControls: 16,
@@ -129,11 +306,13 @@
                 controlButtonWidth: 50,
                 timeframeFontSize: 30,
                 yearFontSize: 30,
-                labelFontSize: 17,
-                titleStartY: 60,
+                labelFontSize: 16,
+                titleStartY: 95,
                 buttonStartY: 450,
-                timeframeStartY: 490,
-                yearStartY: 600
+                timeframeStartY: 520,
+                yearStartY: 620,
+                legendStartY: 350,
+                startButtonY: 720
             },
             animation: {
                 dotEntryDuration: 800,
@@ -193,11 +372,17 @@
             // Controlli animazioni
             disableDotEntryAnimation: false,
             
-            // Per il back button
+            // Per il back button (posizionato come learn more button nel codice originale)
             backButtonArea: null,
             
             // Stato per hover sul back button
-            isBackButtonHovered: false
+            isBackButtonHovered: false,
+            
+            // Per lo scroll semplice
+            scrollArea: null,
+            scrollHint: null,
+            buttonsContainer: null,
+            isAtBottom: false
         };
 
         // Immagine di sfondo
@@ -238,8 +423,8 @@
         
         // 1 - Caricamento dati
         function preload() {
-            loadTable('assets/data_impatto.csv', 'csv', 'header', processTableData);
-            radialBgImage = loadImage('assets/radial_bg.png');
+            loadTable('../assets/data_impatto.csv', 'csv', 'header', processTableData);
+            radialBgImage = loadImage('../assets/radial_bg.png');
         }
 
         // 2 - Processamento dati
@@ -419,20 +604,6 @@
                     stroke(255, 43, 0, animatedAlpha); // ROSSO come originale
                     strokeWeight(animatedStrokeWeight);
                     ellipse(0, 0, animatedRadius * 2);
-                    
-                    if (state.circleRevealProgress >= 1) {
-                        const circleNumber = i + 1;
-                        const labelX = 0;
-                        const labelY = -radius - 15;
-                        
-                        push();
-                        fill(255, 43, 0); // ROSSO
-                        noStroke();
-                        textSize(16);
-                        textAlign(CENTER, CENTER);
-                        text(circleNumber, labelX, labelY+5);
-                        pop();
-                    }
                 } else {
                     let animatedRadius = radius;
                     if (state.circleRevealProgress < 1) {
@@ -478,7 +649,7 @@
             updateDotAnimations();
             
             drawTitle();
-            drawBackButton();
+            drawBackButton(); // Posizionato come il learn more button
             
             drawMainCircle();
             drawContinentLabels();
@@ -509,40 +680,39 @@
             textStyle(NORMAL);
         }
 
-        // 12 - Back Button con bordo bianco e icona "×" - MODIFICATO PER ANDARE A OVERVIEW.HTML
+        // 12 - Back Button MODIFICATO: STROKE NERO E SENZA CERCHIO
         function drawBackButton() {
             const buttonWidth = 160;
-            const buttonHeight = CONFIG.layout.controlButtonHeight;
-            const buttonX = width - buttonWidth - CONFIG.layout.marginX - 20;
-            const buttonY = CONFIG.layout.titleStartY + CONFIG.layout.topOffset + 10;
-
-            // Bordo BIANCO
-            stroke(CONFIG.colors.accent); // BIANCO
+            const buttonHeight = 40;
+            
+            // POSIZIONE: width - buttonWidth - 50 (come il learn more button originale)
+            const buttonX = width - buttonWidth - 50;
+            const buttonY = CONFIG.layout.startButtonY;
+            
+            // Bordo NERO (modificato)
+            stroke(CONFIG.colors.text); // NERO
             strokeWeight(1);
             noFill();
             rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
-            // Quadrato con "×"
-            const squareSize = 20;
-            const squareX = buttonX + 15;
-            const squareY = buttonY + 15;
-            
-            // Disegna la "×" bianca dentro il quadrato
+            // Icona con "×" - SENZA CERCHIO ATTORNO
             push();
-            translate(squareX + squareSize/2, squareY + squareSize/2);
-            fill(CONFIG.colors.accent); // BIANCO
-            noStroke();
-            textSize(16);
+            translate(buttonX + 25, buttonY + buttonHeight/2);
+            fill(CONFIG.colors.text); // NERO (testo della X)
+            noStroke(); // NESSUNO STROKE
+            textSize(20); // Leggermente più grande
+            textStyle(BOLD);
             textAlign(CENTER, CENTER);
             text("×", 0, 0);
             pop();
 
-            // Testo "Back" in nero
+            // Testo "Back" in NERO
             fill(CONFIG.colors.text); // NERO
             noStroke();
-            textSize(16);
+            textSize(CONFIG.layout.labelFontSize);
+            textStyle(BOLD);
             textAlign(LEFT, CENTER);
-            text("Back", buttonX + 50, buttonY + 25);
+            text("Back", buttonX + 50, buttonY + buttonHeight/2);
 
             // Memorizza l'area per l'interazione
             state.backButtonArea = {
@@ -553,12 +723,12 @@
             };
         }
 
-        // 13 - Info box per hover sui vulcani - INVARIATO
+        // 13 - Info box per hover sui vulcani - AGGIORNATO con dimensioni originali
         function drawInfobox() {
             if (state.hoveredVolcano) {
                 const volcano = state.hoveredVolcano;
-                const boxWidth = CONFIG.layout.infoBoxWidth;
-                const boxHeight = CONFIG.layout.infoBoxHeight;
+                const boxWidth = CONFIG.layout.infoBoxWidth; // 220
+                const boxHeight = CONFIG.layout.infoBoxHeight; // 90
 
                 let x = mouseX + 25;
                 let y = mouseY - boxHeight / 2;
@@ -568,7 +738,7 @@
                 if (y + boxHeight > height) y = height - boxHeight;
 
                 fill(CONFIG.colors.infoBox);
-                stroke(255, 43, 0); // ROSSO per info box
+                stroke(CONFIG.colors.infoBoxStroke); // ROSSO
                 strokeWeight(1);
                 rect(x, y, boxWidth, boxHeight, 5);
 
@@ -578,12 +748,16 @@
                 textStyle(BOLD);
                 textAlign(LEFT, TOP);
                 text(volcano.name, x + 10, y + 10);
+                
                 textSize(16);
+                textStyle(NORMAL);
                 text('Year: ' + formatYear(volcano.year), x + 10, y + 40);
+                
+                text('Impact: ' + volcano.impact, x + 10, y + 60); // Aggiunta l'impact
             }
         }
 
-        // 14 - Cerchio principale con cerchi di impatto - INVARIATO
+        // 14 - Cerchio principale con cerchi di impatto - COMPLETAMENTE AGGIORNATO
         function drawMainCircle() {
             push();
             translate(state.centerX, state.centerY);
@@ -592,11 +766,31 @@
                 let imageDim = 2 * 0.989;
                 let imageSize = CONFIG.layout.maxRadius * imageDim;
                 imageMode(CENTER);
-                // Immagine normale, senza trasparenza
                 image(radialBgImage, 0, 0, imageSize, imageSize);
             }
             
             drawImpactCircles();
+            
+            // NUMERAZIONE DEI CERCHI - come nel codice originale
+            const numbers = [1, 5, 9, 13, 16];
+            
+            numbers.forEach((num, index) => {
+                const radius = map(num, 1, 16, CONFIG.layout.maxRadius, CONFIG.layout.minRadius);
+                const x = 0;
+                const y = radius + 10; // SOTTO il cerchio come nel codice originale
+                
+                if (num === 1 || num === 16) {
+                    fill(0); // Nero per 1 e 16
+                } else {
+                    fill(255, 43, 0); // Rosso per 5, 9, 13
+                }
+                noStroke();
+                textSize(16);
+                textStyle(BOLD);
+                textAlign(CENTER, CENTER);
+                text(num.toString(), x, y);
+            });
+            
             drawContinentDividers();
             
             if (state.filteredData.length > 0) {
@@ -664,7 +858,7 @@
             });
         }
 
-        // 17 - Puntini dei vulcani con animazione - INVARIATO
+        // 17 - Puntini dei vulcani con animazione - AGGIORNATO
         function drawVolcanoDotAnimated(x, y, isHovered, volcano, key) {
             let entryProgress = 1;
             
@@ -688,12 +882,7 @@
             
             // NERO come originale
             fill(0, 0, 0, alpha);
-            if (isHovered) {
-                noStroke();
-            } else {
-                noStroke();
-                strokeWeight(1);
-            }
+            noStroke();
             
             circle(x, y, finalSize);
         }
@@ -727,7 +916,7 @@
             circle(x, y, glowSize);
         }
 
-        // 19 - Etichette dei continenti in grassetto - INVARIATO
+        // 19 - Etichette dei continenti in grassetto - AGGIORNATO
         function drawContinentLabels() {
             CONTINENTS.forEach(cont => {
                 const angles = state.continentAngles[cont];
@@ -735,46 +924,34 @@
 
                 const angle = angles.mid;
                 
-                let r;
-                if (cont === 'Europe' || cont === 'Asia') {
-                    r = CONFIG.layout.maxRadius + CONFIG.layout.europeAsiaOffset;
-                } else {
-                    r = CONFIG.layout.maxRadius + CONFIG.layout.continentLabelOffset;
+                // Distanza fissa dal bordo (come nel codice originale)
+                const labelRadius = CONFIG.layout.maxRadius + 35;
+                
+                const x = state.centerX + cos(angle) * labelRadius;
+                const y = state.centerY + sin(angle) * labelRadius;
+                
+                push();
+                translate(x, y);
+                
+                let rotationAngle = angle + HALF_PI;
+                
+                if (angle > HALF_PI && angle < 3 * HALF_PI) {
+                    rotationAngle += PI;
                 }
                 
-                const x = state.centerX + cos(angle) * r;
-                const y = state.centerY + sin(angle) * r;
-                
-                if (cont === 'Asia') {
-                    state.asiaLabelY = y;
+                if (cont === 'Americas') {
+                    rotationAngle += PI;
                 }
 
+                rotate(rotationAngle);
+                
                 fill(CONFIG.colors.text); // NERO
                 noStroke();
                 textSize(16);
-                textStyle(BOLD); // BOLD come richiesto
-                
-                let horizAlign = LEFT;
-                if (cos(angle) < -0.1) {
-                    horizAlign = RIGHT;
-                } else if (cos(angle) > 0.1) {
-                    horizAlign = LEFT;
-                } else {
-                    horizAlign = CENTER;
-                }
-                
-                let vertAlign = CENTER;
-                if (sin(angle) < -0.1) {
-                    vertAlign = BOTTOM;
-                } else if (sin(angle) > 0.1) {
-                    vertAlign = TOP;
-                } else {
-                    vertAlign = CENTER;
-                }
-                
-                textAlign(horizAlign, vertAlign);
-                text(cont, x, y);
-                textStyle(NORMAL);
+                textStyle(BOLD);
+                textAlign(CENTER, CENTER);
+                text(cont, 0, 0);
+                pop();
             });
         }
 
@@ -823,9 +1000,9 @@
             state.centerY = height / 2 + CONFIG.layout.centerYOffset;
         }
 
-        // 22 - Gestione click del mouse - MODIFICATO PER ANDARE A OVERVIEW.HTML
+        // 22 - Gestione click del mouse - MODIFICATO PER overview.html
         function mousePressed() {
-            // Controllo per il back button
+            // Controllo per il back button (posizionato come learn more button)
             if (state.backButtonArea &&
                 mouseX > state.backButtonArea.x &&
                 mouseX < state.backButtonArea.x + state.backButtonArea.width &&
@@ -849,7 +1026,7 @@
             updateLayout();
         }
 
-        // 25 - Setup iniziale del canvas principale - INVARIATO
+        // 25 - Setup iniziale del canvas principale
         function setup() {
             let canvas = createCanvas(windowWidth, windowHeight);
             canvas.parent('main-sketch-container');
@@ -861,10 +1038,10 @@
             setupScrollListeners();
             
             // Inizializza anche la leggenda
-            initLegend();
+            initializeLegend();
         }
 
-        // 26 - Aggiorna il cursore in base a cosa c'è sotto il mouse - INVARIATO
+        // 26 - Aggiorna il cursore in base a cosa c'è sotto il mouse - AGGIORNATO
         function updateCursor() {
             let isOverButton = false;
 
@@ -879,7 +1056,7 @@
 
             // Controlla se il mouse è sopra un vulcano (puntino)
             const distFromCenter = dist(mouseX, mouseY, state.centerX, state.centerY);
-            if (distFromCenter < CONFIG.layout.maxRadius * 1.1) {
+            if (distFromCenter < CONFIG.layout.maxRadius * 1.5) { // 1.5 come nel codice originale
                 for (let v of state.filteredData) {
                     let key = `${v.name}-${v.year}-${v.deaths}`;
                     
@@ -906,159 +1083,43 @@
             }
         }
 
-        // ===== FUNZIONI PER LA LEGGENDA =====
-        
-        // 27 - Inizializza la leggenda p5.js
-        function initLegend() {
-            // Crea un nuovo sketch p5.js per la leggenda
-            new p5(legendSketch, 'legend-container');
-        }
+        // ===== FUNZIONI PER LO SCROLL E I BOTTONI - VERSIONE SEMPLIFICATA =====
 
-        // 28 - Sketch p5.js per la leggenda (MODIFICATO secondo le richieste)
-        function legendSketch(sketch) {
-            sketch.setup = function() {
-                const container = document.getElementById('legend-container');
-                const canvas = sketch.createCanvas(400, 200);
-                canvas.parent('legend-container');
-                sketch.textSize(16);
-                sketch.textFont('Helvetica');
-                sketch.textStyle(sketch.BOLD);
-            };
-
-            sketch.draw = function() {
-                sketch.clear(); // Sfondo trasparente invece che bianco
-                
-                // Configurazione della leggenda con modifiche richieste
-                const legendConfig = {
-                    colors: {
-                        text: '#FFFFFF', // Testo bianco
-                        accent: '#FFFFFF' // Icone bianche invece che rosse
-                    },
-                    position: {
-                        x: 40,
-                        y: 50,
-                        spacing: 40
-                    }
-                };
-
-                // Prima riga: Eruzione vulcanica
-                const line1Y = legendConfig.position.y;
-                
-                // Icona: pallino nero SENZA bordo (come richiesto)
-                sketch.fill(0);
-                sketch.noStroke(); // NO stroke attorno al pallino
-                sketch.circle(legendConfig.position.x + 15, line1Y + 12, 14);
-                
-                // Testo
-                sketch.fill(legendConfig.colors.text);
-                sketch.noStroke();
-                sketch.textAlign(sketch.LEFT, sketch.CENTER);
-                sketch.text('Volcanic eruptions', legendConfig.position.x + 40, line1Y + 12);
-                
-                // Seconda riga: Impact range
-                const line2Y = legendConfig.position.y + legendConfig.position.spacing;
-                
-                // Icona: cerchio con freccetta - BIANCA
-                sketch.push();
-                sketch.translate(legendConfig.position.x + 15, line2Y + 12);
-                sketch.noFill();
-                sketch.stroke(legendConfig.colors.accent); // BIANCO
-                sketch.strokeWeight(1);
-                sketch.circle(0, 0, 25);
-                
-                sketch.stroke(legendConfig.colors.accent); // BIANCO
-                sketch.strokeWeight(1);
-                sketch.line(12.5, 0, 1, 0);
-                sketch.line(1, 0, 3, -2.5);
-                sketch.line(1, 0, 3, 2.5);
-                sketch.pop();
-                
-                // Testo
-                sketch.fill(legendConfig.colors.text);
-                sketch.text('Distribution based on impact range', legendConfig.position.x + 40, line2Y + 12);
-                
-                // Terza riga: Ordine temporale
-                const line3Y = legendConfig.position.y + legendConfig.position.spacing * 2;
-                
-                sketch.push();
-                sketch.translate(legendConfig.position.x + 8, line3Y + 22);
-                sketch.stroke(legendConfig.colors.accent); // BIANCO
-                sketch.strokeWeight(1);
-                sketch.noFill();
-                
-                const R = 20;
-                sketch.line(0, 0, R, 0);
-                sketch.line(0, 0, 0, -R);
-                sketch.arc(0, 0, R * 2, R * 2, sketch.PI + sketch.HALF_PI, sketch.TWO_PI);
-                
-                const ang = sketch.TWO_PI;
-                const ax = sketch.cos(ang) * R;
-                const ay = sketch.sin(ang) * R;
-                
-                sketch.line(ax - 5, ay, ax, ay);
-                sketch.line(ax, ay, ax - 3, ay - 3);
-                sketch.line(ax, ay, ax - 3, ay + 3);
-                sketch.pop();
-                
-                sketch.fill(legendConfig.colors.text);
-                sketch.text('Temporal order of eruptions', legendConfig.position.x + 40, line3Y + 12);
-                
-                // Ripristina lo stile normale per il testo
-                sketch.textStyle(sketch.NORMAL);
-            };
-        }
-
-        // ===== FUNZIONI PER LO SCROLL E I BOTTONI =====
-
-        // 29 - Setup degli event listener per lo scroll e i bottoni - MODIFICATO
+        // 29 - Setup degli event listener per lo scroll e i bottoni - VERSIONE SEMPLIFICATA
         function setupScrollListeners() {
-            const scrollContainer = document.getElementById('text-scroll-area');
-            const buttonsContainer = document.getElementById('buttons-container');
-            const scrollHint = document.getElementById('scroll-hint');
+            // Ottieni gli elementi
+            state.scrollArea = document.getElementById('text-scroll-area');
+            state.scrollHint = document.getElementById('scroll-hint');
+            state.buttonsContainer = document.getElementById('buttons-container');
+            const aboutMethodologyBtnContainer = document.getElementById('about-methodology-btn-container');
+            const aboutMethodologyBtn = document.getElementById('about-methodology-btn');
             
-            if (scrollContainer && scrollHint) {
-                // Funzione per gestire lo scroll della freccia
-                scrollHint.addEventListener('click', function() {
-                    // Scorri di una quantità fissa (simile allo scroll del mouse)
-                    scrollContainer.scrollTop += 300;
-                    
-                    // Controlla se siamo alla fine dello scroll
-                    checkScrollEnd();
-                });
+            // Se l'elemento dello scroll esiste
+            if (state.scrollArea) {
+                // Aggiungi scroll listener semplice
+                state.scrollArea.addEventListener('scroll', handleTextScroll);
                 
-                // Funzione per controllare la fine dello scroll
-                function checkScrollEnd() {
-                    const scrollPercentage = (scrollContainer.scrollTop / (scrollContainer.scrollHeight - scrollContainer.clientHeight)) * 100;
-                    
-                    // Nasconde la freccia quando si è vicini alla fine (90%)
-                    if (scrollPercentage > 90) {
-                        scrollHint.style.display = 'none';
-                    } else {
-                        scrollHint.style.display = 'block';
-                    }
-                    
-                    // Mostra i bottoni quando si è arrivati alla fine (95%)
-                    if (scrollPercentage > 95) {
-                        buttonsContainer.style.display = 'flex';
-                    } else {
-                        buttonsContainer.style.display = 'none';
-                    }
+                // Abilita lo scroll con la ruota del mouse su tutto il documento
+                document.addEventListener('wheel', handleGlobalWheel, { passive: false });
+                
+                // Click sulla freccia
+                if (state.scrollHint) {
+                    state.scrollHint.addEventListener('click', function() {
+                        scrollTextContent(300);
+                    });
                 }
-                
-                // Controlla anche lo scroll normale del contenitore
-                scrollContainer.addEventListener('scroll', checkScrollEnd);
                 
                 // Controlla inizialmente
                 checkScrollEnd();
             }
             
-            // Setup dei bottoni finali - MODIFICATO
+            // Setup dei bottoni finali - I BOTTONI SONO VISIBILI SOLO QUANDO IL TESTO È FINITO
             const backToMapBtn = document.getElementById('back-to-map-btn');
             const aboutDatasetBtn = document.getElementById('about-dataset-btn');
             
             if (backToMapBtn) {
                 backToMapBtn.addEventListener('click', function() {
-                    window.location.href = "overview.html"; // Torna alla overview
+                    window.location.href = "overview.html";
                 });
                 
                 // Aggiungi gestione hover per cursore
@@ -1073,7 +1134,7 @@
             
             if (aboutDatasetBtn) {
                 aboutDatasetBtn.addEventListener('click', function() {
-                    window.location.href = "methodology.html"; // Pagina della metodologia
+                    window.location.href = "methodology.html";
                 });
                 
                 // Aggiungi gestione hover per cursore
@@ -1085,6 +1146,208 @@
                     aboutDatasetBtn.style.cursor = 'default';
                 });
             }
+            
+            // Setup del bottone About the methodology centrato nel box del testo
+            if (aboutMethodologyBtn) {
+                aboutMethodologyBtn.addEventListener('click', function() {
+                    window.location.href = "methodology.html";
+                });
+                
+                // Aggiungi gestione hover per cursore (gestita dal CSS)
+                aboutMethodologyBtn.addEventListener('mouseenter', function() {
+                    aboutMethodologyBtn.style.cursor = 'pointer';
+                });
+                
+                aboutMethodologyBtn.addEventListener('mouseleave', function() {
+                    aboutMethodologyBtn.style.cursor = 'default';
+                });
+            }
+        }
+
+        // 30 - Gestione scroll globale - SEMPLICE
+        function handleGlobalWheel(e) {
+            // Se abbiamo un'area di scroll
+            if (state.scrollArea) {
+                // Applica lo scroll all'area del testo
+                state.scrollArea.scrollTop += e.deltaY;
+                
+                // Previeni lo scroll della pagina
+                e.preventDefault();
+                
+                // Controlla se siamo alla fine
+                checkScrollEnd();
+            }
+        }
+
+        // 31 - Gestione scroll del testo
+        function handleTextScroll() {
+            checkScrollEnd();
+        }
+
+        // 32 - Controlla se siamo alla fine dello scroll - MOSTRA BOTTONE E NASCONDI FRECCIA
+        function checkScrollEnd() {
+            if (!state.scrollArea || !state.scrollHint) return;
+            
+            const scrollTop = state.scrollArea.scrollTop;
+            const scrollHeight = state.scrollArea.scrollHeight - state.scrollArea.clientHeight;
+            const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+            
+            const aboutMethodologyBtnContainer = document.getElementById('about-methodology-btn-container');
+            const aboutMethodologyBtn = document.getElementById('about-methodology-btn');
+            const buttonsContainer = document.getElementById('buttons-container');
+            
+            // Nasconde COMPLETAMENTE la freccia quando si è vicini alla fine (90%)
+            // e mostra il bottone About the methodology nel box del testo
+            if (scrollPercentage > 90) {
+                state.scrollHint.style.display = "none";
+                state.isAtBottom = true;
+                
+                // Mostra il bottone About the methodology centrato nel box del testo
+                if (aboutMethodologyBtnContainer) {
+                    aboutMethodologyBtnContainer.style.display = "flex";
+                }
+                
+                // Mostra anche i bottoni in basso (Back to Eruptions e About the methodology)
+                if (buttonsContainer) {
+                    buttonsContainer.style.display = "flex";
+                }
+            } else {
+                state.scrollHint.style.display = "block";
+                state.isAtBottom = false;
+                
+                // Nascondi il bottone About the methodology centrato nel box del testo
+                if (aboutMethodologyBtnContainer) {
+                    aboutMethodologyBtnContainer.style.display = "none";
+                }
+                
+                // Nascondi anche i bottoni in basso
+                if (buttonsContainer) {
+                    buttonsContainer.style.display = "none";
+                }
+            }
+        }
+
+        // 33 - Scroll del contenuto testo
+        function scrollTextContent(pixels) {
+            if (!state.scrollArea) return;
+            
+            state.scrollArea.scrollTop += pixels;
+            checkScrollEnd();
+        }
+
+        // ===== FUNZIONI PER LA LEGGENDA =====
+        
+        // 27 - Inizializza la leggenda p5.js - FUNZIONE RINOMINATA
+        function initializeLegend() {
+            // Crea un nuovo sketch p5.js per la leggenda
+            new p5(legendSketch, 'legend-container');
+        }
+
+        // 28 - Sketch p5.js per la leggenda - AGGIORNATO esattamente come nel codice originale
+        function legendSketch(sketch) {
+            sketch.setup = function() {
+                const container = document.getElementById('legend-container');
+                const canvas = sketch.createCanvas(container.clientWidth, container.clientHeight);
+                canvas.parent('legend-container');
+                sketch.textSize(16);
+                sketch.textFont('Helvetica');
+                sketch.textStyle(sketch.NORMAL);
+            };
+
+            sketch.draw = function() {
+                sketch.clear(); // Sfondo trasparente
+                
+                const startX = 20;
+                const startY = 20;
+                
+                sketch.fill(255); // Testo bianco
+                sketch.noStroke();
+                sketch.textAlign(sketch.LEFT, sketch.CENTER);
+                
+                // Prima riga: Volcanic eruption (pallino nero)
+                const y1 = startY;
+                
+                // Icona: pallino nero SENZA bordo
+                sketch.fill(0); // Nero
+                sketch.noStroke();
+                sketch.circle(startX + 20, y1 + 12, 12);
+                
+                // Testo
+                sketch.fill(255); // Bianco
+                sketch.text('Volcanic eruption', startX + 45, y1 + 12);
+                
+                // Seconda riga: Distribution based on impact range (cerchio + freccia)
+                const y2 = startY + 35;
+                
+                sketch.push();
+                sketch.translate(startX + 20, y2 + 12);
+                
+                sketch.noFill();
+                sketch.stroke(255); // Bianco
+                sketch.strokeWeight(1);
+                
+                const R = 13;
+                const r = 4;
+                const r2 = 3;
+                
+                // cerchio grande
+                sketch.circle(0, 0, R * 2);
+                
+                // cerchio centrale
+                sketch.circle(0, 0, r * 2);
+                
+                // punto centrale
+                //sketch.circle(0, 0, r2 * 2);
+                
+                // linea verticale
+                sketch.line(0, R + 2, 0, 4);
+                
+                // punta della freccia
+                //sketch.line(0, 1, -2, 5);
+                //sketch.line(0, 1, 2, 5);
+                
+                sketch.fill(255); // Bianco
+                sketch.triangle(0, 1, -2, 6, 2, 6);
+                sketch.pop();
+                
+                // Testo
+                sketch.fill(255);
+                sketch.text('Distribution based on impact range', startX + 45, y2 + 12);
+                
+                // Terza riga: Temporal order of eruptions (spicchio con freccia)
+                const y3 = startY + 70;
+                
+                sketch.push();
+                sketch.translate(startX + 15, y3 + 25);
+                
+                sketch.noFill();
+                sketch.stroke(255); // Bianco
+                sketch.strokeWeight(1);
+                
+                const A = 23;
+                const a1 = -sketch.PI / 1.7;
+                const a2 = -sketch.PI / 4;
+                
+                // lati dello spicchio
+                sketch.line(0, 0, sketch.cos(a1) * A, sketch.sin(a1) * A);
+                sketch.line(0, 0, sketch.cos(a2) * A, sketch.sin(a2) * A);
+                
+                // arco
+                sketch.arc(0, 0, A * 2, A * 2, a1, a2);
+                
+                // freccia tangente sull'arco
+                const ax = sketch.cos(a2) * A;
+                const ay = sketch.sin(a2) * A;
+                
+                sketch.line(ax, ay, ax - 4, ay - 2);
+                sketch.line(ax, ay, ax - 2, ay - 4);
+                
+                sketch.pop();
+                
+                // Testo (ESATTAMENTE come nel codice originale)
+                sketch.fill(255);
+                sketch.text('Eruption order: from oldest to most recent within each continent. ', startX + 45, y3 + 12);
+            };
         }
     </script>
 </body>

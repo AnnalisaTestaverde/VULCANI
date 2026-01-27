@@ -1130,22 +1130,28 @@ function drawLegend() {
     noFill();
 
     const R = 13;
-    const r = 2;
+    const r = 4;
+    const r2 = 3;
 
     // cerchio grande
     circle(0, 0, R * 2);
 
     // cerchio centrale
-    circle(0, -1, r * 2);
+    circle(0, 0, r * 2);
+
+    // cerchio centrale
+    //circle(0, 0, r2 * 2);
 
     // linea verticale
-    line(0, R - 2, 0, 2);
+    line(0, R + 2, 0, 4);
    
 
     // punta della freccia
-    line(0, -2, -2, 3);
-    line(0, -2, 2, 3);
+    //line(0, 1, -2, 5);
+    //line(0, 1, 2, 5);
 
+    fill(CONFIG.colors.accent);
+    triangle (0, 1, -2, 6, 2, 6);
     pop();
 
     noStroke();
