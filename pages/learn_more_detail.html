@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About the Graphic - Detail View</title>
+    <!-- Collegamento al CSS esterno (lo stesso file) -->
+    <link rel="stylesheet" href="style_learn_more.css">
+    <!-- Libreria p5.js per le animazioni -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    
+    <!-- Stile CSS aggiuntivo per i bottoni e scroll -->
+    <style>
+        /* Stile per i bottoni in basso - MODIFICATO: MESSI PIÙ IN ALTO */
+        #buttons-container {
+            display: none; /* NASCOSTO INIZIALMENTE */
+            position: fixed;
+            bottom: 100px; /* PIÙ IN ALTO */
+            left: 0;
+            right: 0;
+            justify-content: center;
+            z-index: 1000;
+            padding: 0 40px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .buttons-row {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .bottom-button {
+            background-color: transparent;
+            color: #FFFFFF; /* Testo bianco */
+            border: 2px solid #FFFFFF; /* Stroke bianco */
+            border-radius: 5px; /* Squadrato come la methodology */
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Helvetica', Arial, sans-serif;
+            cursor: default; /* Default cursor, cambia in pointer su hover */
+            text-align: center;
+            flex: 1;
+            transition: all 0.3s ease;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.5px;
+        }
+        
+        .bottom-button:hover {
+            background-color: #FFFFFF !important; /* Bianco su hover */
+            color: #FF2B00 !important; /* Testo rosso su hover */
+            cursor: pointer !important; /* Manina su hover */
+        }
+        
+        .button-spacer {
+            width: 30px;
+        }
+        
+        /* Rimuovi lo stile predefinito dei bottoni */
+        .bottom-button:focus {
+            outline: none;
+        }
+        
+        /* Stile per la freccia di scroll - COME ORIGINALE */
+        #scroll-hint {
+            position: absolute;
+            bottom: -70px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #000000 !important;
+            font-size: 40px !important;
+            font-weight: 900 !important;
+            cursor: pointer;
+            z-index: 100;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            animation: bounce 2s infinite;
+            pointer-events: auto;
+            opacity: 1 !important;
+            transition: opacity 0.3s ease-out;
+            -webkit-font-smoothing: antialiased !important;
+            -moz-osx-font-smoothing: grayscale !important;
+            text-shadow: none !important;
+            font-family: 'Helvetica', Arial, sans-serif !important;
+            line-height: 40px;
+        }
+        
+        .text-scroll-hint.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+        
+        /* Stile per il contenitore del testo */
+        #text-scroll-area {
+            position: relative;
+            height: 100%;
+        }
+        
+        /* Stile per lo scroll automatico del mouse */
+        .scroll-enabled {
+            overflow-y: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        .scroll-enabled::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+        
+        /* Bottone About the methodology centrato nel box del testo */
+        #about-methodology-btn-container {
+            position: absolute;
+            bottom: 40px; /* Posizione dal basso del text container */
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px); /* Stessa larghezza del text container con margini */
+            max-width: 800px;
+            display: none; /* Nascondi inizialmente */
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        #about-methodology-btn {
+            background-color: transparent;
+            color: #FFFFFF; /* Testo bianco */
+            border: 2px solid #FFFFFF; /* Stroke bianco */
+            border-radius: 5px; /* Squadrato come la methodology */
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Helvetica', Arial, sans-serif;
+            cursor: default; /* Default cursor, cambia in pointer su hover */
+            text-align: center;
+            transition: all 0.3s ease;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.5px;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        #about-methodology-btn:hover {
+            background-color: #FFFFFF !important; /* Bianco su hover */
+            color: #FF2B00 !important; /* Testo rosso su hover */
+            cursor: pointer !important; /* Manina su hover */
+        }
+        
+        #about-methodology-btn:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Container per il canvas principale p5.js -->
+    <div id="main-sketch-container"></div>
+    
+    <!-- Container per il testo a sinistra -->
+    <div id="text-container">
+        <!-- Area di scroll per il testo (senza scrollbar visibile) -->
+        <div id="text-scroll-area" class="scroll-enabled">
+            <!-- Contenuto testuale completo -->
+            <div id="text-content">
+                <!-- Sezione 1: Il grafico -->
+                <div class="section-title">THE GRAPH: A MAP OF VOLCANIC POWER</div>
+                <div class="section-text">
+                    This visualization transforms volcanic eruption data into an interactive map that tells the story of Earth's destructive power. Each black dot represents a real event, positioned on a large concentric circle. Its position is not random: it is determined by an <span class="bold-white">Impact Score</span>, a score between 1 and 16, calculated by adding five key indicators.
+                </div>
+                
+                <!-- Sezione 2: Sistema di punteggio -->
+                <div class="section-title">THE IMPACT SCORE SYSTEM</div>
+                <div class="section-text">
+                    The <span class="bold-white">Impact Score</span> (from 1 to 16) is calculated by summing five indicators, each rated from 0 to 4:
+                </div>
+                
+                <!-- Elenco puntato degli indicatori (sostituisce i box) -->
+                <ul class="impact-list">
+                    <li><span class="bold-white">DEATHS</span> - From 1 to 4, based on the number of victims (from 1-50 to over 1,000).</li>
+                    <li><span class="bold-white">INJURIES</span> - From 1 to 4, based on injured people (from 1-50 to over 1,000).</li>
+                    <li><span class="bold-white">DESTROYED HOUSES</span> - From 1 to 4, based on lost buildings (from 1-50 to over 1,000).</li>
+                    <li><span class="bold-white">ECONOMIC DAMAGE</span> - From 1 to 4, based on estimated costs (from less than 1 million to over 25 million dollars).</li>
+                    <li><span class="bold-white">MISSING</span> - From 0 to 4, to indicate the number of missing or unidentified people (from 1-50 to over 1,000; 0 if not relevant or not documented).</li>
+                </ul>
+                
+                <div class="section-text">
+                    An eruption with a score of 16 was devastating in all aspects; one with a score of 1, instead, had minimal impact.
+                </div>
+                
+                <!-- Sezione 4: Come leggere il grafico -->
+                <div class="section-title" style="margin-bottom: 1px;">HOW TO READ THE GRAPH</div>
+                
+                <!-- NOTA: RIMOSSA LA LEGGENDA (div legend-container) -->
+                
+                <div class="section-text">
+                    <span class="bold-white">THE BLACK DOTS </span>: Each dot represents a volcanic eruption. Hovering the mouse over a dot displays a window with the <span class="bold-white">volcano's name</span> and the <span class="bold-white">eruption year</span>. Clicking on the dot directly accesses the event's <span class="bold-white">detail page</span>, where you can explore the data further.
+                </div>
+                
+                <div class="section-text">
+                    <span class="bold-white">THE CONCENTRIC CIRCLES</span>: The <span class="bold-white">outer ring</span> corresponds to score 1 (minimal impact), while the <span class="bold-white">bright red central point</span> represents the maximum score of 16 (maximum devastation). The closer a dot is to the center, the more severe the event was.
+                </div>
+                
+                <div class="section-text"> 
+                    <span class="bold-white">THE CONTINENTAL WEDGES</span>: The circle is divided into five <span class="bold-white">wedges</span>, each representing a continent: <span class="bold-white">Asia</span>, <span class="bold-white">Americas</span>, <span class="bold-white">Europe</span>, <span class="bold-white">Oceania</span>, <span class="bold-white">Africa</span>. Within each wedge, eruptions are arranged <span class="bold-white">clockwise</span>, starting from the oldest event (4200 BC) to <span class="bold-white">today</span>.
+                </div>
+                
+                <!-- Sezione 5: Controlli esterni -->
+                <div class="section-title">EXTERNAL CONTROLS: FILTERS AND ANIMATION</div>
+                
+                <div class="section-text">
+                    On the left side of the page, tools are available to explore the data dynamically.
+                </div>
+                
+                <!-- Elenco puntato dei controlli (sostituisce i box) -->
+                <ul class="controls-list">
+                    <li><span class="bold-white">SELECT TIME FRAME</span> - With the arrows << and >>, you can select a specific time interval (for example, "800 AD - 1800 AD"). The graph updates automatically, showing only eruptions that occurred in that period.</li>
+                    <li><span class="bold-white">SELECT YEAR</span> - With the arrows < and >, you can navigate year by year among those present in the dataset. Not all years are present, as the dataset does not include records for every single year. In recent decades, however, precision increases significantly, allowing analysis of individual years like 2005.</li>
+                    <li><span class="bold-white">START ANIMATION</span> - Starts an automatic animation that scrolls through available years in succession, highlighting eruptions that occurred in each year with a <span class="bold-black">luminous pulsating effect</span> (a red glow that expands around the dot).</li>
+                </ul>
+                
+                <!-- Bottone About the methodology centrato nel box del testo -->
+                <div id="about-methodology-btn-container">
+                    <button id="about-methodology-btn">About the methodology</button>
+                </div>
+                
+                <!-- Spazio finale ridotto (per accorciare il box) -->
+                <div style="height: 150px;"></div>
+            </div>
+        </div>
+        
+        <!-- Freccia al centro in basso per indicare lo scroll - STILE ORIGINALE -->
+        <div id="scroll-hint" class="text-scroll-hint">V</div>
+    </div>
+    
+    <!-- Bottoni finali - SEMPRE VISIBILI E PIÙ IN ALTO -->
+    <div id="buttons-container">
+        <div class="buttons-row">
+            <button class="bottom-button" id="back-to-map-btn">Back to Eruptions</button>
+            <div class="button-spacer"></div>
+            <button class="bottom-button" id="about-dataset-btn">About the methodology</button>
+        </div>
+    </div>
+    
+    <!-- Codice JavaScript p5.js principale - CON GRAFICO MODIFICATO -->
+    <script>
+        // ===== CONFIGURAZIONE IDENTICA ALL'ORIGINALE =====
+        const CONFIG = {
+            colors: {
+                background: '#FF2B00', // Sfondo arancione
+                text: '#000000ff', // Testo nero (per la maggior parte)
+                accent: '#FFFFFF', // Bianco per bordo button e "GRAPHIC"
+                accentLight: '#FF2B00',
+                circle: '#111010b3',
+                continentBase: '#FF2B00',
+                highlightGlow: '#FF2B00',
+                infoBox: '#ffffffff',
+                infoBoxText: '#000000ff',
+                infoBoxStroke: '#FF2B00',
+                timeline: '#FF2B00',
+                selectedContinent: '#b9b9b988',
+                chartMain: '#FFFFFF', // Bianco per il grafico
+                chartLines: 'rgba(255, 255, 255, 0.3)' // Linee chiare per il grafico
+            },
+            layout: {
+                centerXRatio: 0.695,
+                maxRadius: 300,
+                minRadius: 29,
+                continentLabelOffset: 15,
+                europeAsiaOffset: 15,
+                infoBoxWidth: 220,
+                infoBoxHeight: 90,
+                bottomControlY: 100,
+                marginX: 40,
+                fontSizeControls: 16,
+                centerYOffset: -10,
+                topOffset: -20,
+                leftPanelWidth: 300,
+                controlButtonHeight: 50,
+                controlButtonWidth: 50,
+                timeframeFontSize: 30,
+                yearFontSize: 30,
+                labelFontSize: 16,
+                titleStartY: 95,
+                buttonStartY: 450,
+                timeframeStartY: 520,
+                yearStartY: 620,
+                legendStartY: 350,
+                startButtonY: 720,
+                // Configurazioni per il grafico d'impatto (come nel codice originale)
+                chartSize: 600,
+                chartXPercent: 0.7,
+                chartYPercent: 0.5,
+                chartLevels: 4,
+                chartGapAngleDeg: 10,
+                chartGapRadial: 5,
+                chartTitleSize: 28,
+                chartLabelSize: 14,
+                chartTooltipTextSize: 17
+            },
+            animation: {
+                dotEntryDuration: 800,
+                dotStaggerDelay: 30,
+                dotPopScale: 1.4,
+                randomDelayMax: 600,
+                waveDuration: 1000,
+                easingFunction: 'easeOutBack',
+                fastDotEntryDuration: 400,
+                fastRandomDelayMax: 200,
+                chartDuration: 1000
+            }
+        };
+
+        // ===== STATO APPLICAZIONE =====
+        let state = {
+            // Per il grafico d'impatto
+            volcanoData: null,
+            chartData: null,
+            selectedVolcano: null,
+            
+            // Per le animazioni
+            animationStartTime: 0,
+            isAnimating: false,
+            
+            // Per il back button
+            backButtonArea: null,
+            
+            // Per lo scroll
+            scrollArea: null,
+            scrollHint: null,
+            buttonsContainer: null,
+            isAtBottom: false
+        };
+
+        // Dati del Vesuvio come esempio (con coordinate per posizionamento)
+        const SAMPLE_VOLCANO = {
+            name: "Vesuvius",
+            year: 79,
+            death: 3,        // Livello 3 su 4
+            inj: 2,          // Livello 2 su 4
+            dmg: 4,          // Livello 4 su 4
+            house: 3,        // Livello 3 su 4
+            missing: 1,      // Livello 1 su 4
+            impact: 13,      // Totale impatto (3+2+4+3+1 = 13)
+            rawDeath: "Approximately 2,000 people died",
+            rawInj: "Unknown number of injuries",
+            rawDmg: "Complete destruction of Pompeii and Herculaneum",
+            rawHouse: "Thousands of buildings destroyed",
+            rawMissing: "Unknown number of missing"
+        };
+
+        // ===== FUNZIONI PRINCIPALI P5.JS =====
+        
+        // 1 - Inizializzazione dati
+        function initializeData() {
+            // Usa i dati di esempio
+            state.volcanoData = SAMPLE_VOLCANO;
+            state.chartData = buildChartData();
+            
+            // Avvia animazione iniziale
+            startAnimation();
+        }
+
+        // 2 - Costruisce dati per il grafico
+        function buildChartData() {
+            const d = state.volcanoData;
+            
+            return {
+                death: constrain(Math.round(d.death), 0, CONFIG.layout.chartLevels),
+                inj: constrain(Math.round(d.inj), 0, CONFIG.layout.chartLevels),
+                dmg: constrain(Math.round(d.dmg), 0, CONFIG.layout.chartLevels),
+                house: constrain(Math.round(d.house), 0, CONFIG.layout.chartLevels),
+                missing: constrain(Math.round(d.missing), 0, CONFIG.layout.chartLevels),
+                impact: d.impact,
+                rawDeath: d.rawDeath,
+                rawInj: d.rawInj,
+                rawDmg: d.rawDmg,
+                rawHouse: d.rawHouse,
+                rawMissing: d.rawMissing,
+                name: d.name,
+                year: d.year
+            };
+        }
+
+        // 3 - Setup iniziale
+        function setup() {
+            let canvas = createCanvas(windowWidth, windowHeight);
+            canvas.parent('main-sketch-container');
+            frameRate(60);
+            
+            // Inizializza i dati
+            initializeData();
+            
+            // Setup degli event listener per lo scroll e i bottoni
+            setupScrollListeners();
+        }
+
+        // 4 - Loop principale del grafico
+        function draw() {
+            // Sfondo arancione fisso
+            background(CONFIG.colors.background);
+            
+            // Disegna titolo
+            drawTitle();
+            
+            // Disegna back button
+            drawBackButton();
+            
+            // Disegna il grafico d'impatto
+            if (state.chartData) {
+                drawImpactChart(state.chartData);
+            }
+            
+            // Aggiorna animazioni
+            updateAnimations();
+            
+            // Aggiorna cursore
+            updateCursor();
+        }
+
+        // 5 - Titolo (con "GRAPHIC" in bianco)
+        function drawTitle() {
+            textSize(72);
+            textFont('Helvetica');
+            textStyle(BOLD);
+            textAlign(LEFT, TOP);
+            
+            const titleY = CONFIG.layout.titleStartY + CONFIG.layout.topOffset;
+            
+            // "ABOUT THE" in nero
+            fill(CONFIG.colors.text);
+            text('ABOUT THE', CONFIG.layout.marginX, titleY);
+
+            // "GRAPHIC" in BIANCO
+            fill(CONFIG.colors.accent);
+            text('DETAIL VIEW', CONFIG.layout.marginX, titleY + 75);
+            
+            textStyle(NORMAL);
+        }
+
+        // 6 - Back Button (MODIFICATO: porta a detail.html invece di overview.html)
+        function drawBackButton() {
+            const buttonWidth = 160;
+            const buttonHeight = 40;
+            
+            const buttonX = width - buttonWidth - 50;
+            const buttonY = CONFIG.layout.startButtonY;
+            
+            // Bordo NERO
+            stroke(CONFIG.colors.text);
+            strokeWeight(1);
+            noFill();
+            rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
+
+            // Icona con "×"
+            push();
+            translate(buttonX + 25, buttonY + buttonHeight/2);
+            fill(CONFIG.colors.text);
+            noStroke();
+            textSize(20);
+            textStyle(BOLD);
+            textAlign(CENTER, CENTER);
+            text("×", 0, 0);
+            pop();
+
+            // Testo "Back" in NERO
+            fill(CONFIG.colors.text);
+            noStroke();
+            textSize(CONFIG.layout.labelFontSize);
+            textStyle(BOLD);
+            textAlign(LEFT, CENTER);
+            text("Back", buttonX + 50, buttonY + buttonHeight/2);
+
+            // Memorizza l'area per l'interazione
+            state.backButtonArea = {
+                x: buttonX,
+                y: buttonY,
+                width: buttonWidth,
+                height: buttonHeight
+            };
+        }
+
+        // 7 - Disegna il grafico d'impatto RADIALE (bianco su sfondo arancione)
+        function drawImpactChart(d) {
+            // Posizione centro (ESATTAMENTE come nel codice originale)
+            let cx = width * CONFIG.layout.chartXPercent;
+            let cy = height * CONFIG.layout.chartYPercent;
+            
+            push();
+            translate(cx, cy);
+            
+            // Configurazione
+            let gapAngle = radians(CONFIG.layout.chartGapAngleDeg);
+            let gapRadial = CONFIG.layout.chartGapRadial;
+            let chartSize = CONFIG.layout.chartSize;
+            let radiusStep = chartSize / (2 * CONFIG.layout.chartLevels);
+            let maxChartRadius = chartSize / 2;
+            
+            // Valori e labels
+            const values = [d.death, d.inj, d.dmg, d.house, d.missing];
+            const labels = ["Deaths", "Injuries", "Damage", "Houses Destroyed", "Missing"];
+            const sectionAngle = TWO_PI / 5;
+            
+            // Calcola progresso animazione
+            let animationProgress = getAnimationProgress();
+            
+            // Overlay scuro dietro il grafico (come nel codice originale)
+            let panelW = chartSize + 60;
+            let panelH = chartSize + 60;
+            let px = -panelW / 2;
+            let py = -panelH / 2;
+            
+            // Pannello semitrasparente
+            noFill();
+            noStroke();
+            rect(px, py, panelW, panelH, 10);
+            
+            // Disegna tutte le sezioni
+            for (let i = 0; i < 5; i++) {
+                let start = sectionAngle * i + gapAngle / 2;
+                let end = sectionAngle * (i + 1) - gapAngle / 2;
+                
+                for (let level = 1; level <= CONFIG.layout.chartLevels; level++) {
+                    let innerR = radiusStep * (level - 1) + gapRadial;
+                    let outerR = radiusStep * level - gapRadial;
+                    
+                    if (values[i] >= level) {
+                        let animatedOuterR;
+                        
+                        if (animationProgress < 1.0) {
+                            let levelDelay = (level - 1) * 0.15;
+                            let levelProgress = constrain((animationProgress - levelDelay) / (1 - levelDelay), 0, 1);
+                            let easedProgress = 1 - pow(1 - levelProgress, 3);
+                            animatedOuterR = innerR + (outerR - innerR) * easedProgress;
+                        } else {
+                            animatedOuterR = outerR;
+                        }
+                        
+                        // Riempi il segmento con BIANCO
+                        fill(CONFIG.colors.chartMain);
+                        stroke(CONFIG.colors.chartMain);
+                        strokeWeight(1);
+                        drawArcSegment(innerR, animatedOuterR, start, end);
+                    } else {
+                        // Disegna solo il contorno (trasparente con bordo bianco)
+                        noFill();
+                        stroke(CONFIG.colors.chartLines);
+                        strokeWeight(1);
+                        drawArcSegment(innerR, outerR, start, end);
+                    }
+                }
+            }
+            
+            // Disegna le etichette
+            let detailMaxWidth = 110; // Larghezza massima testo (come nel codice originale)
+            
+            for (let i = 0; i < 5; i++) {
+                let start = sectionAngle * i + gapAngle / 2;
+                let end = sectionAngle * (i + 1) - gapAngle / 2;
+                
+                textStyle(NORMAL);
+                noStroke();
+                fill(CONFIG.colors.chartMain); // Testo BIANCO
+                textSize(CONFIG.layout.chartLabelSize);
+                textAlign(CENTER, CENTER);
+                
+                let ang = (start + end) / 2;
+                let lx = cos(ang) * (chartSize / 2 + 50);
+                let ly = sin(ang) * (chartSize / 2 + 50);
+                
+                // Disegna il titolo principale
+                text(labels[i], lx, ly - 14);
+                
+                // Disegna il livello
+                let levelValue = values[i];
+                let levelText = "Impact: " + levelValue;
+                
+                fill(CONFIG.colors.accent); // Testo BIANCO
+                textSize(CONFIG.layout.chartLabelSize);
+                textStyle(BOLD);
+                text(levelText, lx, ly + 3);
+                
+                // Testo descrittivo (più piccolo)
+                let detailText = "";
+                if (i === 0) detailText = d.rawDeath;
+                if (i === 1) detailText = d.rawInj;
+                if (i === 2) detailText = d.rawDmg;
+                if (i === 3) detailText = d.rawHouse;
+                if (i === 4) detailText = d.rawMissing;
+                
+                // Tronca il testo se troppo lungo
+                if (detailText.length > 40) {
+                    detailText = detailText.substring(0, 40) + "...";
+                }
+                
+                fill(CONFIG.colors.chartMain); // Testo BIANCO
+                textSize(CONFIG.layout.chartLabelSize);
+                textStyle(NORMAL);
+                textAlign(CENTER, TOP);
+                text(detailText, lx - detailMaxWidth / 2, ly + 14, detailMaxWidth);
+            }
+            
+            // Titolo centrale con totale impatto (ESATTAMENTE nella stessa posizione del codice originale)
+            push();
+            noStroke();
+            fill(245, 40, 0); // ROSSO come nel codice originale
+            textSize(CONFIG.layout.chartTitleSize);
+            textAlign(CENTER, CENTER);
+            textStyle(BOLD);
+            
+            // Testo "Total impact level: " + valore (ESATTAMENTE come nel codice originale)
+            let totalImpactText = "Total impact level: " + d.impact;
+            let totalImpactX = 270; // STESSA posizione X
+            let totalImpactY = -310; // STESSA posizione Y (abbassata per non interferire)
+            text(totalImpactText, totalImpactX, totalImpactY);
+            
+            // Ripristina stile normale
+            textStyle(NORMAL);
+            pop();  
+            
+            // Titolo sopra: "Example: Vesuvius 79 AD" (aggiunto sopra)
+            push();
+            noStroke();
+            fill(CONFIG.colors.accent); // BIANCO
+            textSize(CONFIG.layout.chartTitleSize);
+            textAlign(CENTER, CENTER);
+            textStyle(BOLD);
+            
+            let exampleText = "Example: " + d.name + " " + d.year + " AD";
+            text(exampleText, totalImpactX, totalImpactY - 40);
+            pop();
+            
+            pop();
+        }
+
+        // 8 - Funzione di utilità per disegnare segmento ad arco
+        function drawArcSegment(r1, r2, start, end) {
+            beginShape();
+            for (let a = start; a <= end; a += 0.01) {
+                vertex(cos(a) * r2, sin(a) * r2);
+            }
+            for (let a = end; a >= start; a -= 0.01) {
+                vertex(cos(a) * r1, sin(a) * r1);
+            }
+            endShape(CLOSE);
+        }
+
+        // 9 - Gestione animazioni
+        function startAnimation() {
+            state.isAnimating = true;
+            state.animationStartTime = millis();
+        }
+
+        function updateAnimations() {
+            // L'animazione viene gestita automaticamente in getAnimationProgress()
+        }
+
+        function getAnimationProgress() {
+            if (!state.isAnimating) return 1.0;
+            
+            let elapsed = millis() - state.animationStartTime;
+            let progress = constrain(elapsed / CONFIG.animation.chartDuration, 0, 1);
+            
+            if (progress >= 1.0) {
+                state.isAnimating = false;
+            }
+            
+            return progress;
+        }
+
+        // 10 - Aggiorna il cursore
+        function updateCursor() {
+            let isOverButton = false;
+
+            // Controlla se il mouse è sopra il back button
+            if (state.backButtonArea &&
+                mouseX > state.backButtonArea.x &&
+                mouseX < state.backButtonArea.x + state.backButtonArea.width &&
+                mouseY > state.backButtonArea.y &&
+                mouseY < state.backButtonArea.y + state.backButtonArea.height) {
+                isOverButton = true;
+            }
+
+            // Cambia il cursore
+            if (isOverButton) {
+                cursor(HAND);
+            } else {
+                cursor(ARROW);
+            }
+        }
+
+        // 11 - Gestione click del mouse (MODIFICATO: back button porta a detail.html)
+        function mousePressed() {
+            // Controllo per il back button (MODIFICATO: torna a detail.html)
+            if (state.backButtonArea &&
+                mouseX > state.backButtonArea.x &&
+                mouseX < state.backButtonArea.x + state.backButtonArea.width &&
+                mouseY > state.backButtonArea.y &&
+                mouseY < state.backButtonArea.y + state.backButtonArea.height) {
+                
+                // Torna alla pagina detail.html
+                window.location.href = "detail.html?name=Vesuvius&year=79&number=1";
+                return;
+            }
+            
+            // Click sul grafico per cambiare vulcano di esempio
+            let cx = width * CONFIG.layout.chartXPercent;
+            let cy = height * CONFIG.layout.chartYPercent;
+            let d = dist(mouseX, mouseY, cx, cy);
+            
+            if (d < CONFIG.layout.chartSize / 2) {
+                // Cambia il vulcano di esempio
+                cycleExampleVolcano();
+                startAnimation();
+            }
+        }
+
+        // 12 - Cicla tra diversi vulcani di esempio
+        function cycleExampleVolcano() {
+            const examples = [
+                {
+                    name: "Vesuvius",
+                    year: 79,
+                    death: 3,
+                    inj: 2,
+                    dmg: 4,
+                    house: 3,
+                    missing: 1,
+                    impact: 13,
+                    rawDeath: "Approximately 2,000 people died",
+                    rawInj: "Unknown number of injuries",
+                    rawDmg: "Complete destruction of Pompeii and Herculaneum",
+                    rawHouse: "Thousands of buildings destroyed",
+                    rawMissing: "Unknown number of missing"
+                },
+                {
+                    name: "Mount St. Helens",
+                    year: 1980,
+                    death: 2,
+                    inj: 2,
+                    dmg: 3,
+                    house: 2,
+                    missing: 1,
+                    impact: 10,
+                    rawDeath: "57 people died",
+                    rawInj: "Hundreds injured",
+                    rawDmg: "Over $1 billion in damage",
+                    rawHouse: "Hundreds of structures destroyed",
+                    rawMissing: "Several people missing"
+                },
+                {
+                    name: "Krakatoa",
+                    year: 1883,
+                    death: 4,
+                    inj: 3,
+                    dmg: 4,
+                    house: 2,
+                    missing: 3,
+                    impact: 16,
+                    rawDeath: "Over 36,000 people died",
+                    rawInj: "Thousands injured",
+                    rawDmg: "Global climate effects",
+                    rawHouse: "Coastal villages destroyed",
+                    rawMissing: "Thousands missing after tsunamis"
+                }
+            ];
+            
+            // Trova l'indice corrente o usa 0
+            let currentIndex = 0;
+            if (state.volcanoData) {
+                for (let i = 0; i < examples.length; i++) {
+                    if (examples[i].name === state.volcanoData.name) {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+            }
+            
+            // Passa al prossimo
+            let nextIndex = (currentIndex + 1) % examples.length;
+            state.volcanoData = examples[nextIndex];
+            state.chartData = buildChartData();
+        }
+
+        // 13 - Ridimensionamento finestra
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+        }
+
+        // ===== FUNZIONI PER LO SCROLL E I BOTTONI =====
+
+        // 14 - Setup degli event listener per lo scroll e i bottoni
+        function setupScrollListeners() {
+            // Ottieni gli elementi
+            state.scrollArea = document.getElementById('text-scroll-area');
+            state.scrollHint = document.getElementById('scroll-hint');
+            state.buttonsContainer = document.getElementById('buttons-container');
+            const aboutMethodologyBtnContainer = document.getElementById('about-methodology-btn-container');
+            const aboutMethodologyBtn = document.getElementById('about-methodology-btn');
+            
+            // Se l'elemento dello scroll esiste
+            if (state.scrollArea) {
+                // Aggiungi scroll listener semplice
+                state.scrollArea.addEventListener('scroll', handleTextScroll);
+                
+                // Abilita lo scroll con la ruota del mouse su tutto il documento
+                document.addEventListener('wheel', handleGlobalWheel, { passive: false });
+                
+                // Click sulla freccia
+                if (state.scrollHint) {
+                    state.scrollHint.addEventListener('click', function() {
+                        scrollTextContent(300);
+                    });
+                }
+                
+                // Controlla inizialmente
+                checkScrollEnd();
+            }
+            
+            // Setup dei bottoni finali
+            const backToMapBtn = document.getElementById('back-to-map-btn');
+            const aboutDatasetBtn = document.getElementById('about-dataset-btn');
+            
+            if (backToMapBtn) {
+                backToMapBtn.addEventListener('click', function() {
+                    window.location.href = "overview.html";
+                });
+                
+                backToMapBtn.addEventListener('mouseenter', function() {
+                    backToMapBtn.style.cursor = 'pointer';
+                });
+                
+                backToMapBtn.addEventListener('mouseleave', function() {
+                    backToMapBtn.style.cursor = 'default';
+                });
+            }
+            
+            if (aboutDatasetBtn) {
+                aboutDatasetBtn.addEventListener('click', function() {
+                    window.location.href = "methodology.html";
+                });
+                
+                aboutDatasetBtn.addEventListener('mouseenter', function() {
+                    aboutDatasetBtn.style.cursor = 'pointer';
+                });
+                
+                aboutDatasetBtn.addEventListener('mouseleave', function() {
+                    aboutDatasetBtn.style.cursor = 'default';
+                });
+            }
+            
+            // Setup del bottone About the methodology centrato nel box del testo
+            if (aboutMethodologyBtn) {
+                aboutMethodologyBtn.addEventListener('click', function() {
+                    window.location.href = "methodology.html";
+                });
+                
+                aboutMethodologyBtn.addEventListener('mouseenter', function() {
+                    aboutMethodologyBtn.style.cursor = 'pointer';
+                });
+                
+                aboutMethodologyBtn.addEventListener('mouseleave', function() {
+                    aboutMethodologyBtn.style.cursor = 'default';
+                });
+            }
+        }
+
+        // 15 - Gestione scroll globale
+        function handleGlobalWheel(e) {
+            if (state.scrollArea) {
+                state.scrollArea.scrollTop += e.deltaY;
+                e.preventDefault();
+                checkScrollEnd();
+            }
+        }
+
+        // 16 - Gestione scroll del testo
+        function handleTextScroll() {
+            checkScrollEnd();
+        }
+
+        // 17 - Controlla se siamo alla fine dello scroll
+        function checkScrollEnd() {
+            if (!state.scrollArea || !state.scrollHint) return;
+            
+            const scrollTop = state.scrollArea.scrollTop;
+            const scrollHeight = state.scrollArea.scrollHeight - state.scrollArea.clientHeight;
+            const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+            
+            const aboutMethodologyBtnContainer = document.getElementById('about-methodology-btn-container');
+            const aboutMethodologyBtn = document.getElementById('about-methodology-btn');
+            const buttonsContainer = document.getElementById('buttons-container');
+            
+            // Nasconde COMPLETAMENTE la freccia quando si è vicini alla fine (90%)
+            // e mostra il bottone About the methodology nel box del testo
+            if (scrollPercentage > 90) {
+                state.scrollHint.style.display = "none";
+                state.isAtBottom = true;
+                
+                // Mostra il bottone About the methodology centrato nel box del testo
+                if (aboutMethodologyBtnContainer) {
+                    aboutMethodologyBtnContainer.style.display = "flex";
+                }
+                
+                // Mostra anche i bottoni in basso (Back to Eruptions e About the methodology)
+                if (buttonsContainer) {
+                    buttonsContainer.style.display = "flex";
+                }
+            } else {
+                state.scrollHint.style.display = "block";
+                state.isAtBottom = false;
+                
+                // Nascondi il bottone About the methodology centrato nel box del testo
+                if (aboutMethodologyBtnContainer) {
+                    aboutMethodologyBtnContainer.style.display = "none";
+                }
+                
+                // Nascondi anche i bottoni in basso
+                if (buttonsContainer) {
+                    buttonsContainer.style.display = "none";
+                }
+            }
+        }
+
+        // 18 - Scroll del contenuto testo
+        function scrollTextContent(pixels) {
+            if (!state.scrollArea) return;
+            
+            state.scrollArea.scrollTop += pixels;
+            checkScrollEnd();
+        }
+    </script>
+</body>
+</html>
