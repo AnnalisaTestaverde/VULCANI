@@ -5,6 +5,7 @@ let timeOffset = 0;
 // Rallentato da 0.01 a 0.003 per un movimento più lento e fluido
 const noiseSpeed = 0.003; 
 
+
 function setup() {
   const canvas = createCanvas(windowWidth, windowHeight);
   // Assegna l'ID per il CSS

@@ -1,12 +1,25 @@
 let imgs = [];
 let names = [
   "Alice Comini",
-  "Matilde Curino",
+  "Matilde Curino", 
   "Greta Franco",
   "Carlo Galli",
   "Ilaria La Spada",
   "Annalisa Testaverde"
 ];
+
+// Ruoli dei membri
+let roles = [
+  "Frontend Development, \nData Visualization & Map-making.",
+  "Data Analysis & Visualization,\nIllustrations and Debugging.",
+  "Frontend Development, \nIllustrations and Methodology. ",
+  "Figma Mockups & Prototypes, \nResearch and Debugging.",
+  "Web Development, \nData Visualization & Animations.",
+  "Web Support, Learn More \nand Call Management."
+];
+
+// Dimensioni di visualizzazione uniformi
+let displayConfigs = [];
 
 function preload() {
   imgs[0] = loadImage("../assets/alice.png");
@@ -18,21 +31,47 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  // Calcola altezza totale del contenuto
+  const contentHeight = calculateContentHeight();
+  
+  // Crea canvas con altezza calcolata
+  let canvas = createCanvas(window.innerWidth, contentHeight);
+  canvas.parent('sketch-container');
+  
+  // Stili per il canvas
+  canvas.style('display', 'block');
+  canvas.style('position', 'relative');
+  canvas.style('width', '100%');
+  canvas.style('height', contentHeight + 'px');
+  
   textFont("Helvetica");
+  textAlign(CENTER);
+  
+  // Configurazione per ogni immagine
+  setupImageConfigs();
+}
+
+function setupImageConfigs() {
+  // Configurazioni specifiche per ogni immagine per uniformità
+  displayConfigs = [
+    { scale: 1.0, offsetY: 0, offsetX: 0 },   // Alice
+    { scale: 1.0, offsetY: 0, offsetX: 0 },   // Matilde
+    { scale: 1.0, offsetY: 0, offsetX: 0 },   // Greta
+    { scale: 1.0, offsetY: 0, offsetX: 0 },   // Carlo
+    { scale: 1.0, offsetY: 0, offsetX: 0 },   // Ilaria
+    { scale: 1.0, offsetY: 0, offsetX: 0 }    // Annalisa
+  ];
 }
 
 function draw() {
   background(255);
-
   
+  // Disegna titoli
   drawTitles();
+  
+  // Disegna tutti i membri
   drawMembers();
-  drawFooter();
 }
-
-
-
 
 /* ---------------- TITOLI ---------------- */
 
@@ -40,36 +79,61 @@ function drawTitles() {
   textAlign(CENTER);
 
   fill(0);
-  textSize(48);
+  textSize(window.innerWidth > 768 ? 48 : 36);
   textStyle(BOLD);
-  text("TEAM'S PROJECT", width / 2, 120);
+  text("TEAM'S PROJECT", width / 2, 100);
 
   fill("#FF2B00");
-  textSize(28);
-  text("THE PEOPLE WHO MADE IT POSSIBLE.", width / 2, 170);
+  textSize(window.innerWidth > 768 ? 28 : 22);
+  text("THE PEOPLE WHO MADE IT POSSIBLE.", width / 2, 150);
 
   fill(50);
-  textSize(16);
+  textSize(window.innerWidth > 768 ? 16 : 14);
   textStyle(NORMAL);
 
-  let t =
-    "Hi! We are second-year students of Communication Design from Section C2\nof the Computer Graphics Laboratory course at Politecnico di Milano.";
-
-  text(t, width / 2, 220);
+  let t = "Hi! We are second-year students of Communication Design from Section C2\nof the Computer Graphics Laboratory course at Politecnico di Milano.";
+  
+  if (window.innerWidth <= 768) {
+    t = "Hi! We are second-year students of Communication Design\nfrom Section C2 of the Computer Graphics Laboratory\ncourse at Politecnico di Milano.";
+  }
+  
+  text(t, width / 2, 200);
 }
 
 /* ---------------- GRIGLIA MEMBRI ---------------- */
 
 function drawMembers() {
-  let cols = 3;
-  let colW = 250;
-  let rowH = 250;
-
+  // Calcola layout basato sulla larghezza
+  let cols, colW, rowH, startY, circleRadius;
+  
+  if (window.innerWidth > 1024) {
+    cols = 3;
+    colW = 320;
+    rowH = 380;
+    startY = 280;
+    circleRadius = 100; // Cerchio grande
+  } else if (window.innerWidth > 768) {
+    cols = 3;
+    colW = 240;
+    rowH = 360;
+    startY = 260;
+    circleRadius = 90;
+  } else if (window.innerWidth > 480) {
+    cols = 2;
+    colW = 280;
+    rowH = 350;
+    startY = 240;
+    circleRadius = 85;
+  } else {
+    cols = 1;
+    colW = 280;
+    rowH = 340;
+    startY = 220;
+    circleRadius = 80;
+  }
+  
   let totalW = cols * colW;
   let startX = (width - totalW) / 2;
-  let startY = 300;
-
-  textAlign(CENTER);
 
   for (let i = 0; i < names.length; i++) {
     let col = i % cols;
@@ -79,75 +143,118 @@ function drawMembers() {
     let y = startY + row * rowH;
 
     let centerX = x + colW / 2;
-    let centerY = y + 80;
+    let imgCenterY = y + circleRadius + 20;
 
-    
-    // immagine
-    imageMode(CENTER);
-    // immagine dentro cerchio (no stretch)
-if (imgs[i]) {
-  push();
-  imageMode(CENTER);
+    // 1. PRIMA: Cerchio di sfondo BIANCO (stesso colore dello sfondo)
+    fill(255); // BIANCO PURO
+    noStroke();
+    ellipse(centerX, imgCenterY, circleRadius * 2, circleRadius * 2);
 
-  // crea una maschera circolare
-  drawingContext.save();
-  drawingContext.beginPath();
-  drawingContext.arc(centerX, centerY, 80, 0, TWO_PI);
-  drawingContext.clip();
+    // 2. POI: Immagine con clip circolare
+    if (imgs[i]) {
+      push();
+      imageMode(CENTER);
+      
+      // Crea maschera circolare
+      drawingContext.save();
+      drawingContext.beginPath();
+      drawingContext.arc(centerX, imgCenterY, circleRadius, 0, TWO_PI);
+      drawingContext.clip();
 
-  // disegna l'immagine mantenendo le proporzioni
-  let img = imgs[i];
-  let targetSize = 190;
-  let ratio = img.width / img.height;
+      // Calcola dimensioni per riempire il cerchio
+      let img = imgs[i];
+      let config = displayConfigs[i] || { scale: 1.0, offsetY: 0, offsetX: 0 };
+      
+      let imgRatio = img.width / img.height;
+      let targetDiameter = circleRadius * 2;
+      
+      // Dimensioni per coprire il cerchio
+      let displayW, displayH;
+      
+      if (imgRatio > 1) {
+        // Immagine più larga che alta
+        displayW = targetDiameter * 1.1 * config.scale; // Leggermente più grande del cerchio
+        displayH = displayW / imgRatio;
+      } else {
+        // Immagine più alta che larga
+        displayH = targetDiameter * 1.1 * config.scale;
+        displayW = displayH * imgRatio;
+      }
+      
+      // Posiziona l'immagine al centro con eventuali offset
+      image(img, 
+            centerX + config.offsetX, 
+            imgCenterY + config.offsetY, 
+            displayW, 
+            displayH);
+      
+      drawingContext.restore();
+      pop();
+      
+      // 3. OPZIONALE: Contorno sottile per definire il cerchio (molto leggero)
+      stroke(240); // Grigio MOLTO chiaro
+      strokeWeight(0.5);
+      noFill();
+      ellipse(centerX, imgCenterY, circleRadius * 2, circleRadius * 2);
+    }
 
-  let w, h;
-  if (ratio > 1) {
-    w = targetSize;
-    h = targetSize / ratio;
-  } else {
-    h = targetSize;
-    w = targetSize * ratio;
-  }
-
-  image(img, centerX, centerY, w, h);
-
-  // ripristina context
-  drawingContext.restore();
-  pop();
-} else {
-  fill(255);
-  textSize(12);
-  text("missing\nphoto", centerX, centerY);
-}
-
-
-    // nome
+    // Nome
     fill(0);
-    textSize(16);
-    text(names[i], centerX, y + 180);
+    textSize(window.innerWidth > 768 ? 18 : 16);
+    textStyle(BOLD);
+    let nameY = y + circleRadius * 2 + 60;
+    text(names[i], centerX, nameY);
+    
+    // Ruolo
+    fill(100);
+    textSize(window.innerWidth > 768 ? 14 : 12);
+    textStyle(NORMAL);
+    let roleY = nameY + 25;
+    text(roles[i], centerX, roleY);
   }
 }
 
-/* ---------------- FOOTER ---------------- */
+/* ---------------- CALCOLO ALTEZZA ---------------- */
 
-function drawFooter() {
-  fill("#FF2B00");
-  rect(0, height - 50, width, 1);
+function calculateContentHeight() {
+  const titleHeight = 250;
+  const membersHeight = calculateMembersHeight();
+  const footerSpace = 100;
+  
+  return titleHeight + membersHeight + footerSpace;
+}
 
-  fill(0);
-  textSize(12);
-  textAlign(LEFT);
-  text("© Computer Graphics Lab - Information Design", 40, height - 20);
-
-  textAlign(CENTER);
-  text("A.A. 2025/2026", width / 2, height - 20);
-
-  textAlign(RIGHT);
-  text("Group 03", width - 40, height - 20);
+function calculateMembersHeight() {
+  let cols, rowH;
+  
+  if (window.innerWidth > 1024) {
+    cols = 3;
+    rowH = 380;
+  } else if (window.innerWidth > 768) {
+    cols = 3;
+    rowH = 360;
+  } else if (window.innerWidth > 480) {
+    cols = 2;
+    rowH = 350;
+  } else {
+    cols = 1;
+    rowH = 340;
+  }
+  
+  const rows = Math.ceil(6 / cols);
+  return rows * rowH + 50;
 }
 
 /* ---------------- RESPONSIVE ---------------- */
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  const contentHeight = calculateContentHeight();
+  resizeCanvas(window.innerWidth, contentHeight);
+  
+  const canvas = document.querySelector('canvas');
+  if (canvas) {
+    canvas.style.height = contentHeight + 'px';
+  }
+  
+  redraw();
 }

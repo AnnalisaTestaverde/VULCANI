@@ -41,7 +41,16 @@ header a {
     text-decoration: none;
     color: #000000;
     margin-left: 40px;
-    font-size: 14px;
+    font-size: 15px;
+    transition: color 0.2s;
+}
+
+header a.explore {
+    text-decoration: none;
+    color:#FF2B00 ;
+    font-weight: bold;
+    margin-left: 40px;
+    font-size: 15px;
     transition: color 0.2s;
 }
 
@@ -51,7 +60,7 @@ header a:hover {
 
 .logo {
     font-weight: bold;
-    font-size: 14px;
+    font-size: 15px;
     color: #000000;
 }
 
