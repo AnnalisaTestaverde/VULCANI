@@ -278,8 +278,8 @@ header {
 .map-button {
     display: inline-block;
     margin-top: 40px;
-    padding: 8px 25px;
-    border-radius: 20px;
+    padding: 12px 30px; /* Padding leggermente aumentato */
+    border-radius: 10px; /* Cambiato da 20px a 0 per angoli squadrati */
     background-color: transparent;
     border: 2px solid #FF2B00;
     color: #FF2B00;
@@ -287,11 +287,15 @@ header {
     font-size: 16px;
     font-weight: bold;
     transition: all 0.3s ease;
+    text-align: center;
+    cursor: pointer;
 }
 
 .map-button:hover {
     background-color: #FF2B00;
     color: white;
+    transform: translateY(-2px); /* Leggera animazione al hover */
+    box-shadow: 0 4px 8px rgba(255, 43, 0, 0.2);
 }
 
 /* ===== FOOTER (IDENTICO ALLA PAGINA TEAM) ===== */
@@ -575,6 +579,3 @@ canvas {
     height: 100vh;
     z-index: 0;
 }
-
-
-
