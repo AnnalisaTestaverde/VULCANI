@@ -457,15 +457,15 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   push();
   textSize(mainTextSize);
   textAlign(LEFT, TOP);
-  textStyle(BOLD);
+  textStyle(NORMAL);
 
   // Label rossa
-  fill(chartMainColor);
+  fill(0);
   text("Date: ", margin, dateY);
 
   // Valore nero
-  fill(0);
-  textStyle(NORMAL);
+  fill(chartMainColor);
+  textStyle(BOLD);
   text(fullDate, margin + textWidth("Date: "), dateY);
   pop();
 
@@ -473,7 +473,7 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
 
   // --- TITOLO TIPO VULCANO ---
   push();
-  fill(245, 40, 0);
+  fill(chartMainColor);
   textSize(mainTextSize);
   textAlign(LEFT, TOP);
   text(typeRaw, margin, titleY+20);
@@ -673,7 +673,7 @@ function drawMap(lat, lon, country) {
   // Titolo
   let titleY = mapY - 30;
   push();
-  fill(245, 40, 0);
+  fill(chartMainColor);
   textSize(mainTextSize);
   textStyle(BOLD);
   textAlign(LEFT, TOP);
@@ -683,16 +683,16 @@ function drawMap(lat, lon, country) {
 
   push();
   textSize(mainTextSize);
-  textStyle(BOLD);
+  textStyle(NORMAL);
   textAlign(LEFT, TOP);
 
   // Label rossa
-  fill(chartMainColor);
+  fill(0);
   text(label, mapX, titleY);
 
   // Valore nero
-  fill(0);
-  textStyle(NORMAL);
+  fill(chartMainColor);
+  textStyle(BOLD);
   text(value, mapX + 7 + textWidth(label), titleY);
   pop();
 
@@ -942,12 +942,13 @@ function drawYearNavigator(year) {
     textAlign(LEFT);
 
     // Label rossa
-    fill(chartMainColor);
+    textStyle(NORMAL);
+    fill(0);
     text(label, margin - 22, counterY);
 
     // Valore nero (subito dopo la label)
-    fill(0);
-    textStyle(NORMAL);
+    fill(chartMainColor);
+    textStyle(BOLD);
     text(value, margin - 11.25 + textWidth(label), counterY);
     pop();
 
@@ -1467,6 +1468,7 @@ function drawImpactChart(d) {
     let ly = sin(ang) * (chartSize / 2 + 55);
     
     // Disegna il titolo principale (Deaths, Injuries, ecc.)
+    textStyle(BOLD);
     text(labels[i], lx, ly - 25);
     
     // AGGIUNTA: Disegna "Lvl. x" sotto ogni etichetta
@@ -1588,7 +1590,7 @@ function drawLearnMoreButton() {
   
   // Posizionato in alto a destra con margine - Learn More a destra
   const buttonX = width - buttonWidth - 50; // Allineato con overview
-  const buttonY = 20; // Allineato con il back button
+  const buttonY = 720; // Allineato con il back button
   
   // Home button a sinistra di Learn More
   const homeButtonX = buttonX - buttonWidth - buttonSpacing;
