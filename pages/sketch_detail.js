@@ -1,16 +1,16 @@
 // ---------- VARIABILI CONFIGURABILI ----------
-let chartXPercent = 0.7;      // posizione X (percentuale della larghezza, 0..1)
-let chartYPercent = 0.5;      // posizione Y (percentuale dell'altezza, 0..1)
-let chartSize = 600;           // dimensione totale del grafico (diametro suggerito)
-let chartLevels = 4;           // livelli (max barre concentriche) - CAMBIATO DA 5 A 4
-let chartMainColor = "#ff2b00";// colore principale delle barre
-let chartOverlayAlpha = 200;   // alpha overlay scuro (0..255)
-let chartGapAngleDeg = 10;     // gap tra spicchi (gradi)
-let chartGapRadial = 5;        // spazio tra anelli
-let chartTitleSize = 28;       // dimensione testo titolo centro
+let chartXPercent = 0.7;
+let chartYPercent = 0.5;
+let chartSize = 600;
+let chartLevels = 4;
+let chartMainColor = "#ff2b00";
+let chartOverlayAlpha = 200;
+let chartGapAngleDeg = 10;
+let chartGapRadial = 5;
+let chartTitleSize = 28;
 let mainTextSize = 17;
-let chartLabelSize = 14;       // dimensione label esterne
-let chartTooltipTextSize = 17; // dimensione tooltip
+let chartLabelSize = 14;
+let chartTooltipTextSize = 17;
 const INFLATION_FACTOR = 2.4;
 
 // ---------- VARIABILI GLOBALI ----------
@@ -21,17 +21,15 @@ let selectedYear = 0;
 let selectedNumber = 0;
 let currentIndex = 0;
 
-// Dopo le variabili globali
 let state = {
   learnMoreButtonArea: null
 };
 
 // Variabili per animazione
 let animationStartTime = 0;
-let animationDuration = 1000; // Durata animazione in millisecondi
+let animationDuration = 1000;
 let isAnimating = false;
-let previousSelectedNumber = null;
-let initialAnimationStarted = false; // Nuova variabile per l'animazione iniziale
+let initialAnimationStarted = false;
 
 // ---------- VARIABILI TRANSIZIONE ----------
 let transitionState = {
@@ -44,118 +42,80 @@ let transitionState = {
   targetRadius: 0
 };
 
-// immagini vulcano
+// ---------- IMMAGINI ----------
+let worldMap;
+let bookIcon;
+let currentVolcanoImage = null;
+let imageCache = {};
+let imagesLoaded = false;
+
+// Variabili per le immagini vulcano (originali)
 let stratoImg, calderaImg, complexImg, cinderImg, compoundImg, craterImg, fissureImg;
 let lava_coneImg, lava_domeImg, maarImg, pumiceImg, pyroclastic_coneImg, pyroclastic_shieldImg;
 let shieldImg, subglacialImg, submarineImg, tuffImg, volcanic_fieldImg;
 
-// immagine mappa
-let worldMap;
-
-// icoona libro
-let bookIcon;
-
-// ---------- PRELOAD ----------
+// ---------- PRELOAD OTTIMIZZATO ----------
 function preload() {
-  // CSV e mappa
+  // CARICA SOLO L'ESSENZIALE ASSOLUTO
   data = loadTable("../assets/data_impatto.csv", "csv", "header");
   worldMap = loadImage("../assets/Equirectangular_projection.jpg");
-
-  // preload illustrazioni (stesso set che avevi)
+  bookIcon = loadImage("../assets/book_icon.png");
+  
+  // Pre-carica SOLO le 3 immagini più comuni per velocità iniziale
   stratoImg = loadImage("../assets/stratovolcano.png");
   calderaImg = loadImage("../assets/caldera.png");
-  complexImg = loadImage("../assets/complex_volcano.png");
-  cinderImg = loadImage("../assets/cinder_cone.png");
-  compoundImg = loadImage("../assets/compound_volcano.png");
-  craterImg = loadImage("../assets/crater_rows.png");
-  fissureImg = loadImage("../assets/fissure_vent.png");
-  lava_coneImg = loadImage("../assets/lava_cone.png");
-  lava_domeImg = loadImage("../assets/lava_dome.png");
-  maarImg = loadImage("../assets/maar.png");
-  pumiceImg = loadImage("../assets/pumice_cone.png");
-  pyroclastic_coneImg = loadImage("../assets/pyroclastic_cone.png");
-  pyroclastic_shieldImg = loadImage("../assets/pyroclastic_shield.png");
   shieldImg = loadImage("../assets/shield_volcano.png");
-  subglacialImg = loadImage("../assets/subglacial_volcano.png");
-  submarineImg = loadImage("../assets/submarine.png");
-  tuffImg = loadImage("../assets/tuff_cone.png");
-  volcanic_fieldImg = loadImage("../assets/volcanic_field.png");
-
-  bookIcon = loadImage("../assets/book_icon.png");
-}
-
-// Funzione per convertire i danni da dollari 1990 a dollari 2026
-function convertTo2026Dollars(damageValue) {
-  if (!damageValue || damageValue === 0 || isNaN(damageValue)) {
-    return 0;
-  }
-  return damageValue * INFLATION_FACTOR;
-}
-
-// Funzione per formattare i valori monetari in modo leggibile
-function formatDamageValue(damageValue) {
-  if (damageValue === undefined || damageValue === null || damageValue === 0 || isNaN(damageValue)) {
-    return "Details not available";
-  }
   
-  // Converti sempre a dollari 2026
-  let value = convertTo2026Dollars(damageValue);
-  
-  // Mostra solo "2026 dollars" senza menzionare il 1990
-  if (value < 1) {
-    return `Less than $1 million (2026 dollars)`;
-  } else if (value < 1000) {
-    return `$${Math.round(value * 10) / 10} million (2026 dollars)`;
-  } else {
-    return `$${(value / 1000).toFixed(1)} billion (2026 dollars)`;
-  }
+  // Salva in cache
+  imageCache.strato = stratoImg;
+  imageCache.caldera = calderaImg;
+  imageCache.shield = shieldImg;
 }
 
-// ---------- SETUP ----------
+// ---------- SETUP VELOCE ----------
 function setup() {
+  // Salva la pagina precedente
+  localStorage.setItem('previousPageBeforeDetailView', window.location.href);
+  
   createCanvas(windowWidth, windowHeight);
   textFont("Helvetica");
-
-  // Imposta un frame rate fisso per migliorare le prestazioni
   frameRate(60);
-
-  // legge parametri ed assegna a variabili
+  
+  // Legge parametri URL
   selectedName = getQueryParam("name");
   selectedYear = int(getQueryParam("year"));
   selectedNumber = int(getQueryParam("number"));
 
   if (!selectedName) return;
 
-  // nella funzione setup(), dopo aver letto i parametri
-  if (!selectedName) return;
+  // Processa i dati in modo OTTIMIZZATO
+  processDataFast();
+  
+  // Avvia subito l'animazione
+  startAnimation();
+  initialAnimationStarted = true;
+  
+  // Carica l'immagine del vulcano corrente in background
+  loadVolcanoImageAsync();
+  
+  // Carica altre immagini in background DOPO 2 secondi (dopo che la pagina è visibile)
+  setTimeout(loadOtherImagesBackground, 2000);
+}
 
-  // PRE-PROCESSAMENTO: Converti tutte le coordinate una volta sola
-  window.allCoordinates = {};
-
-  for (let i = 0; i < data.getRowCount(); i++) {
-    let name = data.getString(i, "Name");
-    let country = data.getString(i, "Country");
-    let latStr = data.getString(i, "Latitude");
-    let lonStr = data.getString(i, "Longitude");
-    let number = data.getString(i, "Number");
-    
-    // Crea una chiave unica
-    let key = `${name}_${number || i}`;
-    
-    // Converti coordinate
-    window.allCoordinates[key] = getUniversalCoordinates(latStr, lonStr, name, country);
-  }
-
-  console.log(`Coordinate pre-processate: ${Object.keys(window.allCoordinates).length}`);
-
-  // popola eruptions[] filtrando per Name con coordinate corrette
+// ---------- FUNZIONI OTTIMIZZATE ----------
+function processDataFast() {
+  eruptions = [];
+  
+  // Ottimizzazione: cerca solo per il nome selezionato
   for (let i = 0; i < data.getRowCount(); i++) {
     if (data.getString(i, "Name") === selectedName) {
-      let number = data.getString(i, "Number");
-      let key = `${selectedName}_${number || i}`;
-      
-      // Ottieni coordinate pre-processate
-      let coords = window.allCoordinates[key] || { lat: 0, lon: -30 };
+      // Usa le funzioni di correzione coordinate originali
+      let coords = getUniversalCoordinates(
+        data.getString(i, "Latitude"),
+        data.getString(i, "Longitude"),
+        data.getString(i, "Name"),
+        data.getString(i, "Country")
+      );
       
       eruptions.push({
         year: int(data.getString(i, "Year")),
@@ -165,16 +125,16 @@ function setup() {
         type: data.getString(i, "Type") || "Unknown",
         deaths: data.getString(i, "Deaths") || "Not Available",
         number: int(data.getString(i, "Number")),
-        lat: coords.lat,  // Coordinate corrette!
-        lon: coords.lon,  // Coordinate corrette!
+        lat: coords.lat,
+        lon: coords.lon,
       });
     }
   }
 
-  // ordina per anno
+  // Ordina (max 20-30 elementi, veloce)
   eruptions.sort((a, b) => a.year - b.year);
-
-  // sincronizza currentIndex con Number o Year
+  
+  // Trova indice
   if (!isNaN(selectedNumber) && selectedNumber > 0) {
     const idxByNumber = eruptions.findIndex(e => e.number === selectedNumber);
     if (idxByNumber !== -1) currentIndex = idxByNumber;
@@ -186,506 +146,204 @@ function setup() {
     }
   }
 
-  // fallback (primo elemento)
   if (eruptions.length > 0 && currentIndex === 0) {
     selectedYear = eruptions[0].year;
     selectedNumber = eruptions[0].number;
   }
-  
-  // Avvia l'animazione iniziale
-  startAnimation();
-  initialAnimationStarted = true;
 }
 
-// ---------- DRAW ----------
+function loadVolcanoImageAsync() {
+  if (eruptions.length === 0) return;
+  
+  const selected = eruptions[currentIndex];
+  const type = normalizeType(selected.type);
+  
+  // Determina quale immagine serve
+  let imageKey = null;
+  
+  // Controlla prima nelle immagini già caricate
+  if (type.includes("stratovolcano") || type.includes("strato")) {
+    imageKey = "strato";
+  } else if (type.includes("caldera")) {
+    imageKey = "caldera";
+  } else if (type.includes("shield")) {
+    imageKey = "shield";
+  } else if (type.includes("cinder")) {
+    imageKey = "cinder";
+  } else if (type.includes("complex")) {
+    imageKey = "complex";
+  } else if (type.includes("compound")) {
+    imageKey = "compound";
+  } else if (type.includes("crater")) {
+    imageKey = "crater";
+  } else if (type.includes("fissure")) {
+    imageKey = "fissure";
+  } else if (type.includes("lava_cone") || type.includes("lava cone")) {
+    imageKey = "lava_cone";
+  } else if (type.includes("lava_dome") || type.includes("lava dome")) {
+    imageKey = "lava_dome";
+  } else if (type.includes("maar")) {
+    imageKey = "maar";
+  } else if (type.includes("pumice")) {
+    imageKey = "pumice";
+  } else if (type.includes("pyroclastic_cone") || type.includes("pyroclastic cone")) {
+    imageKey = "pyroclastic_cone";
+  } else if (type.includes("pyroclastic_shield") || type.includes("pyroclastic shield")) {
+    imageKey = "pyroclastic_shield";
+  } else if (type.includes("subglacial")) {
+    imageKey = "subglacial";
+  } else if (type.includes("submarine")) {
+    imageKey = "submarine";
+  } else if (type.includes("tuff")) {
+    imageKey = "tuff";
+  } else if (type.includes("volcanic_field") || type.includes("volcanic field")) {
+    imageKey = "volcanic_field";
+  }
+  
+  // Se l'immagine è già in cache, usala
+  if (imageKey && imageCache[imageKey]) {
+    currentVolcanoImage = imageCache[imageKey];
+    return;
+  }
+  
+  // Altrimenti caricala
+  if (!imageKey) imageKey = "strato"; // Fallback
+  
+  const imagePaths = {
+    "strato": "../assets/stratovolcano.png",
+    "caldera": "../assets/caldera.png",
+    "shield": "../assets/shield_volcano.png",
+    "cinder": "../assets/cinder_cone.png",
+    "complex": "../assets/complex_volcano.png",
+    "compound": "../assets/compound_volcano.png",
+    "crater": "../assets/crater_rows.png",
+    "fissure": "../assets/fissure_vent.png",
+    "lava_cone": "../assets/lava_cone.png",
+    "lava_dome": "../assets/lava_dome.png",
+    "maar": "../assets/maar.png",
+    "pumice": "../assets/pumice_cone.png",
+    "pyroclastic_cone": "../assets/pyroclastic_cone.png",
+    "pyroclastic_shield": "../assets/pyroclastic_shield.png",
+    "subglacial": "../assets/subglacial_volcano.png",
+    "submarine": "../assets/submarine.png",
+    "tuff": "../assets/tuff_cone.png",
+    "volcanic_field": "../assets/volcanic_field.png"
+  };
+  
+  if (imagePaths[imageKey]) {
+    // Carica in background
+    loadImage(imagePaths[imageKey], (img) => {
+      currentVolcanoImage = img;
+      imageCache[imageKey] = img; // Salva in cache
+    });
+  }
+}
+
+function loadOtherImagesBackground() {
+  // Carica altre immagini DOPO 2 secondi, una alla volta con intervalli casuali
+  const otherImages = [
+    "../assets/complex_volcano.png",
+    "../assets/cinder_cone.png",
+    "../assets/compound_volcano.png",
+    "../assets/crater_rows.png",
+    "../assets/fissure_vent.png",
+    "../assets/lava_cone.png",
+    "../assets/lava_dome.png",
+    "../assets/maar.png",
+    "../assets/pumice_cone.png",
+    "../assets/pyroclastic_cone.png",
+    "../assets/pyroclastic_shield.png",
+    "../assets/subglacial_volcano.png",
+    "../assets/submarine.png",
+    "../assets/tuff_cone.png",
+    "../assets/volcanic_field.png"
+  ];
+  
+  // Carica una immagine ogni 300-800ms per non sovraccaricare
+  otherImages.forEach((path, index) => {
+    setTimeout(() => {
+      loadImage(path, (img) => {
+        const name = path.split('/').pop().replace('.png', '');
+        imageCache[name] = img;
+        console.log(`Immagine caricata in background: ${name}`);
+      });
+    }, 300 + index * 350); // Spread più ampio
+  });
+}
+
+// ---------- DRAW OTTIMIZZATO ----------
 function draw() {
   background("#FFFFFF");
 
-  /* fallback nel caso in cui 
-  NON ci sia alcun vulcano selezionato */
   if (eruptions.length === 0) {
-    fill(0);
-    textSize(24);
-    textAlign(LEFT, TOP);
-    text("Nessun vulcano selezionato", 50, 50);
-    drawBackButton();
+    drawNoDataScreen();
     return;
   }
 
-  // Aggiorna la transizione se attiva
   updateTransition();
 
-  // Se la transizione è attiva, disegna tutto con la transizione sopra
   if (transitionState.active) {
-    // 1. Disegna tutti gli elementi normali
+    // Durante transizione, disegna solo l'essenziale
     let selected = eruptions[currentIndex];
-    drawVolcanoTypeBackground(selected.type);
-    drawMap(selected.lat, selected.lon, selected.country);
-    drawBackButton();
-    writeText();
-    drawYearNavigator(selected.year);
-    drawVolcanoDescription(selected.type, selected.year, selected.mo, selected.dy);
-    
-    // 2. Disegna il grafico (con animazione se necessario)
-    let dataRowIndex = findDataRowIndex(selectedName, selectedNumber);
-    if (dataRowIndex !== -1) {
-      let chartDatum = buildChartDataFromRow(dataRowIndex);
-      drawImpactChart(chartDatum);
-    } else {
-      drawChartPlaceholder();
+    if (currentVolcanoImage) {
+      drawVolcanoTypeBackgroundOptimized(selected.type);
     }
-    
-    // 3. Disegna il pulsante Learn More
+    drawBackButton();
     drawLearnMoreButton();
-    
-    // 4. Disegna la transizione SOPRA tutto
+    writeText();
     drawTransition();
-    
   } else {
-    // Disegno normale (senza transizione)
-    let selected = eruptions[currentIndex];
-    drawVolcanoTypeBackground(selected.type);
-    drawMap(selected.lat, selected.lon, selected.country);
-    drawBackButton();
-    drawLearnMoreButton();
-    writeText();
-    drawYearNavigator(selected.year);
-    drawVolcanoDescription(selected.type, selected.year, selected.mo, selected.dy);
-    
-    let dataRowIndex = findDataRowIndex(selectedName, selectedNumber);
-    if (dataRowIndex !== -1) {
-      let chartDatum = buildChartDataFromRow(dataRowIndex);
-      drawImpactChart(chartDatum);
-    } else {
-      drawChartPlaceholder();
-    }
+    // Disegno completo
+    drawFullContentOptimized();
   }
 
-  // 9. AGGIORNA IL CURSORE (sempre, anche durante transizione)
   updateCursor();
 }
 
-// ---------- FUNZIONI UTILI ----------
-
-// restituisce il valore del parametro x presente nell'URL
-function getQueryParam(param) {
-  let urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(param);
-}
-
-/* FORMATTAZIONE ANNO - 
-funzione per formattare l'anno con AD/BC */
-function formatYear(year) {
-  if (year < 0) {
-    return Math.abs(year) + " BC";
+function drawFullContentOptimized() {
+  let selected = eruptions[currentIndex];
+  
+  // Sfondo (se l'immagine è caricata)
+  if (currentVolcanoImage) {
+    drawVolcanoTypeBackgroundOptimized(selected.type);
+  }
+  
+  // Mappa ORIGINALE
+  drawMap(selected.lat, selected.lon, selected.country);
+  
+  // Interfaccia
+  drawBackButton();
+  drawLearnMoreButton();
+  writeText();
+  drawYearNavigator(selected.year);
+  drawVolcanoDescription(selected.type, selected.year, selected.mo, selected.dy);
+  
+  // Grafico
+  let dataRowIndex = findDataRowIndexFast();
+  if (dataRowIndex !== -1) {
+    let chartDatum = buildChartDataFromRow(dataRowIndex);
+    drawImpactChart(chartDatum);
   } else {
-    return Math.abs(year) + " AD";
+    drawChartPlaceholder();
   }
 }
 
-/* NORMALIZZAZIONE TESTO */
-function normalizeType(typeStr) {
-  if (!typeStr) return "";
-  return typeStr.toLowerCase().trim().replace(/\s+/g, ' ').replace(/[.,;]/g, '');
-}
-
-/* RESTITUZIONE DESCRIZIONE */
-function getVolcanoDescription(type) {
-  let normalizedType = normalizeType(type);
-  // ... (stesse descrizioni di prima)
-  if (normalizedType.includes("caldera")) {
-    return "Large, roughly circular depression formed when a volcano's magma chamber is emptied by eruption or subsurface magma movement, causing the overlying rock roof to collapse.";
-  }
-  else if (normalizedType.includes("cinder cone") || normalizedType.includes("cinder")) {
-    return "Smallest and most common type of volcano, built from accumulation of pyroclastic fragments (cinders, ash, scoria) ejected from a single vent.";
-  }
-  else if (normalizedType.includes("complex volcano") || normalizedType.includes("complex")) {
-    return "Mixed volcanic landform consisting of related volcanic centers with associated lava flows and pyroclastic deposits.";
-  }
-  else if (normalizedType.includes("crater rows") || normalizedType.includes("crater")) {
-    return "Linear alignments of small volcanic cones and craters that form along active fissures, typically composed of spatter and cinder cones.";
-  }
-  else if (normalizedType.includes("fissure vent") || normalizedType.includes("fissure")) {
-    return "Linear volcanic opening through which lava erupts, typically with little explosive activity.";
-  }
-  else if (normalizedType.includes("lava cone")) {
-    return "Small, steep-sided cone built from welded fragments of molten lava called spatter, which adhere together upon impact near a volcanic vent.";
-  }
-  else if (normalizedType.includes("lava dome")) {
-    return "Circular, mound-shaped volcanic protrusion formed by slow extrusion of highly viscous, silica-rich lava that accumulates around the vent.";
-  }
-  else if (normalizedType.includes("maar")) {
-    return "Broad, low-relief volcanic crater formed by phreatomagmatic eruptions when groundwater comes into contact with hot magma.";
-  }
-  else if (normalizedType.includes("pumice cone") || normalizedType.includes("pumice")) {
-    return "Volcanic cone built from accumulation of lapilli-to-block-sized pumice deposits ejected from moderate-intensity explosive eruptions.";
-  }
-  else if (normalizedType.includes("pyroclastic cone") || normalizedType.includes("pyroclastic")) {
-    return "General term for volcanic cones constructed from accumulation of explosively ejected fragmental material around a vent.";
-  }
-  else if (normalizedType.includes("pyroclastic shield")) {
-    return "Uncommon type of shield volcano formed primarily from pyroclastic and highly explosive eruptions rather than fluid lava flows.";
-  }
-  else if (normalizedType.includes("shield volcano") || normalizedType.includes("shield")) {
-    return "Large volcano with low, gently sloping profile (typically 2–10 degrees), formed by eruption of highly fluid, low-viscosity basaltic lava.";
-  }
-  else if (normalizedType.includes("stratovolcano") || normalizedType.includes("strato")) {
-    return "Tall, conical volcano built from many alternating layers of hardened lava, ash, and pyroclastic material deposited during successive eruptions.";
-  }
-  else if (normalizedType.includes("subglacial volcano") || normalizedType.includes("subglacial")) {
-    return "Volcanic landform produced by eruptions beneath glaciers or ice sheets, where magma melts overlying ice and rapidly cools lava.";
-  }
-  else if (normalizedType.includes("submarine volcano") || normalizedType.includes("submarine")) {
-    return "Volcanic eruption occurring beneath the ocean surface, more prevalent than subaerial volcanism.";
-  }
-  else if (normalizedType.includes("tuff cone") || normalizedType.includes("tuff")) {
-    return "Pyroclastic cone composed primarily of consolidated volcanic ash (tuff) formed through phreatomagmatic eruptions.";
-  }
-  else if (normalizedType.includes("volcanic field") || normalizedType.includes("volcanic")) {
-    return "Geographic area containing clusters of up to 100 or more volcanoes, typically 30–80 kilometers in diameter.";
-  }
-  else if (normalizedType.includes("compound")) {
-    return "Compound volcano - a volcanic center that has experienced multiple eruptions from different vents.";
-  }
-  else {
-    return "Volcanic formation with unique geological characteristics.";
-  }
-}
-
-/* ILLUSTRAZIONE TIPOLOGIA - sfondo */
-function drawVolcanoTypeBackground(typeRaw) {
-  let type = normalizeType(typeRaw);
-
+// ---------- FUNZIONI VISIVE OTTIMIZZATE ----------
+function drawVolcanoTypeBackgroundOptimized(typeRaw) {
+  if (!currentVolcanoImage) return;
+  
   push();
   translate(width * 0.5, height / 2);
   imageMode(CENTER);
-
-  // riduzione opacità!
   tint(255, 50);
 
+  // Dimensione ottimizzata
   let imgWidth = min(1100, width * 0.95);
   let imgHeight = imgWidth * (750/1000);
 
-  // cambio immagine a seconda della tipologia di vulcano
-  switch(true) {
-    case type.includes("stratovolcano"):
-      image(stratoImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("caldera"):
-      image(calderaImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("cinder"):
-      image(cinderImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("shield"):
-      image(shieldImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("complex"):
-      image(complexImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("compound"):
-      image(compoundImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("fissure"):
-      image(fissureImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("lava cone"):
-      image(lava_coneImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("lava dome"):
-      image(lava_domeImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("maar"):
-      image(maarImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("pumice"):
-      image(pumiceImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("pyroclastic cone"):
-      image(pyroclastic_coneImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("pyroclastic shield"):
-      image(pyroclastic_shieldImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("subglacial"):
-      image(subglacialImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("submarine"):
-      image(submarineImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("tuff"):
-      image(tuffImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("volcanic"):
-      image(volcanic_fieldImg, 0, 0, imgWidth, imgHeight);
-      break;
-    case type.includes("crater"):
-      image(craterImg, 0, 0, imgWidth, imgHeight);
-      break;
-  }
-
+  image(currentVolcanoImage, 0, 0, imgWidth, imgHeight);
   tint(255, 255);
   pop();
-}
-
-function getOrdinalSuffix(day) {
-  if (day > 3 && day < 21) return "th";
-  switch (day % 10) {
-    case 1: return "st";
-    case 2: return "nd";
-    case 3: return "rd";
-    default: return "th";
-  }
-}
-
-function getMonthName(mo) {
-  const months = [
-    "January", "February", "March", "April",
-    "May", "June", "July", "August",
-    "September", "October", "November", "December"
-  ];
-  let m = int(mo);
-  return (m >= 1 && m <= 12) ? months[m - 1] : "???";
-}
-
-// ---------- DESCRIZIONE ----------
-function drawVolcanoDescription(typeRaw, y, mo, dy) {
-  let margin = 60;
-  
-  // Spostiamo tutto leggermente in giù per far spazio alla data
-  let dateY = 340; 
-  let titleY = 365; 
-  let descriptionY = 410;
-
-  // INIZIO: il testo è allineato al punto d'inizio della mappa
-  let mapW = 320;
-  // LARGHEZZA: il testo va a capo quando raggiunge il bordo della mappa
-  let textWidthValue = mapW;
-
-  // --- DATA COMPLETA (estesa) ---
-  let dayAvailable = (dy && dy !== "0" && dy !== "");
-  let monthAvailable = (mo && mo !== "0" && mo !== "");
-
-  let dayText = dayAvailable ? dy + getOrdinalSuffix(int(dy)) : "??";
-  let monthText = monthAvailable ? getMonthName(mo) : "???";
-
-  // Anno con BC
-  let yearText = (y < 0) ? Math.abs(y) + " BC" : y.toString();
-
-  let fullDate = `${dayText} ${monthText} ${yearText}`;
-
-
-  push();
-  fill(chartMainColor);
-  textSize(mainTextSize);
-  textStyle(BOLD);
-  textAlign(LEFT, TOP);
-  pop();
-  push();
-  textSize(mainTextSize);
-  textAlign(LEFT, TOP);
-  textStyle(NORMAL);
-
-  // Label rossa
-  fill(0);
-  text("Date: ", margin, dateY);
-
-  // Valore nero
-  fill(chartMainColor);
-  textStyle(BOLD);
-  text(fullDate, margin + textWidth("Date: "), dateY);
-  pop();
-
-  pop();
-
-  // --- TITOLO TIPO VULCANO ---
-  push();
-  fill(chartMainColor);
-  textSize(mainTextSize);
-  textAlign(LEFT, TOP);
-  text(typeRaw, margin, titleY+20);
-  pop();
-
-  // --- DESCRIZIONE ---
-  let description = getVolcanoDescription(typeRaw);
-  push();
-  fill(0);
-  textSize(mainTextSize);
-  textStyle(NORMAL);
-  textLeading(20);
-  textAlign(LEFT, TOP);
-  text(description, margin, descriptionY, textWidthValue);
-  pop();
-}
-
-/* AGGIUNTA TITOLO */
-function writeText() {
-  let margin = 60;
-
-  // TESTO: prima riga - "THE IMPACT OF"
-  fill(0);
-  textAlign(LEFT, TOP);
-  textSize(48);
-  textStyle(BOLD);
-  let y1 = 75;
-  text("THE IMPACT OF ", margin, y1);
-
-  // TESTO: seconda riga - nome del vulcano in rosso
-  fill(245, 40, 0);
-  let volcanoName = selectedName ? selectedName.toUpperCase() : "UNKNOWN";
-  let y2 = y1 + 55;
-  text(volcanoName, margin, y2);
-
-  // TESTO: "IN" in nero sulla stessa riga
-  fill(0);
-  text(" IN", margin + textWidth(volcanoName), y2);
-}
-
-// =============================================
-// FUNZIONI DI CORREZIONE COORDINATE
-// =============================================
-
-// Funzione per convertire coordinate nel formato strano del CSV
-function fixAllCoordinates(coordStr, isLatitude = true) {
-  if (!coordStr || coordStr === "" || coordStr === "0") {
-    return isLatitude ? 0 : -30;
-  }
-  
-  let str = coordStr.toString().trim();
-  
-  // Se è già un numero decimale valido
-  if (!isNaN(parseFloat(str)) && str.indexOf(' ') === -1) {
-    let dotCount = (str.match(/\./g) || []).length;
-    
-    if (dotCount <= 1) {
-      let num = parseFloat(str);
-      
-      // Controllo di sanità
-      if (isLatitude && Math.abs(num) > 90) {
-        return fixDMS(str, isLatitude);
-      }
-      if (!isLatitude && Math.abs(num) > 180) {
-        return fixDMS(str, isLatitude);
-      }
-      
-      return num;
-    }
-  }
-  
-  return fixDMS(str, isLatitude);
-}
-
-// Funzione per correggere formato DMS (gradi.minuti.secondi)
-function fixDMS(str, isLatitude) {
-  let parts = str.split('.');
-  parts = parts.filter(p => p !== "");
-  
-  if (parts.length === 0) {
-    return isLatitude ? 0 : -30;
-  }
-  
-  let isNegative = false;
-  if (parts[0].startsWith('-')) {
-    isNegative = true;
-    parts[0] = parts[0].substring(1);
-  }
-  
-  // Formato "gradi.minuti.secondi" (3+ parti)
-  if (parts.length >= 3) {
-    let degrees = parseFloat(parts[0]) || 0;
-    let minutes = parseFloat(parts[1]) || 0;
-    let seconds = parseFloat(parts[2]) || 0;
-    
-    let decimal = degrees + minutes/60 + seconds/3600;
-    decimal = isNegative ? -decimal : decimal;
-    
-    return decimal;
-  }
-  
-  // Formato "gradi.minuti" (2 parti)
-  if (parts.length === 2) {
-    let degrees = parseFloat(parts[0]) || 0;
-    let minutes = parseFloat(parts[1]) || 0;
-    
-    // Se minuti > 59, probabilmente non sono minuti ma parte decimale
-    if (minutes >= 60) {
-      let combined = parseFloat(parts[0] + "." + parts[1]);
-      return isNegative ? -combined : combined;
-    }
-    
-    let decimal = degrees + minutes/60;
-    decimal = isNegative ? -decimal : decimal;
-    
-    return decimal;
-  }
-  
-  // Solo gradi (1 parte)
-  if (parts.length === 1) {
-    let num = parseFloat(parts[0]) || 0;
-    
-    // Controllo per valori impossibili
-    if (isLatitude && Math.abs(num) > 90) {
-      // Forse è un errore: "367" potrebbe essere "36.7"
-      if (num > 90 && num < 1000) {
-        let strNum = parts[0];
-        if (strNum.length === 3) {
-          num = parseFloat(strNum.substring(0, 2) + "." + strNum.substring(2));
-        }
-      }
-    }
-    
-    return isNegative ? -num : num;
-  }
-  
-  return isLatitude ? 0 : -30;
-}
-
-// Funzione che applica correzioni automatiche basate sul paese
-function applyKnownFixes(name, lat, lon, country) {
-  // Correzione per Italia (coordinate sballate nel dataset)
-  if (country && country.includes("Italy")) {
-    if (lat > 47 && lat < 60) {
-      lat = lat - 12;
-      lon = lon - 7;
-    }
-  }
-  
-  // Correzione per Islanda
-  if (country && country.includes("Iceland")) {
-    if (lat > 70) {
-      lat = lat - 15;
-    }
-  }
-  
-  // Correzione per Giappone - Fujisan
-  if (country && country.includes("Japan")) {
-    if (name === "Fujisan" && lat > 40) {
-      lat = 35.36;
-      lon = 138.73;
-    }
-  }
-  
-  return { lat: lat, lon: lon };
-}
-
-// Funzione principale per ottenere coordinate corrette
-function getUniversalCoordinates(latStr, lonStr, name = "", country = "") {
-  // Step 1: Converti le coordinate grezze
-  let lat = fixAllCoordinates(latStr, true);
-  let lon = fixAllCoordinates(lonStr, false);
-  
-  // Step 2: Applica correzioni per errori sistematici
-  let fixed = applyKnownFixes(name, lat, lon, country);
-  
-  // Step 3: Normalizza ai range geografici validi
-  if (fixed.lat > 90) fixed.lat = 90;
-  if (fixed.lat < -90) fixed.lat = -90;
-  
-  // Longitudine: -180 a 180
-  while (fixed.lon > 180) fixed.lon -= 360;
-  while (fixed.lon < -180) fixed.lon += 360;
-  
-  return fixed;
 }
 
 /* MAPPA CON CORREZIONE RESPONSIVE DEL MARKER */
@@ -822,381 +480,18 @@ function drawResponsiveLocationMarker(x, y) {
   pop();
 }
 
-/* BACK BUTTON */
-function drawBackButton() {
-  push();
-  
-  // Imposta il bordo nero
-  stroke(0);
-  strokeWeight(1);
-  noFill();
-  
-  // Calcola le dimensioni del testo
-  textSize(14);
-  textStyle(BOLD);
-  textAlign(LEFT, TOP);
-  let textW = textWidth("<   BACK");
-  let textH = 15; // Altezza approssimativa del testo
-  
-  // Definisci il padding (spaziatura interna)
-  let paddingX = 12;
-  let paddingY = 8;
-  
-  // Calcola la posizione e dimensione del rettangolo
-  // Il rettangolo deve essere centrato attorno al testo
-  let rectX = 67 - paddingX/2;
-  let rectY = 25 - paddingY/2;
-  let rectW = textW + paddingX;
-  let rectH = textH + paddingY;
-  
-  // Disegna il rettangolo con angoli leggermente arrotondati
-  rect(rectX, rectY, rectW, rectH, 6);
-  
-  // Disegna il testo
-  noStroke();
-  fill(0);
-  textSize(14);
-  textStyle(BOLD);
-  textAlign(LEFT, TOP);
-  text("<   BACK", 67, 25);
-  
-  pop();
-}
-
-/* NAVIGATORE ANNI */
-function drawYearNavigator(year) {
-
-  let hasMultipleEruptions = eruptions.length > 1;
-  let activeColor = color(chartMainColor);
-  let inactiveColor = color(180);
-  let arrowColor = hasMultipleEruptions ? activeColor : inactiveColor;
-
-
-  let margin = 82;
-  let y = 230;
-  let navigatorX = margin;
-
-  textSize(48);
-  let leftArrowWidth = textWidth("<");
-  
-  // Calcolo larghezza anno corrente per posizionamento
-  textSize(72);
-  let yearFormatted = formatYear(year);
-  let yearWidth = textWidth(yearFormatted);
-  
-  textSize(48);
-  let rightArrowWidth = textWidth(">");
-
-  // altezza e padding cornice
-  let spaceBetween = 40;
-  let framePadding = 20;
-  let frameHeight = 50;
-
-  textAlign(LEFT, CENTER);
-  fill(0);
-
-  // FRECCIA SINISTRA / DIM.
-  let leftArrowX = navigatorX;
-  let leftFrameX = leftArrowX - framePadding;
-  let leftFrameY = y - frameHeight/2;
-
-  // FRECCIA SINISTRA: cornice
-  push();
-  stroke(arrowColor);
-  strokeWeight(1);
-  noFill();
-  rect(leftFrameX, leftFrameY, leftArrowWidth + framePadding*2, frameHeight, 10);
-  pop();
-
-  // FRECCIA SINISTRA: disegno "<"
-  push();
-  fill(arrowColor);
-  textSize(48);
-  textStyle(NORMAL);
-  text("<", leftArrowX, y);
-  pop();
-
-
-
-  // TESTO: anno
-  push();
-  fill(245, 40, 0);
-  textSize(72);
-  let yearX = leftArrowX + leftArrowWidth + spaceBetween;
-  text(yearFormatted, yearX, y);
-  
-  let rightArrowX = yearX + yearWidth + spaceBetween;
-  pop();
-
-  // FRECCIA DESTRA / DIM.
-  let rightFrameX = rightArrowX - framePadding;
-  let rightFrameY = y - frameHeight/2;
-
-  // FRECCIA DESTRA: cornice
-  push();
-  stroke(arrowColor);
-  strokeWeight(1);
-  noFill();
-  rect(rightFrameX, rightFrameY, rightArrowWidth + framePadding*2, frameHeight, 10);
-  pop();
-
-  // FRECCIA DESTRA: disegno ">"
-  push();
-  fill(arrowColor);
-  textSize(48);
-  textStyle(NORMAL);
-  text(">", rightArrowX, y);
-  pop();
-
-
-  // ---- COUNTER ------
-  if (eruptions.length > 0) {
-    push();
-    noStroke();
-    fill(chartMainColor);
-    textSize(mainTextSize);
-    textAlign(LEFT); 
-    
-    let counterY = y + 75;
-    
-    let counterText = (currentIndex + 1) + " / " + eruptions.length;
-    
-    let label = "Eruption count: ";
-    let value = counterText;
-
-    push();
-    textSize(mainTextSize);
-    textAlign(LEFT);
-
-    // Label rossa
-    textStyle(NORMAL);
-    fill(0);
-    text(label, margin - 22, counterY);
-
-    // Valore nero (subito dopo la label)
-    fill(chartMainColor);
-    textStyle(BOLD);
-    text(value, margin - 11.25 + textWidth(label), counterY);
-    pop();
-
-    pop();
-  }
-}
-
-/* INTERAZIONI (mousePressed) - mantiene la navigazione e back */
-function mousePressed() {
-  // Se la transizione è attiva, disabilita tutti gli altri click
-  if (transitionState.active) return;
-
-  // BACK BUTTON
-  if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
-    window.location.href = "overview.html";
-    return;
-  }
-
-  // LEARN MORE BUTTON
-  if (state.learnMoreButtonArea &&
-      mouseX > state.learnMoreButtonArea.x &&
-      mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
-      mouseY > state.learnMoreButtonArea.y &&
-      mouseY < state.learnMoreButtonArea.y + state.learnMoreButtonArea.height) {
-    
-    // Avvia la transizione invece di aprire direttamente
-    startTransitionToLearnMore();
-    return;
-  }
-
-  // Se c'è una sola eruzione, disabilita la navigazione
-  if (eruptions.length <= 1) {
-    return;
-  }
-
-
-  // NAV. ANNI / DIM: calcolo posizione (AGGIORNATO con i nuovi valori)
-  let margin = 82; // Aggiornato da 60 a 82 (come in drawYearNavigator)
-  let y = 230;
-  let navigatorX = margin;
-
-  // sinistra
-  textSize(48);
-  let leftArrowWidth = textWidth("<");
-  let framePadding = 20; // Aggiornato da 15 a 20 (come in drawYearNavigator)
-  let frameHeight = 50; // Aggiornato da 70 a 50 (come in drawYearNavigator)
-  let leftArrowX = navigatorX;
-  let leftFrameX = leftArrowX - framePadding;
-  let leftFrameY = y - frameHeight/2;
-
-  // centro
-  textSize(72);
-  let yearFormatted = formatYear(selectedYear);
-  let yearWidth = textWidth(yearFormatted);
-  let yearX = leftArrowX + leftArrowWidth + 40;
-
-  // destra
-  textSize(48);
-  let rightArrowWidth = textWidth(">");
-  let rightArrowX = yearX + yearWidth + 40;
-  let rightFrameX = rightArrowX - framePadding;
-  let rightFrameY = y - frameHeight/2;
-
-  // FRECCIA SINISTRA: cliccabilità (area cornice)
-  if (mouseX > leftFrameX &&
-      mouseX < leftFrameX + leftArrowWidth + framePadding*2 &&
-      mouseY > leftFrameY &&
-      mouseY < leftFrameY + frameHeight) {
-    // Loop all'indietro
-    if (currentIndex > 0) {
-      currentIndex--;
-    } else {
-      // Se siamo al primo elemento, vai all'ultimo
-      currentIndex = eruptions.length - 1;
-    }
-    selectedYear = eruptions[currentIndex].year;
-    selectedNumber = eruptions[currentIndex].number;
-    
-    // Avvia l'animazione
-    startAnimation();
-    return;
-  }
-
-  // FRECCIA DESTRA: cliccabilità (area cornice)
-  if (mouseX > rightFrameX &&
-      mouseX < rightFrameX + rightArrowWidth + framePadding*2 &&
-      mouseY > rightFrameY &&
-      mouseY < rightFrameY + frameHeight) {
-    // MODIFICA QUI: crea il loop tornando all'indice 0 quando si è all'ultimo elemento
-    if (currentIndex < eruptions.length - 1) {
-      currentIndex++;
-    } else {
-      // Se siamo all'ultimo elemento, torna al primo
-      currentIndex = 0;
-    }
-    selectedYear = eruptions[currentIndex].year;
-    selectedNumber = eruptions[currentIndex].number;
-    
-    // Avvia l'animazione
-    startAnimation();
-    return;
-  }
-}
-
-/* RESPONSIVENESS */
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-}
-
-// ---------- FUNZIONI GRAFICO D'IMPATTO ----------
-
-/**
- * Cerca la riga CSV corrispondente a name + number.
- * Ritorna indice riga o -1 se non trovato.
- */
-function findDataRowIndex(name, number) {
+function findDataRowIndexFast() {
+  // Ricerca ottimizzata
   for (let i = 0; i < data.getRowCount(); i++) {
-    let n = data.getString(i, "Name");
-    let num = data.getString(i, "Number");
-    // confronto robusto
-    if (n === name && String(number) === String(num)) {
+    if (data.getString(i, "Name") === selectedName && 
+        String(data.getString(i, "Number")) === String(selectedNumber)) {
       return i;
     }
   }
   return -1;
 }
 
-/**
- * Costruisce l'oggetto chartData dalla riga CSV (index)
- */
-function buildChartDataFromRow(i) {
-  // prende le stringhe raw per i tooltip/testo
-  let strDeath = data.getString(i, "Deaths");
-  let strInj = data.getString(i, "Injuries");
-  let strDmg = data.getString(i, "Damage ($Mil)");
-  let strHouse = data.getString(i, "Houses Destroyed");
-  let strMissing = data.getString(i, "Missing");
-
-  // parse dei valori
-  let deathVal = Number(data.getString(i, "Death Description"));
-  let injVal = Number(data.getString(i, "Injuries Description"));
-  let dmgVal = Number(data.getString(i, "Damage Description"));
-  let houseVal = Number(data.getString(i, "Houses Destroyed Description"));
-  let missingVal = Number(data.getString(i, "Missing Description"));
-
-  // prendi il valore "Impact" dal CSV
-  let impactVal = Number(data.getString(i, "Impact"));
-
-  // DEBUG: Controlla se ci sono dati
-  console.log(`Row ${i}: dmgVal = ${dmgVal}, strDmg = "${strDmg}"`);
-
-  // Calcola il valore convertito per i danni (SOLO PER GRAFICO)
-  let dmgValForChart = 0;
-  if (!isNaN(dmgVal) && dmgVal > 0) {
-    dmgValForChart = constrain(Math.round(convertTo2026Dollars(dmgVal)), 0, chartLevels);
-  }
-
-  // normalizzazione: se NaN => 0
-  deathVal = isNaN(deathVal) ? 0 : deathVal;
-  injVal = isNaN(injVal) ? 0 : injVal;
-  dmgVal = isNaN(dmgVal) ? 0 : dmgVal;
-  houseVal = isNaN(houseVal) ? 0 : houseVal;
-  missingVal = isNaN(missingVal) ? 0 : missingVal;
-  impactVal = isNaN(impactVal) ? 0 : impactVal;
-
-  // clamp fra 0 e chartLevels
-  deathVal = constrain(Math.round(deathVal), 0, chartLevels);
-  injVal = constrain(Math.round(injVal), 0, chartLevels);
-  houseVal = constrain(Math.round(houseVal), 0, chartLevels);
-  missingVal = constrain(Math.round(missingVal), 0, chartLevels);
-
-  // Formatta i dati raw
-  let formattedDamage = "Details not available";
-  if (strDmg && strDmg.trim() !== "") {
-    // Se c'è una stringa nel CSV, usala
-    formattedDamage = strDmg;
-  } else if (dmgVal > 0) {
-    // Altrimenti formatta il valore numerico
-    formattedDamage = formatDamageValue(dmgVal);
-  }
-
-  return {
-    index: i,
-    name: data.getString(i, "Name"),
-    country: data.getString(i, "Country") || "",
-    death: deathVal,
-    inj: injVal,
-    dmg: dmgValForChart, // Valore convertito per il grafico
-    house: houseVal,
-    missing: missingVal,
-    impact: impactVal,
-    rawDeath: (strDeath === "" ? "Details not available" : strDeath),
-    rawInj: (strInj === "" ? "Details not available" : strInj),
-    rawDmg: formattedDamage, // Usa il valore formattato
-    rawHouse: (strHouse === "" ? "Details not available" : strHouse),
-    rawMissing: (strMissing === "" ? "Details not available" : strMissing),
-    originalDmgValue: dmgVal // Mantieni il valore originale per debug
-  };
-}
-
-/**
- * Disegna un placeholder se la riga CSV non è trovata
- */
-function drawChartPlaceholder() {
-  let cx = width * chartXPercent;
-  let cy = height * chartYPercent;
-  push();
-  fill(240);
-  noStroke();
-  rectMode(CENTER);
-  rect(cx, cy, chartSize + 40, chartSize + 40, 12);
-  pop();
-
-  push();
-  textAlign(CENTER, CENTER);
-  fill(0);
-  textSize(16);
-  text("Impact chart\nnot available", cx, cy);
-  pop();
-}
-
+// ---------- FUNZIONI DEL GRAFICO (COMPLETE) ----------
 function getDetailText(value, descCode, type, chartData = null) {
   // Se il valore numerico esiste, restituiamo quello
   if (value !== "" && value !== 0 && !isNaN(value)) {
@@ -1246,41 +541,7 @@ function getDetailText(value, descCode, type, chartData = null) {
   return tables[type][code];
 }
 
-/**
- * Funzione per avviare l'animazione
- */
-function startAnimation() {
-  isAnimating = true;
-  animationStartTime = millis();
-}
-
-/**
- * Funzione per calcolare il progresso dell'animazione (0-1)
- */
-function getAnimationProgress() {
-  if (!isAnimating) return 1.0;
-  
-  let elapsed = millis() - animationStartTime;
-  let progress = constrain(elapsed / animationDuration, 0, 1);
-  
-  // Se l'animazione è completata, resetta lo stato
-  if (progress >= 1.0) {
-    isAnimating = false;
-  }
-  
-  return progress;
-}
-
-/**
- * Disegna il grafico d'impatto con animazione
- */
 function drawImpactChart(d) {
-  // DEBUG: Controlla i dati
-  console.log("Chart data:", d);
-  console.log("d.rawDmg:", d.rawDmg);
-  console.log("d.dmg (converted):", d.dmg);
-  console.log("originalDmgValue:", d.originalDmgValue);
-
   // Tooltip text
   let tooltipText = "";
 
@@ -1321,10 +582,6 @@ function drawImpactChart(d) {
     !(d.house === 0 && d.rawHouse === "Details not available"),
     !(d.missing === 0 && d.rawMissing === "Details not available")
   ];
-
-  // DEBUG: Controlla disponibilità dati
-  console.log("isDataAvailable:", isDataAvailable);
-  console.log("Damage check - d.dmg:", d.dmg, "d.rawDmg:", d.rawDmg);
 
   // Calcola il progresso dell'animazione
   let animationProgress = getAnimationProgress();
@@ -1417,8 +674,8 @@ function drawImpactChart(d) {
       drawingContext.clip();
       
       // Disegna il pattern a linee oblique all'interno della maschera
-      let patternSpacing = 6; // Spaziatura tra le linee
-      let lineColor = color(180, 180, 180); // Grigio trasparente
+      let patternSpacing = 6;
+      let lineColor = color(180, 180, 180);
       
       stroke(lineColor);
       strokeWeight(1);
@@ -1437,18 +694,15 @@ function drawImpactChart(d) {
       
       // Disegna linee oblique
       for (let offset = -maxX - maxY; offset < maxX + maxY; offset += patternSpacing) {
-        // Calcola i punti per la linea corrente
         let x1, y1, x2, y2;
         
         if (cosAngle !== 0) {
-          // Linea obliqua standard
           x1 = minX;
           y1 = (offset - x1 * cosAngle) / sinAngle;
           x2 = maxX;
           y2 = (offset - x2 * cosAngle) / sinAngle;
         }
         
-        // Disegna la linea solo se è all'interno dell'area visibile
         if (y1 >= minY || y2 >= minY || y1 <= maxY || y2 <= maxY) {
           line(x1, y1, x2, y2);
         }
@@ -1465,8 +719,8 @@ function drawImpactChart(d) {
   }
 
   // Disegna tutte le label
-  let detailMaxWidth = 130; // Aumenta la larghezza massima
-  let lineHeight = 16; // Altezza di ogni linea di testo
+  let detailMaxWidth = 130;
+  let lineHeight = 16;
 
   for (let i = 0; i < 5; i++) {
     let start = sectionAngle * i + gapAngle / 2;
@@ -1510,41 +764,38 @@ function drawImpactChart(d) {
       else if (i === 3) detailText = getDetailText(d.rawHouse, d.house, "houses");
       else if (i === 4) detailText = getDetailText(d.rawMissing, d.missing, "missing");
 
-      fill(0); // nero
+      fill(0);
       textSize(chartLabelSize);
       textStyle(NORMAL);
       textAlign(CENTER, TOP);
       
-      // Calcola quante linee di testo ci sono
       let numLines = 1;
       if (detailText.includes('\n')) {
         numLines = 2;
       }
       
-      // Posiziona il testo in base al numero di linee
       let textY = ly + 7;
       text(detailText, lx - detailMaxWidth / 2, textY, detailMaxWidth);
     }
   }
 
+  // Titolo "Total impact level: " al centro in alto
   push();
   noStroke();
-  fill(245, 40, 0); // Rosso
+  fill(245, 40, 0);
   textSize(chartTitleSize);
   textAlign(CENTER, CENTER);
   textStyle(BOLD);
   
-  // Testo "Total impact level: " + valore
   let totalImpactText = "Total impact level: " + d.impact;
   let totalImpactX = 270;
-  let totalImpactY = -310; // CAMBIATO da -320 a -350 per abbassare la scritta
+  let totalImpactY = -310;
   text(totalImpactText, totalImpactX, totalImpactY);
   
-  // Ripristina stile normale
   textStyle(NORMAL);
-  pop();  
+  pop();
 
-    // hover tooltip content
+  // hover tooltip content
   if (hoveredSection !== -1) {
     if (hoveredSection === 0) {
       tooltipText = getDetailText(d.rawDeath, d.death, "deaths");
@@ -1553,7 +804,7 @@ function drawImpactChart(d) {
       tooltipText = getDetailText(d.rawInj, d.inj, "injuries");
     }
     else if (hoveredSection === 2) {
-      tooltipText = d.rawDmg; // Usa il valore già convertito
+      tooltipText = d.rawDmg;
     }
     else if (hoveredSection === 3) {
       tooltipText = getDetailText(d.rawHouse, d.house, "houses");
@@ -1603,33 +854,451 @@ function drawArcSegment(r1, r2, start, end) {
   endShape(CLOSE);
 }
 
-function drawLearnMoreButton() {
-  const buttonWidth = 160; // Stessa larghezza di overview
-  const buttonHeight = 40; // Altezza consistente
-  
-  // Posizionato in alto a destra con margine - Learn More a destra
-  const buttonX = width - buttonWidth - 50; // Allineato con overview
-  const buttonY = 720; // Allineato con il back button
+// ---------- FUNZIONI UTILITY (invariate) ----------
+function getQueryParam(param) {
+  let urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
 
-  // --- LEARN MORE BUTTON (come in overview) ---
+function normalizeType(typeStr) {
+  if (!typeStr) return "";
+  return typeStr.toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+function formatYear(year) {
+  return year < 0 ? Math.abs(year) + " BC" : Math.abs(year) + " AD";
+}
+
+function getOrdinalSuffix(day) {
+  if (day > 3 && day < 21) return "th";
+  switch (day % 10) {
+    case 1: return "st";
+    case 2: return "nd";
+    case 3: return "rd";
+    default: return "th";
+  }
+}
+
+function getMonthName(mo) {
+  const months = ["January", "February", "March", "April", "May", "June", 
+                 "July", "August", "September", "October", "November", "December"];
+  let m = int(mo);
+  return (m >= 1 && m <= 12) ? months[m - 1] : "???";
+}
+
+function convertTo2026Dollars(damageValue) {
+  if (!damageValue || damageValue === 0 || isNaN(damageValue)) return 0;
+  return damageValue * INFLATION_FACTOR;
+}
+
+function formatDamageValue(damageValue) {
+  if (damageValue === undefined || damageValue === null || damageValue === 0 || isNaN(damageValue)) {
+    return "Details not available";
+  }
+  
+  let value = convertTo2026Dollars(damageValue);
+  
+  if (value < 1) {
+    return `Less than $1 million (2026 dollars)`;
+  } else if (value < 1000) {
+    return `$${Math.round(value * 10) / 10} million (2026 dollars)`;
+  } else {
+    return `$${(value / 1000).toFixed(1)} billion (2026 dollars)`;
+  }
+}
+
+function buildChartDataFromRow(i) {
+  let strDeath = data.getString(i, "Deaths");
+  let strInj = data.getString(i, "Injuries");
+  let strDmg = data.getString(i, "Damage ($Mil)");
+  let strHouse = data.getString(i, "Houses Destroyed");
+  let strMissing = data.getString(i, "Missing");
+
+  let deathVal = Number(data.getString(i, "Death Description"));
+  let injVal = Number(data.getString(i, "Injuries Description"));
+  let dmgVal = Number(data.getString(i, "Damage Description"));
+  let houseVal = Number(data.getString(i, "Houses Destroyed Description"));
+  let missingVal = Number(data.getString(i, "Missing Description"));
+  let impactVal = Number(data.getString(i, "Impact"));
+
+  let dmgValForChart = 0;
+  if (!isNaN(dmgVal) && dmgVal > 0) {
+    dmgValForChart = constrain(Math.round(convertTo2026Dollars(dmgVal)), 0, chartLevels);
+  }
+
+  deathVal = isNaN(deathVal) ? 0 : deathVal;
+  injVal = isNaN(injVal) ? 0 : injVal;
+  dmgVal = isNaN(dmgVal) ? 0 : dmgVal;
+  houseVal = isNaN(houseVal) ? 0 : houseVal;
+  missingVal = isNaN(missingVal) ? 0 : missingVal;
+  impactVal = isNaN(impactVal) ? 0 : impactVal;
+
+  deathVal = constrain(Math.round(deathVal), 0, chartLevels);
+  injVal = constrain(Math.round(injVal), 0, chartLevels);
+  houseVal = constrain(Math.round(houseVal), 0, chartLevels);
+  missingVal = constrain(Math.round(missingVal), 0, chartLevels);
+
+  let formattedDamage = "Details not available";
+  if (strDmg && strDmg.trim() !== "") {
+    formattedDamage = strDmg;
+  } else if (dmgVal > 0) {
+    formattedDamage = formatDamageValue(dmgVal);
+  }
+
+  return {
+    index: i,
+    name: data.getString(i, "Name"),
+    country: data.getString(i, "Country") || "",
+    death: deathVal,
+    inj: injVal,
+    dmg: dmgValForChart,
+    house: houseVal,
+    missing: missingVal,
+    impact: impactVal,
+    rawDeath: (strDeath === "" ? "Details not available" : strDeath),
+    rawInj: (strInj === "" ? "Details not available" : strInj),
+    rawDmg: formattedDamage,
+    rawHouse: (strHouse === "" ? "Details not available" : strHouse),
+    rawMissing: (strMissing === "" ? "Details not available" : strMissing),
+    originalDmgValue: dmgVal
+  };
+}
+
+function drawChartPlaceholder() {
+  let cx = width * chartXPercent;
+  let cy = height * chartYPercent;
+  
+  push();
+  fill(240);
+  noStroke();
+  rectMode(CENTER);
+  rect(cx, cy, chartSize + 40, chartSize + 40, 12);
+  pop();
+
+  push();
+  textAlign(CENTER, CENTER);
+  fill(0);
+  textSize(16);
+  text("Impact chart\nnot available", cx, cy);
+  pop();
+}
+
+// ---------- INTERFACCIA (invariata) ----------
+function drawNoDataScreen() {
+  fill(0);
+  textSize(24);
+  textAlign(LEFT, TOP);
+  text("Nessun vulcano selezionato", 50, 50);
+  drawBackButton();
+}
+
+function drawBackButton() {
+  push();
+  stroke(0);
+  strokeWeight(1);
+  noFill();
+  
+  textSize(14);
+  textStyle(BOLD);
+  let textW = textWidth("<   BACK");
+  let rectX = 67 - 6;
+  let rectY = 25 - 4;
+  
+  rect(rectX, rectY, textW + 12, 23, 6);
+  
+  noStroke();
+  fill(0);
+  text("<   BACK", 67, 33);
+  pop();
+}
+
+function writeText() {
+  let margin = 60;
+  
+  fill(0);
+  textAlign(LEFT, TOP);
+  textSize(48);
+  textStyle(BOLD);
+  let y1 = 75;
+  text("THE IMPACT OF ", margin, y1);
+
+  fill(245, 40, 0);
+  let volcanoName = selectedName ? selectedName.toUpperCase() : "UNKNOWN";
+  let y2 = y1 + 55;
+  text(volcanoName, margin, y2);
+
+  fill(0);
+  text(" IN", margin + textWidth(volcanoName), y2);
+}
+
+// ---------- DESCRIZIONE ----------
+function drawVolcanoDescription(typeRaw, y, mo, dy) {
+  let margin = 60;
+  
+  // Spostiamo tutto leggermente in giù per far spazio alla data
+  let dateY = 340; 
+  let titleY = 365; 
+  let descriptionY = 410;
+
+  // INIZIO: il testo è allineato al punto d'inizio della mappa
+  let mapW = 320;
+  // LARGHEZZA: il testo va a capo quando raggiunge il bordo della mappa
+  let textWidthValue = mapW;
+
+  // --- DATA COMPLETA (estesa) ---
+  let dayAvailable = (dy && dy !== "0" && dy !== "");
+  let monthAvailable = (mo && mo !== "0" && mo !== "");
+
+  let dayText = dayAvailable ? dy + getOrdinalSuffix(int(dy)) : "??";
+  let monthText = monthAvailable ? getMonthName(mo) : "???";
+
+  // Anno con BC
+  let yearText = (y < 0) ? Math.abs(y) + " BC" : y.toString();
+
+  let fullDate = `${dayText} ${monthText} ${yearText}`;
+
+
+  push();
+  fill(chartMainColor);
+  textSize(mainTextSize);
+  textStyle(BOLD);
+  textAlign(LEFT, TOP);
+  pop();
+  push();
+  textSize(mainTextSize);
+  textAlign(LEFT, TOP);
+  textStyle(NORMAL);
+
+  // Label rossa
+  fill(0);
+  text("Date: ", margin, dateY);
+
+  // Valore nero
+  fill(chartMainColor);
+  textStyle(BOLD);
+  text(fullDate, margin + textWidth("Date: "), dateY);
+  pop();
+
+  pop();
+
+  // --- TITOLO TIPO VULCANO ---
+  push();
+  fill(chartMainColor);
+  textSize(mainTextSize);
+  textAlign(LEFT, TOP);
+  text(typeRaw, margin, titleY+20);
+  pop();
+
+  // --- DESCRIZIONE ---
+  let description = getVolcanoDescription(typeRaw);
+  push();
+  fill(0);
+  textSize(mainTextSize);
+  textStyle(NORMAL);
+  textLeading(20);
+  textAlign(LEFT, TOP);
+  text(description, margin, descriptionY, textWidthValue);
+  pop();
+}
+
+function getVolcanoDescription(type) {
+  let normalizedType = normalizeType(type);
+  
+  if (normalizedType.includes("caldera")) {
+    return "Large, roughly circular depression formed when a volcano's magma chamber is emptied by eruption or subsurface magma movement, causing the overlying rock roof to collapse.";
+  }
+  else if (normalizedType.includes("cinder cone") || normalizedType.includes("cinder")) {
+    return "Smallest and most common type of volcano, built from accumulation of pyroclastic fragments (cinders, ash, scoria) ejected from a single vent.";
+  }
+  else if (normalizedType.includes("complex volcano") || normalizedType.includes("complex")) {
+    return "Mixed volcanic landform consisting of related volcanic centers with associated lava flows and pyroclastic deposits.";
+  }
+  else if (normalizedType.includes("crater rows") || normalizedType.includes("crater")) {
+    return "Linear alignments of small volcanic cones and craters that form along active fissures, typically composed of spatter and cinder cones.";
+  }
+  else if (normalizedType.includes("fissure vent") || normalizedType.includes("fissure")) {
+    return "Linear volcanic opening through which lava erupts, typically with little explosive activity.";
+  }
+  else if (normalizedType.includes("lava cone")) {
+    return "Small, steep-sided cone built from welded fragments of molten lava called spatter, which adhere together upon impact near a volcanic vent.";
+  }
+  else if (normalizedType.includes("lava dome")) {
+    return "Circular, mound-shaped volcanic protrusion formed by slow extrusion of highly viscous, silica-rich lava that accumulates around the vent.";
+  }
+  else if (normalizedType.includes("maar")) {
+    return "Broad, low-relief volcanic crater formed by phreatomagmatic eruptions when groundwater comes into contact with hot magma.";
+  }
+  else if (normalizedType.includes("pumice cone") || normalizedType.includes("pumice")) {
+    return "Volcanic cone built from accumulation of lapilli-to-block-sized pumice deposits ejected from moderate-intensity explosive eruptions.";
+  }
+  else if (normalizedType.includes("pyroclastic cone") || normalizedType.includes("pyroclastic")) {
+    return "General term for volcanic cones constructed from accumulation of explosively ejected fragmental material around a vent.";
+  }
+  else if (normalizedType.includes("pyroclastic shield")) {
+    return "Uncommon type of shield volcano formed primarily from pyroclastic and highly explosive eruptions rather than fluid lava flows.";
+  }
+  else if (normalizedType.includes("shield volcano") || normalizedType.includes("shield")) {
+    return "Large volcano with low, gently sloping profile (typically 2–10 degrees), formed by eruption of highly fluid, low-viscosity basaltic lava.";
+  }
+  else if (normalizedType.includes("stratovolcano") || normalizedType.includes("strato")) {
+    return "Tall, conical volcano built from many alternating layers of hardened lava, ash, and pyroclastic material deposited during successive eruptions.";
+  }
+  else if (normalizedType.includes("subglacial volcano") || normalizedType.includes("subglacial")) {
+    return "Volcanic landform produced by eruptions beneath glaciers or ice sheets, where magma melts overlying ice and rapidly cools lava.";
+  }
+  else if (normalizedType.includes("submarine volcano") || normalizedType.includes("submarine")) {
+    return "Volcanic eruption occurring beneath the ocean surface, more prevalent than subaerial volcanism.";
+  }
+  else if (normalizedType.includes("tuff cone") || normalizedType.includes("tuff")) {
+    return "Pyroclastic cone composed primarily of consolidated volcanic ash (tuff) formed through phreatomagmatic eruptions.";
+  }
+  else if (normalizedType.includes("volcanic field") || normalizedType.includes("volcanic")) {
+    return "Geographic area containing clusters of up to 100 or more volcanoes, typically 30–80 kilometers in diameter.";
+  }
+  else if (normalizedType.includes("compound")) {
+    return "Compound volcano - a volcanic center that has experienced multiple eruptions from different vents.";
+  }
+  else {
+    return "Volcanic formation with unique geological characteristics.";
+  }
+}
+
+// ---------- YEAR NAVIGATOR (ORIGINALE con "< anno >") ----------
+function drawYearNavigator(year) {
+  let hasMultipleEruptions = eruptions.length > 1;
+  let activeColor = color(chartMainColor);
+  let inactiveColor = color(180);
+  let arrowColor = hasMultipleEruptions ? activeColor : inactiveColor;
+
+  let margin = 82; // Come nel tuo codice originale
+  let y = 230;
+  let navigatorX = margin;
+
+  textSize(48);
+  let leftArrowWidth = textWidth("<");
+  
+  // Calcolo larghezza anno corrente per posizionamento
+  textSize(72);
+  let yearFormatted = formatYear(year);
+  let yearWidth = textWidth(yearFormatted);
+  
+  textSize(48);
+  let rightArrowWidth = textWidth(">");
+
+  // altezza e padding cornice ORIGINALI
+  let spaceBetween = 40;
+  let framePadding = 20; // Originale: 20
+  let frameHeight = 50; // Originale: 50
+
+  textAlign(LEFT, CENTER);
+  fill(0);
+
+  // FRECCIA SINISTRA
+  let leftArrowX = navigatorX;
+  let leftFrameX = leftArrowX - framePadding;
+  let leftFrameY = y - frameHeight/2;
+
+  // FRECCIA SINISTRA: cornice
+  push();
+  stroke(arrowColor);
+  strokeWeight(1);
+  noFill();
+  rect(leftFrameX, leftFrameY, leftArrowWidth + framePadding*2, frameHeight, 10);
+  pop();
+
+  // FRECCIA SINISTRA: disegno "<"
+  push();
+  fill(arrowColor);
+  textSize(48);
+  textStyle(NORMAL);
+  text("<", leftArrowX, y);
+  pop();
+
+  // ANNO (tra le frecce)
+  push();
+  fill(245, 40, 0);
+  textSize(72);
+  let yearX = leftArrowX + leftArrowWidth + spaceBetween;
+  text(yearFormatted, yearX, y);
+  
+  let rightArrowX = yearX + yearWidth + spaceBetween;
+  pop();
+
+  // FRECCIA DESTRA
+  let rightFrameX = rightArrowX - framePadding;
+  let rightFrameY = y - frameHeight/2;
+
+  // FRECCIA DESTRA: cornice
+  push();
+  stroke(arrowColor);
+  strokeWeight(1);
+  noFill();
+  rect(rightFrameX, rightFrameY, rightArrowWidth + framePadding*2, frameHeight, 10);
+  pop();
+
+  // FRECCIA DESTRA: disegno ">"
+  push();
+  fill(arrowColor);
+  textSize(48);
+  textStyle(NORMAL);
+  text(">", rightArrowX, y);
+  pop();
+
+  // COUNTER
+  if (eruptions.length > 0) {
+    push();
+    noStroke();
+    fill(chartMainColor);
+    textSize(mainTextSize);
+    textAlign(LEFT); 
+    
+    let counterY = y + 75;
+    
+    let counterText = (currentIndex + 1) + " / " + eruptions.length;
+    
+    let label = "Eruption count: ";
+    let value = counterText;
+
+    push();
+    textSize(mainTextSize);
+    textAlign(LEFT);
+
+    // Label nera
+    textStyle(NORMAL);
+    fill(0);
+    text(label, margin - 22, counterY);
+
+    // Valore rosso
+    fill(chartMainColor);
+    textStyle(BOLD);
+    text(value, margin - 11.25 + textWidth(label), counterY);
+    pop();
+
+    pop();
+  }
+}
+
+// ---------- LEARN MORE BUTTON (invariato) ----------
+function drawLearnMoreButton() {
+  const buttonWidth = 160;
+  const buttonHeight = 40;
+  const buttonX = width - buttonWidth - 50;
+  const buttonY = 720;
+
   stroke(245, 40, 0);
   strokeWeight(1);
   noFill();
   rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
-  // Icona "i" di informazioni (stesso stile di overview)
   fill(245, 40, 0);
   noStroke();
   
-  // Disegna un cerchio con la "i" dentro
   push();
   translate(buttonX + 25, buttonY + buttonHeight/2);
-  // Cerchio
   stroke(245, 40, 0);
   strokeWeight(1);
   noFill();
   circle(0, 0, 20);
-  // Testo "i"
   fill(245, 40, 0);
   noStroke();
   textSize(16);
@@ -1637,14 +1306,12 @@ function drawLearnMoreButton() {
   text("i", 0, 0);
   pop();
 
-  // Testo "Learn More"
   fill(0);
   noStroke();
   textSize(16);
   textAlign(LEFT, CENTER);
   text("Learn More", buttonX + 50, buttonY + buttonHeight/2);
 
-  // Memorizza l'area per l'interazione
   state.learnMoreButtonArea = {
     x: buttonX,
     y: buttonY,
@@ -1653,101 +1320,157 @@ function drawLearnMoreButton() {
   };
 }
 
-/* FUNZIONE PER CONTROLLARE SE IL MOUSE È SOPRA UN PULSANTE */
-function updateCursor() {
-  let isOverButton = false;
-
-  // Se la transizione è attiva, usa cursore normale
-  if (transitionState.active) {
-    cursor(ARROW);
-    return;
-  }
-
-  // Controlla se il mouse è sopra il Back button
-  if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
-    isOverButton = true;
-  }
-
-  // Controlla se il mouse è sopra il Learn More button
-  if (state.learnMoreButtonArea &&
-      mouseX > state.learnMoreButtonArea.x &&
-      mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
-      mouseY > state.learnMoreButtonArea.y &&
-      mouseY < state.learnMoreButtonArea.y + state.learnMoreButtonArea.height) {
-    isOverButton = true;
-  }
-
-  // Controlla se il mouse è sopra le frecce di navigazione
-  let margin = 82;
-  let y =230;
-  let navigatorX = margin;
-
-  textSize(48);
-  let leftArrowWidth = textWidth("<");
-  let framePadding = 20;
-  let frameHeight = 50;
-  let leftArrowX = navigatorX;
-  let leftFrameX = leftArrowX - framePadding;
-  let leftFrameY = y - frameHeight/2;
-
-  textSize(72);
-  let yearFormatted = formatYear(selectedYear);
-  let yearWidth = textWidth(yearFormatted);
-  let yearX = leftArrowX + leftArrowWidth + 40;
-
-  textSize(48);
-  let rightArrowWidth = textWidth(">");
-  let rightArrowX = yearX + yearWidth + 40;
-  let rightFrameX = rightArrowX - framePadding;
-  let rightFrameY = y - frameHeight/2;
-
-  // Freccia sinistra
-  if (mouseX > leftFrameX &&
-      mouseX < leftFrameX + leftArrowWidth + framePadding*2 &&
-      mouseY > leftFrameY &&
-      mouseY < leftFrameY + frameHeight) {
-    isOverButton = true;
-  }
-
-  // Freccia destra
-  if (mouseX > rightFrameX &&
-      mouseX < rightFrameX + rightArrowWidth + framePadding*2 &&
-      mouseY > rightFrameY &&
-      mouseY < rightFrameY + frameHeight) {
-    isOverButton = true;
-  }
-
-  // Cambia il cursore
-  if (isOverButton) {
-    cursor(HAND);
-  } else {
-    cursor(ARROW);
-  }
+// ---------- ANIMAZIONI (invariate) ----------
+function startAnimation() {
+  isAnimating = true;
+  animationStartTime = millis();
 }
 
-// ---------- FUNZIONI TRANSIZIONE ----------
-
-/**
- * Funzione di easing per transizione fluida
- */
-function easeOutCubic(t) {
-  return 1 - Math.pow(1 - t, 3);
+function getAnimationProgress() {
+  if (!isAnimating) return 1.0;
+  
+  let elapsed = millis() - animationStartTime;
+  let progress = constrain(elapsed / animationDuration, 0, 1);
+  
+  if (progress >= 1.0) {
+    isAnimating = false;
+  }
+  
+  return progress;
 }
 
-/**
- * Avvia la transizione al Learn More
- */
+// ---------- FUNZIONI DI CORREZIONE COORDINATE ORIGINALI ----------
+function fixAllCoordinates(coordStr, isLatitude = true) {
+  if (!coordStr || coordStr === "" || coordStr === "0") {
+    return isLatitude ? 0 : -30;
+  }
+  
+  let str = coordStr.toString().trim();
+  
+  if (!isNaN(parseFloat(str)) && str.indexOf(' ') === -1) {
+    let dotCount = (str.match(/\./g) || []).length;
+    
+    if (dotCount <= 1) {
+      let num = parseFloat(str);
+      
+      if (isLatitude && Math.abs(num) > 90) {
+        return fixDMS(str, isLatitude);
+      }
+      if (!isLatitude && Math.abs(num) > 180) {
+        return fixDMS(str, isLatitude);
+      }
+      
+      return num;
+    }
+  }
+  
+  return fixDMS(str, isLatitude);
+}
+
+function fixDMS(str, isLatitude) {
+  let parts = str.split('.');
+  parts = parts.filter(p => p !== "");
+  
+  if (parts.length === 0) {
+    return isLatitude ? 0 : -30;
+  }
+  
+  let isNegative = false;
+  if (parts[0].startsWith('-')) {
+    isNegative = true;
+    parts[0] = parts[0].substring(1);
+  }
+  
+  if (parts.length >= 3) {
+    let degrees = parseFloat(parts[0]) || 0;
+    let minutes = parseFloat(parts[1]) || 0;
+    let seconds = parseFloat(parts[2]) || 0;
+    
+    let decimal = degrees + minutes/60 + seconds/3600;
+    decimal = isNegative ? -decimal : decimal;
+    
+    return decimal;
+  }
+  
+  if (parts.length === 2) {
+    let degrees = parseFloat(parts[0]) || 0;
+    let minutes = parseFloat(parts[1]) || 0;
+    
+    if (minutes >= 60) {
+      let combined = parseFloat(parts[0] + "." + parts[1]);
+      return isNegative ? -combined : combined;
+    }
+    
+    let decimal = degrees + minutes/60;
+    decimal = isNegative ? -decimal : decimal;
+    
+    return decimal;
+  }
+  
+  if (parts.length === 1) {
+    let num = parseFloat(parts[0]) || 0;
+    
+    if (isLatitude && Math.abs(num) > 90) {
+      if (num > 90 && num < 1000) {
+        let strNum = parts[0];
+        if (strNum.length === 3) {
+          num = parseFloat(strNum.substring(0, 2) + "." + strNum.substring(2));
+        }
+      }
+    }
+    
+    return isNegative ? -num : num;
+  }
+  
+  return isLatitude ? 0 : -30;
+}
+
+function applyKnownFixes(name, lat, lon, country) {
+  if (country && country.includes("Italy")) {
+    if (lat > 47 && lat < 60) {
+      lat = lat - 12;
+      lon = lon - 7;
+    }
+  }
+  
+  if (country && country.includes("Iceland")) {
+    if (lat > 70) {
+      lat = lat - 15;
+    }
+  }
+  
+  if (country && country.includes("Japan")) {
+    if (name === "Fujisan" && lat > 40) {
+      lat = 35.36;
+      lon = 138.73;
+    }
+  }
+  
+  return { lat: lat, lon: lon };
+}
+
+function getUniversalCoordinates(latStr, lonStr, name = "", country = "") {
+  let lat = fixAllCoordinates(latStr, true);
+  let lon = fixAllCoordinates(lonStr, false);
+  
+  let fixed = applyKnownFixes(name, lat, lon, country);
+  
+  if (fixed.lat > 90) fixed.lat = 90;
+  if (fixed.lat < -90) fixed.lat = -90;
+  
+  while (fixed.lon > 180) fixed.lon -= 360;
+  while (fixed.lon < -180) fixed.lon += 360;
+  
+  return fixed;
+}
+
+// ---------- TRANSIZIONE LEARN MORE (APRE NELLA STESSA SCHEDA) ----------
 function startTransitionToLearnMore() {
   const buttonRect = state.learnMoreButtonArea;
   
-  // Calcola punto di partenza (centro del pulsante)
   transitionState.startX = buttonRect.x + buttonRect.width / 2;
   transitionState.startY = buttonRect.y + buttonRect.height / 2;
-  
-  // Raggio iniziale (dimensione del pulsante)
   transitionState.startRadius = Math.max(buttonRect.width, buttonRect.height) / 2;
-  
-  // Raggio target (copre tutto lo schermo)
   transitionState.targetRadius = dist(
     transitionState.startX, 
     transitionState.startY, 
@@ -1755,17 +1478,10 @@ function startTransitionToLearnMore() {
     height/2
   ) + Math.max(width, height) / 2;
   
-  // Attiva la transizione
   transitionState.active = true;
   transitionState.startTime = millis();
-  
-  // Disabilita eventuali altre animazioni durante la transizione
-  isAnimating = false;
 }
 
-/**
- * Aggiorna lo stato della transizione
- */
 function updateTransition() {
   if (!transitionState.active) return;
   
@@ -1774,30 +1490,27 @@ function updateTransition() {
   
   if (progress >= 1) {
     transitionState.active = false;
-    // Apri la pagina Learn More in una nuova scheda
-    window.open("learn_more_detail.html", "_blank");
+    // APRE NELLA STESSA SCHEDA invece che in una nuova
+    window.location.href = "learn_more_detail.html?name=" + encodeURIComponent(selectedName) + 
+                          "&year=" + selectedYear + 
+                          "&number=" + selectedNumber;
   }
 }
 
-/**
- * Disegna la transizione a schermo intero
- */
 function drawTransition() {
   if (!transitionState.active) return;
   
   const elapsed = millis() - transitionState.startTime;
   const progress = constrain(elapsed / transitionState.duration, 0, 1);
-  const easedProgress = easeOutCubic(progress);
   
   const currentRadius = lerp(
     transitionState.startRadius,
     transitionState.targetRadius,
-    easedProgress
+    progress
   );
   
   push();
   
-  // Cerchio rosso che si espande
   fill(chartMainColor);
   noStroke();
   
@@ -1808,7 +1521,6 @@ function drawTransition() {
     currentRadius * 2
   );
   
-  // Bordo per effetto "onda"
   stroke(200, 30, 0, 100);
   strokeWeight(2);
   noFill();
@@ -1820,4 +1532,151 @@ function drawTransition() {
   );
   
   pop();
+}
+
+// ---------- INTERAZIONI (corrette per il navigatore originale) ----------
+function mousePressed() {
+  if (transitionState.active) return;
+
+  // BACK BUTTON
+  if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
+    window.location.href = "overview.html";
+    return;
+  }
+
+  // LEARN MORE BUTTON
+  if (state.learnMoreButtonArea &&
+      mouseX > state.learnMoreButtonArea.x &&
+      mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
+      mouseY > state.learnMoreButtonArea.y &&
+      mouseY < state.learnMoreButtonArea.y + state.learnMoreButtonArea.height) {
+    
+    startTransitionToLearnMore();
+    return;
+  }
+
+  if (eruptions.length <= 1) return;
+
+  // Navigazione anni con dimensioni ORIGINALI
+  let margin = 82;
+  let y = 230;
+  
+  textSize(48);
+  let leftArrowWidth = textWidth("<");
+  let framePadding = 20; // Originale: 20
+  let frameHeight = 50; // Originale: 50
+  let leftFrameX = margin - framePadding;
+  let leftFrameY = y - frameHeight/2;
+
+  textSize(72);
+  let yearWidth = textWidth(formatYear(selectedYear));
+  let yearX = margin + leftArrowWidth + 40;
+
+  textSize(48);
+  let rightArrowWidth = textWidth(">");
+  let rightFrameX = yearX + yearWidth + 40 - framePadding;
+
+  // Freccia sinistra
+  if (mouseX > leftFrameX &&
+      mouseX < leftFrameX + leftArrowWidth + framePadding*2 &&
+      mouseY > leftFrameY &&
+      mouseY < leftFrameY + frameHeight) {
+    if (currentIndex > 0) {
+      currentIndex--;
+    } else {
+      currentIndex = eruptions.length - 1;
+    }
+    updateCurrentEruption();
+    return;
+  }
+
+  // Freccia destra
+  if (mouseX > rightFrameX &&
+      mouseX < rightFrameX + rightArrowWidth + framePadding*2 &&
+      mouseY > leftFrameY &&
+      mouseY < leftFrameY + frameHeight) {
+    if (currentIndex < eruptions.length - 1) {
+      currentIndex++;
+    } else {
+      currentIndex = 0;
+    }
+    updateCurrentEruption();
+    return;
+  }
+}
+
+function updateCurrentEruption() {
+  selectedYear = eruptions[currentIndex].year;
+  selectedNumber = eruptions[currentIndex].number;
+  startAnimation();
+  
+  // Carica nuova immagine se necessario
+  loadVolcanoImageAsync();
+}
+
+function updateCursor() {
+  let isOverButton = false;
+
+  if (transitionState.active) {
+    cursor(ARROW);
+    return;
+  }
+
+  // Back button
+  if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
+    isOverButton = true;
+  }
+
+  // Learn More button
+  if (state.learnMoreButtonArea &&
+      mouseX > state.learnMoreButtonArea.x &&
+      mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
+      mouseY > state.learnMoreButtonArea.y &&
+      mouseY < state.learnMoreButtonArea.y + state.learnMoreButtonArea.height) {
+    isOverButton = true;
+  }
+
+  // Frecce navigazione ORIGINALI
+  if (eruptions.length > 1) {
+    let margin = 82;
+    let y = 230;
+    
+    textSize(48);
+    let leftArrowWidth = textWidth("<");
+    let framePadding = 20;
+    let frameHeight = 50;
+    let leftFrameX = margin - framePadding;
+    let leftFrameY = y - frameHeight/2;
+
+    textSize(72);
+    let yearWidth = textWidth(formatYear(selectedYear));
+    let yearX = margin + leftArrowWidth + 40;
+
+    textSize(48);
+    let rightArrowWidth = textWidth(">");
+    let rightFrameX = yearX + yearWidth + 40 - framePadding;
+
+    // Freccia sinistra
+    if (mouseX > leftFrameX &&
+        mouseX < leftFrameX + leftArrowWidth + framePadding*2 &&
+        mouseY > leftFrameY &&
+        mouseY < leftFrameY + frameHeight) {
+      isOverButton = true;
+    }
+
+    // Freccia destra
+    if (mouseX > rightFrameX &&
+        mouseX < rightFrameX + rightArrowWidth + framePadding*2 &&
+        mouseY > leftFrameY &&
+        mouseY < leftFrameY + frameHeight) {
+      isOverButton = true;
+    }
+  }
+
+  cursor(isOverButton ? HAND : ARROW);
+}
+
+// ---------- RESIZE ----------
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
