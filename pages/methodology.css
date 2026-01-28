@@ -623,3 +623,107 @@ header a:hover {
     }
 }
 
+/* Aggiungi alla fine del file CSS esistente */
+
+/* Stili per il footer HTML (non più p5.js) */
+#html-footer {
+    background-color: #FFFFFF;
+    color: #000000;
+    padding: 80px 40px 40px;
+    border-top: 2px solid #FF2B00;
+    position: relative;
+    z-index: 10;
+    /* NESSUNA regola di display/opacity */
+}
+
+#html-footer.visible {
+    display: block;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 300px 1fr 300px;
+    gap: 60px;
+    font-family: 'Helvetica', Arial, sans-serif;
+}
+
+.footer-column h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #333333;
+    margin-bottom: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.footer-column p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #666666;
+    margin-bottom: 15px;
+}
+
+.footer-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-column ul li {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #666666;
+    margin-bottom: 8px;
+}
+
+.footer-email {
+    color: #FF2B00 !important;
+    text-decoration: none;
+}
+
+.footer-email:hover {
+    text-decoration: underline;
+}
+
+.footer-license {
+    font-size: 12px !important;
+    color: #999999 !important;
+    line-height: 1.4 !important;
+    margin-top: 20px !important;
+}
+
+.footer-logo {
+    font-size: 11px;
+    color: #000000;
+    opacity: 0.7;
+    margin-top: 10px;
+}
+
+/* Animazioni per transizioni smooth */
+.title-transition {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Migliora la gestione dello scroll */
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+#main-content {
+    transition: transform 0.3s ease;
+}

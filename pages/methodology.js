@@ -1,10 +1,9 @@
 /**
- * METHODOLOGY PAGE - TESTO UNICO CON CAMBI DINAMICI
- * Layout simile alla versione originale
- * SCROLL COMPLETO SENZA CONFLITTI
+ * METHODOLOGY PAGE - UNICO FILE JS
+ * Gestisce testo, immagini, bottoni e footer HTML
  */
 
-// Configurazione delle sezioni
+// ===== CONFIGURAZIONE =====
 const sections = [
     {
         id: 1,
@@ -12,6 +11,7 @@ const sections = [
         subtitle: "HOW WE BUILT OUR VISUAL STORY.",
         imageId: "methodology-image-1",
         buttonText: "Explore the dataset",
+        buttonLink: "https://www.ngdc.noaa.gov/hazel/view/hazards/volcano/event-data",
         threshold: 0
     },
     {
@@ -20,6 +20,7 @@ const sections = [
         subtitle: "HOW WE VISUALIZE ERUPTION DATA.",
         imageId: "methodology-image-2",
         buttonText: "Explore all eruptions",
+        buttonLink: "overview.html",
         threshold: 500
     },
     {
@@ -28,10 +29,12 @@ const sections = [
         subtitle: "HOW WE INTERPRET AND PRESENT DATA.",
         imageId: "methodology-image-3",
         buttonText: "Explore the detail graphs",
+        buttonLink: "detail.html",
         threshold: 1400
     }
 ];
 
+// ===== VARIABILI GLOBALI =====
 let currentSectionId = 1;
 let isScrolling = false;
 let isAtFooter = false;
@@ -39,32 +42,113 @@ let textScrollArea = null;
 let mainContent = null;
 let footer = null;
 let scrollHint = null;
-let isPageScrollMode = false; // Nuovo flag per controllare se stiamo scorrendo la pagina
+let isScrollLocked = false;
 
-// Inizializzazione
+// ===== DATI FOOTER HTML =====
+const FOOTER_HTML = `
+<div class="footer-content">
+    <div class="footer-column">
+        <h3>Computer Graphics Studio for Information Design</h3>
+        <p>A.Y. 2025/2026</p>
+        <p>Bachelor's Degree in Communication Design</p>
+        
+        <h3 style="margin-top: 40px;">Project by</h3>
+        <ul>
+            <li>Alice Comini</li>
+            <li>Matilde Curino</li>
+            <li>Greta Franco</li>
+            <li>Carlo Galli</li>
+            <li>Ilaria La Spada</li>
+            <li>Annalisa Testaverde</li>
+        </ul>
+    </div>
+    
+    <div class="footer-column">
+        <p>© CC-BY 4.0 The authors.</p>
+        <p class="footer-license">
+            Except where otherwise noted, all content on this website is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). You are free to share and adapt the material, including for commercial use, provided appropriate credit is given.
+        </p>
+        
+        <p>For questions about attribution or reuse, contact us at:</p>
+        <ul>
+            <li><a href="mailto:alice.comini@mail.polimi.it" class="footer-email">alice.comini@mail.polimi.it</a></li>
+            <li><a href="mailto:matilde.curino@mail.polimi.it" class="footer-email">matilde.curino@mail.polimi.it</a></li>
+            <li><a href="mailto:greta.franco@mail.polimi.it" class="footer-email">greta.franco@mail.polimi.it</a></li>
+            <li><a href="mailto:carlo11.galli@mail.polimi.it" class="footer-email">carlo11.galli@mail.polimi.it</a></li>
+            <li><a href="mailto:ilaria.laspada@mail.polimi.it" class="footer-email">ilaria.laspada@mail.polimi.it</a></li>
+            <li><a href="mailto:annalisa.testaverde@mail.polimi.it" class="footer-email">annalisa.testaverde@mail.polimi.it</a></li>
+        </ul>
+    </div>
+    
+    <div class="footer-column">
+        <h3>Faculty</h3>
+        <ul>
+            <li>Michele Mauri</li>
+            <li>Davide Conficconi</li>
+        </ul>
+        
+        <h3 style="margin-top: 40px;">Teaching Assistants</h3>
+        <ul>
+            <li>Alessandra Facchin</li>
+            <li>Alessandro Nazzari</li>
+        </ul>
+        
+        <div class="footer-logo">
+            DensityDesign Lab<br>
+            NECST
+        </div>
+    </div>
+</div>
+`;
+
+// ===== INIZIALIZZAZIONE =====
 document.addEventListener('DOMContentLoaded', function() {
-    // Configura gli event listener
+    initializePage();
+});
+
+function initializePage() {
+    // Salva riferimenti agli elementi
+    textScrollArea = document.querySelector('.text-content');
+    mainContent = document.getElementById('main-content');
+    scrollHint = document.getElementById('text-scroll-hint');
+    
+    // Crea il footer HTML
+    createHTMLFooter();
+    
+    // Imposta i riferimenti dopo la creazione
+    footer = document.getElementById('html-footer');
+    
+    // Configura event listener
     setupEventListeners();
+    
+    // Calcola soglie scroll
+    calculateScrollThresholds();
     
     // Configura gestione errori immagine
     setupImageErrorHandler();
     
-    // Calcola le soglie in base all'altezza reale
-    calculateScrollThresholds();
-    
-    // Salva riferimenti agli elementi
-    textScrollArea = document.querySelector('.text-content');
-    mainContent = document.getElementById('main-content');
-    footer = document.getElementById('main-footer');
-    scrollHint = document.getElementById('text-scroll-hint');
-    
     // Inizializza la freccia di scroll
     updateScrollHint();
-});
+    
+    console.log("Pagina inizializzata. Footer creato.");
+}
 
-// Configura tutti gli event listener
+// ===== GESTIONE FOOTER HTML =====
+function createHTMLFooter() {
+    const footerContainer = document.getElementById('footer-container');
+    if (!footerContainer) return;
+    
+    const footerDiv = document.createElement('div');
+    footerDiv.id = 'html-footer';
+    footerDiv.className = 'footer';
+    footerDiv.innerHTML = FOOTER_HTML;
+    
+    footerContainer.appendChild(footerDiv);
+}
+
+// ===== EVENT LISTENER =====
 function setupEventListeners() {
-    // Scroll del mouse su TUTTA LA PAGINA
+    // Scroll del mouse
     document.addEventListener('wheel', handleGlobalWheel, { passive: false });
     
     // Click sulla freccia di scroll
@@ -83,97 +167,66 @@ function setupEventListeners() {
     });
     
     // Bottone Learn More
-    const learnMoreBtn = document.getElementById('learn-more-btn');
-    if (learnMoreBtn) {
-        learnMoreBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            handleLearnMoreClick(currentSectionId);
-        });
-    }
+    setupLearnMoreButton();
     
-    // Tasti freccia per scroll
+    // Tasti freccia
     document.addEventListener('keydown', handleKeyDown);
     
-    // Ricalcola soglie al resize
+    // Resize
     window.addEventListener('resize', calculateScrollThresholds);
     
-    // Controlla la posizione dello scroll
+    // Scroll per controllare footer
     window.addEventListener('scroll', checkScrollPosition);
 }
 
-// Gestione click sulla freccia di scroll
-function handleScrollHintClick() {
-    if (isAtFooter) {
-        // Dal footer torna su
-        scrollBackFromFooter();
-    } else {
-        // Dal testo, scendi di una sezione o vai al footer
-        const scrollTop = textScrollArea.scrollTop;
-        const scrollHeight = textScrollArea.scrollHeight - textScrollArea.clientHeight;
-        const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-        
-        if (scrollPercentage >= 95) {
-            // Fine del testo, vai al footer
-            goToFooter();
-        } else {
-            // Scendi nel testo
-            scrollTextContent(400);
+function setupLearnMoreButton() {
+    const button = document.getElementById('learn-more-btn');
+    if (!button) return;
+    
+    // Rimuovi eventuali listener precedenti
+    const newButton = button.cloneNode(true);
+    button.parentNode.replaceChild(newButton, button);
+    
+    // Aggiungi nuovo listener
+    newButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        const section = sections.find(s => s.id === currentSectionId);
+        if (section) {
+            if (section.buttonLink.includes('http')) {
+                window.open(section.buttonLink, '_blank');
+            } else {
+                window.location.href = section.buttonLink;
+            }
         }
-    }
+    });
 }
 
-// Controlla la posizione dello scroll
-function checkScrollPosition() {
-    if (!footer || !textScrollArea) return;
-    
-    const footerRect = footer.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-    
-    // Verifica se il footer è visibile
-    const isFooterVisible = footerRect.top < windowHeight && footerRect.bottom > 0;
-    
-    if (isFooterVisible && !isAtFooter) {
-        // Siamo entrati nel footer
-        isAtFooter = true;
-        isPageScrollMode = true; // Passiamo allo scroll della pagina
-        updateScrollHint();
-    } else if (!isFooterVisible && isAtFooter) {
-        // Siamo usciti dal footer
-        isAtFooter = false;
-        isPageScrollMode = false; // Torniamo allo scroll del testo
-        updateScrollHint();
-    }
-}
-
-// Gestione scroll del mouse su tutta la pagina - VERSIONE SEMPLIFICATA
+// ===== GESTIONE SCROLL =====
 function handleGlobalWheel(e) {
+    if (isScrollLocked) return;
+    
     e.preventDefault();
     
-    if (!textScrollArea || !footer) return;
+    if (!textScrollArea) return;
     
     const delta = e.deltaY;
-    
-    // Se stiamo scorrendo la pagina (footer visibile)
-    if (isPageScrollMode || isAtFooter) {
-        // Controlla se siamo tornati completamente su
-        if (delta < 0 && window.scrollY <= mainContent.offsetTop + mainContent.offsetHeight) {
-            // Siamo tornati al contenuto principale
-            isPageScrollMode = false;
-            isAtFooter = false;
-            updateScrollHint();
-        }
-        // Altrimenti lascia che la pagina scroli normalmente
-        return;
-    }
-    
-    // Se siamo nel testo
     const scrollTop = textScrollArea.scrollTop;
     const scrollHeight = textScrollArea.scrollHeight - textScrollArea.clientHeight;
     const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
     
-    // Scrolling verso il basso
-    if (delta > 0) {
-        if (scrollPercentage >= 95) {
+    // Se siamo nel footer
+    if (isAtFooter) {
+        // Scroll verso l'alto dal footer
+        if (delta < 0 && window.scrollY <= mainContent.offsetTop + mainContent.offsetHeight) {
+            scrollBackFromFooter();
+        }
+        // Scroll verso il basso - permetti scroll normale della pagina
+        return;
+    }
+    
+    // Se siamo nel testo
+    if (delta > 0) { // SCROLL VERSO IL BASSO
+        if (scrollPercentage >= 98) {
             // Fine del testo, vai al footer
             goToFooter();
         } else {
@@ -182,50 +235,102 @@ function handleGlobalWheel(e) {
             detectCurrentSection(textScrollArea.scrollTop);
             updateScrollHint();
         }
-    }
-    // Scrolling verso l'alto
-    else if (delta < 0) {
-        // Scrolla il testo verso l'alto
+    } else if (delta < 0) { // SCROLL VERSO L'ALTO
         textScrollArea.scrollTop += delta * 0.5;
         detectCurrentSection(textScrollArea.scrollTop);
         updateScrollHint();
     }
 }
 
-// Vai al footer (fine del testo)
-function goToFooter() {
-    isAtFooter = true;
-    isPageScrollMode = true;
+function checkScrollPosition() {
+    if (!textScrollArea || !footer) return;
     
-    // Scorri la pagina per mostrare il footer
-    if (footer) {
-        footer.scrollIntoView({ behavior: 'smooth' });
+    const footerRect = footer.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    
+    // Se il footer è visibile (nella viewport)
+    if (footerRect.top < windowHeight && footerRect.bottom > 0) {
+        if (!isAtFooter) {
+            isAtFooter = true;
+            footer.classList.add('visible');
+            updateScrollHint();
+        }
+    } else {
+        if (isAtFooter) {
+            isAtFooter = false;
+            footer.classList.remove('visible');
+            updateScrollHint();
+        }
     }
-    
-    updateScrollHint();
 }
 
-// Torna indietro dal footer
-function scrollBackFromFooter() {
-    isAtFooter = false;
-    isPageScrollMode = false;
-    
-    // Torna al contenuto principale
-    if (mainContent) {
-        mainContent.scrollIntoView({ behavior: 'smooth' });
-    }
-    
-    // Imposta lo scroll del testo in fondo
-    setTimeout(() => {
-        if (textScrollArea) {
-            textScrollArea.scrollTop = textScrollArea.scrollHeight - textScrollArea.clientHeight;
-            detectCurrentSection(textScrollArea.scrollTop);
+// ===== FUNZIONI SCROLL =====
+function handleScrollHintClick() {
+    if (isAtFooter) {
+        scrollBackFromFooter();
+    } else {
+        const scrollTop = textScrollArea.scrollTop;
+        const scrollHeight = textScrollArea.scrollHeight - textScrollArea.clientHeight;
+        const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+        
+        if (scrollPercentage >= 95) {
+            goToFooter();
+        } else {
+            scrollTextContent(400);
         }
-        updateScrollHint();
+    }
+}
+
+function goToFooter() {
+    if (isScrollLocked || !footer) return;
+    
+    isScrollLocked = true;
+    isAtFooter = true;
+    
+    // Mostra il footer
+    footer.classList.add('visible');
+    
+    // Scorri fino al footer
+    footer.scrollIntoView({ behavior: 'smooth' });
+    
+    updateScrollHint();
+    
+    // Sblocca dopo 500ms
+    setTimeout(() => {
+        isScrollLocked = false;
     }, 500);
 }
 
-// Calcola le soglie di scroll in base all'altezza reale
+function scrollBackFromFooter() {
+    if (isScrollLocked || !textScrollArea) return;
+    
+    isScrollLocked = true;
+    isAtFooter = false;
+    
+    // Nascondi il footer
+    footer.classList.remove('visible');
+    
+    // Torna al contenuto principale
+    mainContent.scrollIntoView({ behavior: 'smooth' });
+    
+    // Imposta scroll del testo in fondo
+    setTimeout(() => {
+        textScrollArea.scrollTop = textScrollArea.scrollHeight - textScrollArea.clientHeight;
+        detectCurrentSection(textScrollArea.scrollTop);
+        updateScrollHint();
+        isScrollLocked = false;
+    }, 500);
+}
+
+function scrollTextContent(pixels) {
+    if (!textScrollArea || isAtFooter) return;
+    
+    textScrollArea.scrollTop += pixels;
+    detectCurrentSection(textScrollArea.scrollTop);
+    updateScrollHint();
+}
+
+// ===== GESTIONE SEZIONI =====
 function calculateScrollThresholds() {
     const textSections = document.querySelectorAll('.text-section');
     
@@ -235,11 +340,9 @@ function calculateScrollThresholds() {
     }
 }
 
-// Rileva la sezione corrente in base allo scroll
 function detectCurrentSection(scrollTop) {
     let newSectionId = currentSectionId;
     
-    // Trova la sezione attiva in base alle soglie
     for (let i = sections.length - 1; i >= 0; i--) {
         if (scrollTop >= sections[i].threshold) {
             newSectionId = sections[i].id;
@@ -247,99 +350,98 @@ function detectCurrentSection(scrollTop) {
         }
     }
     
-    // Se la sezione è cambiata, aggiorna
     if (newSectionId !== currentSectionId) {
         updateCurrentSection(newSectionId);
     }
 }
 
-// Aggiorna la sezione corrente
 function updateCurrentSection(sectionId) {
     currentSectionId = sectionId;
     const section = sections.find(s => s.id === sectionId);
     
     if (!section) return;
     
-    // Aggiorna titolo e sottotitolo con animazione
+    // Aggiorna titolo
     updateTitle(section.title, section.subtitle);
     
     // Aggiorna immagine
     updateImage(section.imageId);
     
     // Aggiorna bottone
-    updateButton(section.buttonText);
+    updateButton(section.buttonText, section.buttonLink);
     
     // Aggiorna indicatori
     updateIndicators(sectionId);
 }
 
-// Aggiorna titolo con animazione
 function updateTitle(title, subtitle) {
     const titleElement = document.getElementById('dynamic-title');
     const subtitleElement = document.getElementById('dynamic-subtitle');
     
-    // Aggiungi classe di animazione
+    if (!titleElement || !subtitleElement) return;
+    
     titleElement.classList.add('title-transition');
     subtitleElement.classList.add('title-transition');
     
-    // Aggiorna testo
     titleElement.textContent = title;
     subtitleElement.textContent = subtitle;
     
-    // Rimuovi classe dopo animazione
     setTimeout(() => {
         titleElement.classList.remove('title-transition');
         subtitleElement.classList.remove('title-transition');
     }, 400);
 }
 
-// Aggiorna immagine visibile
 function updateImage(imageId) {
-    // Rimuovi active da tutte le immagini
     document.querySelectorAll('.methodology-image').forEach(img => {
         img.classList.remove('active');
     });
     
-    // Aggiungi active all'immagine corrente
     const currentImage = document.getElementById(imageId);
     if (currentImage) {
         currentImage.classList.add('active');
     }
 }
 
-// Aggiorna testo del bottone
-function updateButton(buttonText) {
+function updateButton(buttonText, buttonLink) {
     const button = document.getElementById('learn-more-btn');
-    if (button) {
-        button.textContent = buttonText;
-    }
+    if (!button) return;
+    
+    button.textContent = buttonText;
+    
+    // Ricrea il listener con il nuovo link
+    const newButton = button.cloneNode(true);
+    button.parentNode.replaceChild(newButton, button);
+    
+    newButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (buttonLink.includes('http')) {
+            window.open(buttonLink, '_blank');
+        } else {
+            window.location.href = buttonLink;
+        }
+    });
 }
 
-// Aggiorna indicatori (pallini)
 function updateIndicators(sectionId) {
-    // Rimuovi active da tutti i pallini
     document.querySelectorAll('.screen-dot').forEach(dot => {
         dot.classList.remove('active');
     });
     
-    // Aggiungi active al pallino corrente
     const currentDot = document.querySelector(`.screen-dot[data-section="${sectionId}"]`);
     if (currentDot) {
         currentDot.classList.add('active');
     }
 }
 
-// Aggiorna visibilità e testo della freccia di scroll
 function updateScrollHint() {
     if (!scrollHint) return;
     
     if (isAtFooter) {
-        // Quando siamo al footer, freccia verso l'alto
         scrollHint.textContent = "V";
         scrollHint.classList.add('up-arrow');
         scrollHint.classList.remove('hidden');
     } else {
-        // Quando siamo nel testo
         if (!textScrollArea) return;
         
         const scrollTop = textScrollArea.scrollTop;
@@ -349,22 +451,11 @@ function updateScrollHint() {
         scrollHint.textContent = "V";
         scrollHint.classList.remove('up-arrow');
         scrollHint.classList.remove('hidden');
-        
-        // Opacità ridotta se siamo alla fine del testo
         scrollHint.style.opacity = scrollPercentage >= 95 ? "0.7" : "1";
     }
 }
 
-// Scroll del contenuto testo
-function scrollTextContent(pixels) {
-    if (!textScrollArea || isAtFooter) return;
-    
-    textScrollArea.scrollTop += pixels;
-    detectCurrentSection(textScrollArea.scrollTop);
-    updateScrollHint();
-}
-
-// Scrolla a una sezione specifica
+// ===== FUNZIONI UTILITY =====
 function scrollToSection(sectionId) {
     if (!textScrollArea || isAtFooter) return;
     
@@ -372,12 +463,9 @@ function scrollToSection(sectionId) {
     if (!section) return;
     
     smoothScrollTo(textScrollArea, section.threshold, 600);
-    
-    // Aggiorna sezione corrente
     updateCurrentSection(sectionId);
 }
 
-// Animazione scroll fluida
 function smoothScrollTo(element, to, duration) {
     if (duration <= 0) return;
     
@@ -399,7 +487,6 @@ function smoothScrollTo(element, to, duration) {
     animateScroll();
 }
 
-// Funzione di easing
 function easeInOutQuad(t, b, c, d) {
     t /= d / 2;
     if (t < 1) return c / 2 * t * t + b;
@@ -407,63 +494,29 @@ function easeInOutQuad(t, b, c, d) {
     return -c / 2 * (t * (t - 2) - 1) + b;
 }
 
-// Gestione click bottone Learn More
-function handleLearnMoreClick(sectionId) {
-    switch(sectionId) {
-        case 1:
-            alert('Learn more about our design methodology and data organization process.');
-            break;
-        case 2:
-            alert('Explore the detailed overview visualization and impact categories.');
-            break;
-        case 3:
-            alert('Discover our data interpretation principles and visualization approach.');
-            break;
-        default:
-            alert('Learn more about our methodology and visualization approach.');
-    }
-}
-
-// Gestione tasti freccia
 function handleKeyDown(e) {
     switch(e.key) {
         case 'ArrowDown':
         case 'PageDown':
             e.preventDefault();
-            if (isAtFooter) {
-                // Rimani al footer
-                return;
-            } else {
-                scrollTextContent(100);
-            }
+            if (!isAtFooter) scrollTextContent(100);
             break;
             
         case 'ArrowUp':
         case 'PageUp':
             e.preventDefault();
-            if (isAtFooter) {
-                scrollBackFromFooter();
-            } else {
-                scrollTextContent(-100);
-            }
+            if (isAtFooter) scrollBackFromFooter();
+            else scrollTextContent(-100);
             break;
             
         case 'ArrowRight':
             e.preventDefault();
-            if (!isAtFooter) {
-                if (currentSectionId < 3) {
-                    scrollToSection(currentSectionId + 1);
-                }
-            }
+            if (!isAtFooter && currentSectionId < 3) scrollToSection(currentSectionId + 1);
             break;
             
         case 'ArrowLeft':
             e.preventDefault();
-            if (!isAtFooter) {
-                if (currentSectionId > 1) {
-                    scrollToSection(currentSectionId - 1);
-                }
-            }
+            if (!isAtFooter && currentSectionId > 1) scrollToSection(currentSectionId - 1);
             break;
             
         case '1':
@@ -480,33 +533,22 @@ function handleKeyDown(e) {
             
         case 'End':
             e.preventDefault();
-            if (!isAtFooter) {
-                goToFooter();
-            }
+            if (!isAtFooter) goToFooter();
             break;
             
         case 'Home':
             e.preventDefault();
-            if (isAtFooter) {
-                scrollBackFromFooter();
-            } else {
-                scrollToSection(1);
-            }
+            if (isAtFooter) scrollBackFromFooter();
+            else scrollToSection(1);
             break;
     }
 }
 
-// Configura gestione errori immagine
 function setupImageErrorHandler() {
     const images = document.querySelectorAll('.methodology-image');
     images.forEach(image => {
         image.onerror = function() {
-            const placeholders = [
-                'Methodology Overview',
-                'Overview Visualization', 
-                'Data Interpretation'
-            ];
-            
+            const placeholders = ['Methodology Overview', 'Overview Visualization', 'Data Interpretation'];
             const index = parseInt(this.id.split('-')[3]) - 1;
             const text = placeholders[index] || 'Methodology Image';
             
@@ -516,7 +558,7 @@ function setupImageErrorHandler() {
     });
 }
 
-// Esporta funzioni utili
+// ===== ESPORTA FUNZIONI =====
 window.methodology = {
     scrollToSection,
     currentSection: () => currentSectionId,
