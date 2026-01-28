@@ -29,7 +29,7 @@ const sections = [
         subtitle: "HOW WE INTERPRET AND PRESENT DATA.",
         imageId: "methodology-image-3",
         buttonText: "Explore the detail graphs",
-        buttonLink: "detail.html",
+        buttonLink: "learn_more_detail.html",
         threshold: 1400
     }
 ];
