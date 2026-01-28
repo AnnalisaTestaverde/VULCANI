@@ -1169,7 +1169,7 @@ function drawSearchButton() {
     // Adatta la larghezza in base allo spazio disponibile
     const buttonWidth = min(190, availableSpace - 40);
     const buttonHeight = 40;
-    const buttonX = startButtonRight + 20;
+    const buttonX = startButtonRight + 10;
     const buttonY = CONFIG.layout.startButtonY;
 
     // Rettangolo del bottone con hover effect
