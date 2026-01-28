@@ -73,7 +73,7 @@
         #scroll-hint {
             position: absolute;
             bottom: -70px;
-            left: 50%;
+            left: 47%;
             transform: translateX(-50%);
             color: #000000 !important;
             font-size: 40px !important;
@@ -690,7 +690,7 @@
             const buttonY = CONFIG.layout.startButtonY;
             
             // Bordo NERO (modificato)
-            stroke(CONFIG.colors.text); // NERO
+            stroke(CONFIG.colors.infoBox); // NERO
             strokeWeight(1);
             noFill();
             rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
@@ -698,7 +698,7 @@
             // Icona con "×" - SENZA CERCHIO ATTORNO
             push();
             translate(buttonX + 25, buttonY + buttonHeight/2);
-            fill(CONFIG.colors.text); // NERO (testo della X)
+            fill(CONFIG.colors.infoBox); // NERO (testo della X)
             noStroke(); // NESSUNO STROKE
             textSize(20); // Leggermente più grande
             textStyle(BOLD);
@@ -707,7 +707,7 @@
             pop();
 
             // Testo "Back" in NERO
-            fill(CONFIG.colors.text); // NERO
+            fill(CONFIG.colors.infoBox); // NERO
             noStroke();
             textSize(CONFIG.layout.labelFontSize);
             textStyle(BOLD);
