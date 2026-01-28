@@ -1,4 +1,4 @@
-/* ===== RESET E STILI BASE ===== */
+/* RESET E STILI BASE */
 * {
     margin: 0;
     padding: 0;
@@ -14,19 +14,18 @@ html, body {
     min-height: 100vh;
 }
 
-/* scroll fluido */
+/* Aggiunta scroll fluido */
 html {
     scroll-behavior: smooth;
 }
 
-/* 1. SFONDO BIANCO GENERALE E TESTO NERO DI BASE */
 body {
     color: #000000;
     background-color: #ffffff;
     overflow-x: hidden;
 }
 
-/* ===== HEADER E NAVIGATION ===== */
+/* HEADER - per impostazione nav dinamica */
 header {
     width: 100%;
     padding: 25px 40px;
@@ -47,7 +46,7 @@ header {
     z-index: 1001;
 }
 
-/* Navigation Desktop */
+/* NAVIGATION */
 .nav-desktop {
     display: flex;
     gap: 40px;
@@ -61,6 +60,7 @@ header {
     position: relative;
 }
 
+/* Riferimento alla categoria "explore" */
 .nav-desktop a.explore {
     color: #FF2B00;
     font-weight: bold;
@@ -70,105 +70,7 @@ header {
     color: #FF2B00;
 }
 
-/* Hamburger Menu Button (Mobile) */
-.hamburger-btn {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 44px;
-    height: 44px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 10px;
-    z-index: 1001;
-    position: relative;
-}
-
-.hamburger-btn span {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background-color: #000;
-    transition: all 0.3s ease;
-    position: absolute;
-    left: 11px;
-}
-
-.hamburger-btn span:nth-child(1) { top: 15px; }
-.hamburger-btn span:nth-child(2) { top: 21px; }
-.hamburger-btn span:nth-child(3) { top: 27px; }
-
-/* Hamburger Animation to X */
-.hamburger-btn.active span:nth-child(1) {
-    transform: rotate(45deg);
-    top: 21px;
-}
-
-.hamburger-btn.active span:nth-child(2) {
-    opacity: 0;
-    transform: translateX(-10px);
-}
-
-.hamburger-btn.active span:nth-child(3) {
-    transform: rotate(-45deg);
-    top: 21px;
-}
-
-/* Mobile Navigation Overlay */
-.nav-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background-color: rgba(255, 255, 255, 0.98);
-    z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.nav-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.nav-mobile {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 25px;
-    width: 100%;
-    padding: 20px;
-}
-
-.nav-mobile a {
-    text-decoration: none;
-    color: #000000;
-    font-size: 22px;
-    font-weight: 500;
-    padding: 10px 20px;
-    transition: all 0.3s ease;
-    text-align: center;
-}
-
-.nav-mobile a.explore {
-    color: #FF2B00;
-}
-
-.nav-mobile a:hover {
-    color: #FF2B00;
-    transform: translateY(-2px);
-}
-
-/* ===== PAGE CONTENT ===== */
+/* CONTENT PAGE - struttura contenuto pagina */
 .page-content {
     padding-top: 90px;
     position: relative;
@@ -176,7 +78,7 @@ header {
     min-height: calc(100vh - 320px);
 }
 
-/* ===== HERO SECTION ===== */
+/* HERO */
 .hero {
     height: 100vh;
     width: 100%;
@@ -203,7 +105,7 @@ header {
     padding: 0 20px;
 }
 
-/* NUOVA FRECCIA PER SCORRIMENTO */
+/* FRECCIA HINT - impostazione freccia */
 .scroll-hint {
     position: absolute;
     bottom: 60px;
@@ -227,6 +129,7 @@ header {
     border: none;
 }
 
+/* FRECCIA HINT - contenitore freccia */
 .scroll-hint span {
     display: block;
     font-size: 40px;
@@ -246,7 +149,7 @@ header {
     }
 }
 
-/* ===== CONTENT SECTION ===== */
+/* CONTENT SECTION */
 .content {
     padding: 200px 200px;
     text-align: left;
@@ -279,7 +182,7 @@ header {
 .map-button {
     display: inline-block;
     margin-top: 40px;
-    padding: 12px 30px; /* Padding leggermente aumentato */
+    padding: 12px 30px;
     border-radius: 5px; /* Cambiato da 20px a 0 per angoli squadrati */
     background-color: transparent;
     border: 2px solid #FF2B00;
@@ -299,11 +202,11 @@ header {
     box-shadow: 0 4px 8px rgba(255, 43, 0, 0.2);
 }
 
-/* ===== FOOTER (IDENTICO ALLA PAGINA TEAM) ===== */
+/* FOOTER */
 footer {
     width: 100%;
     border-top: 2px solid #FF2B00;
-    padding: 80px 0px 70px 230px;
+    padding: 80px 5px 70px 265px;
     margin: 0;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -325,7 +228,7 @@ footer {
     min-height: 250px;
 }
 
-/* COLONNA 1: Studio, Anno e Corso + Logo PoliMi */
+/* COLONNA 1: Studio, Anno e Corso */
 .studio-header {
     margin-bottom: 20px;
 }
@@ -359,7 +262,7 @@ footer {
     color: #FF2B00;
 }
 
-/* LOGO POLIMI */
+/* Logo POLIMI */
 .polimi-logo-container {
     margin-top: 2px;
     display: flex;
@@ -462,6 +365,7 @@ footer {
     font-size: 13px;
 }
 
+/* Contatti */
 .contact-email {
     color: #FF2B00;
     font-weight: 500;
@@ -473,7 +377,7 @@ footer {
     height: 20px;
 }
 
-/* COLONNA 3: Faculty, TAs e Loghi DensityDesign/NECST */
+/* COLONNA 3: Insegnanti ed assistenti */
 .faculty-section {
     margin-bottom: 20px;
 }
@@ -520,7 +424,7 @@ footer {
     color: #444;
 }
 
-/* LOGHI DensityDesign e NECST */
+/* Loghi DensityDesign e NECST */
 .logos-container {
     display: flex;
     flex-direction: column;

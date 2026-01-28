@@ -22,7 +22,8 @@ let selectedNumber = 0;
 let currentIndex = 0;
 
 let state = {
-  learnMoreButtonArea: null
+  learnMoreButtonArea: null,
+  navLinks: null
 };
 
 // Variabili per animazione
@@ -49,7 +50,7 @@ let currentVolcanoImage = null;
 let imageCache = {};
 let imagesLoaded = false;
 
-// Variabili per le immagini vulcano (originali)
+// Variabili per le immagini vulcano
 let stratoImg, calderaImg, complexImg, cinderImg, compoundImg, craterImg, fissureImg;
 let lava_coneImg, lava_domeImg, maarImg, pumiceImg, pyroclastic_coneImg, pyroclastic_shieldImg;
 let shieldImg, subglacialImg, submarineImg, tuffImg, volcanic_fieldImg;
@@ -290,6 +291,7 @@ function draw() {
     }
     drawBackButton();
     drawLearnMoreButton();
+    drawNavBar();
     writeText();
     drawTransition();
   } else {
@@ -308,12 +310,13 @@ function drawFullContentOptimized() {
     drawVolcanoTypeBackgroundOptimized(selected.type);
   }
   
-  // Mappa ORIGINALE
+  // Mappa
   drawMap(selected.lat, selected.lon, selected.country);
   
   // Interfaccia
   drawBackButton();
   drawLearnMoreButton();
+  drawNavBar();
   writeText();
   drawYearNavigator(selected.year);
   drawVolcanoDescription(selected.type, selected.year, selected.mo, selected.dy);
@@ -326,6 +329,94 @@ function drawFullContentOptimized() {
   } else {
     drawChartPlaceholder();
   }
+}
+
+// ---------- NAVBAR ----------
+function drawNavBar() {
+  push();
+  
+  // Barra di navigazione fissa in alto
+  let navHeight = 70;
+  let navY = 0;
+  
+  // Sfondo della navbar
+  fill(255);
+  noStroke();
+  rect(0, navY, width, navHeight);
+  
+  // Logo
+  fill(0);
+  textSize(15);
+  textFont("Helvetica");
+  textStyle(BOLD);
+  textAlign(LEFT, CENTER);
+  text("Significant Volcanic Eruptions", 40, navHeight/2);
+  
+  // Links di navigazione
+  let navLinks = [
+    { name: "Homepage", href: "../index.html", x: 0 },
+    { name: "Team", href: "team.html", x: 0 },
+    { name: "Methodology", href: "methodology.html", x: 0 },
+    { name: "Explore", href: "overview.html", x: 0, isExplore: true }
+  ];
+  
+  // Calcola posizione dei link (allineati a destra)
+  let totalLinksWidth = 0;
+  let linkSpacing = 40;
+  let linkFontSize = 15;
+  
+  textSize(linkFontSize);
+  textStyle(NORMAL);
+  
+  // Calcola larghezza totale
+  for (let link of navLinks) {
+    link.width = textWidth(link.name);
+    totalLinksWidth += link.width;
+  }
+  totalLinksWidth += (navLinks.length - 1) * linkSpacing;
+  
+  // Posiziona i links
+  let startX = width - totalLinksWidth - 40;
+  let currentX = startX;
+  
+  for (let i = 0; i < navLinks.length; i++) {
+    let link = navLinks[i];
+    link.x = currentX;
+    link.y = navHeight/2;
+    
+    // Disegna link
+    if (link.isExplore) {
+      fill("#FF2B00");
+      textStyle(BOLD);
+    } else {
+      fill(0);
+      textStyle(NORMAL);
+    }
+    
+    text(link.name, link.x, link.y);
+    
+    // Controlla hover
+    let textW = link.width;
+    let textH = 20;
+    let textX = link.x;
+    let textY = link.y - textH/2;
+    
+    if (mouseX > textX && mouseX < textX + textW && 
+        mouseY > textY && mouseY < textY + textH) {
+      cursor(HAND);
+      if (!link.isExplore) {
+        fill("#FF2B00");
+        text(link.name, link.x, link.y);
+      }
+    }
+    
+    currentX += link.width + linkSpacing;
+  }
+  
+  // Salva i link per l'interazione
+  state.navLinks = navLinks;
+  
+  pop();
 }
 
 // ---------- FUNZIONI VISIVE OTTIMIZZATE ----------
@@ -491,7 +582,7 @@ function findDataRowIndexFast() {
   return -1;
 }
 
-// ---------- FUNZIONI DEL GRAFICO (COMPLETE) ----------
+// ---------- FUNZIONI DEL GRAFICO ----------
 function getDetailText(value, descCode, type, chartData = null) {
   // Se il valore numerico esiste, restituiamo quello
   if (value !== "" && value !== 0 && !isNaN(value)) {
@@ -854,7 +945,7 @@ function drawArcSegment(r1, r2, start, end) {
   endShape(CLOSE);
 }
 
-// ---------- FUNZIONI UTILITY (invariate) ----------
+// ---------- FUNZIONI UTILITY ----------
 function getQueryParam(param) {
   let urlParams = new URLSearchParams(window.location.search);
   return urlParams.get(param);
@@ -983,7 +1074,7 @@ function drawChartPlaceholder() {
   pop();
 }
 
-// ---------- INTERFACCIA (invariata) ----------
+// ---------- INTERFACCIA ----------
 function drawNoDataScreen() {
   fill(0);
   textSize(24);
@@ -1045,7 +1136,7 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   // LARGHEZZA: il testo va a capo quando raggiunge il bordo della mappa
   let textWidthValue = mapW;
 
-  // --- DATA COMPLETA (estesa) ---
+  // --- DATA COMPLETA ---
   let dayAvailable = (dy && dy !== "0" && dy !== "");
   let monthAvailable = (mo && mo !== "0" && mo !== "");
 
@@ -1163,14 +1254,14 @@ function getVolcanoDescription(type) {
   }
 }
 
-// ---------- YEAR NAVIGATOR (ORIGINALE con "< anno >") ----------
+// ---------- YEAR NAVIGATOR (con "< anno >") ----------
 function drawYearNavigator(year) {
   let hasMultipleEruptions = eruptions.length > 1;
   let activeColor = color(chartMainColor);
   let inactiveColor = color(180);
   let arrowColor = hasMultipleEruptions ? activeColor : inactiveColor;
 
-  let margin = 82; // Come nel tuo codice originale
+  let margin = 82;
   let y = 230;
   let navigatorX = margin;
 
@@ -1185,10 +1276,10 @@ function drawYearNavigator(year) {
   textSize(48);
   let rightArrowWidth = textWidth(">");
 
-  // altezza e padding cornice ORIGINALI
+  // altezza e padding cornice
   let spaceBetween = 40;
-  let framePadding = 20; // Originale: 20
-  let frameHeight = 50; // Originale: 50
+  let framePadding = 20;
+  let frameHeight = 50; 
 
   textAlign(LEFT, CENTER);
   fill(0);
@@ -1278,7 +1369,7 @@ function drawYearNavigator(year) {
   }
 }
 
-// ---------- LEARN MORE BUTTON (invariato) ----------
+// ---------- LEARN MORE BUTTON ----------
 function drawLearnMoreButton() {
   const buttonWidth = 160;
   const buttonHeight = 40;
@@ -1320,7 +1411,7 @@ function drawLearnMoreButton() {
   };
 }
 
-// ---------- ANIMAZIONI (invariate) ----------
+// ---------- ANIMAZIONI ----------
 function startAnimation() {
   isAnimating = true;
   animationStartTime = millis();
@@ -1339,7 +1430,7 @@ function getAnimationProgress() {
   return progress;
 }
 
-// ---------- FUNZIONI DI CORREZIONE COORDINATE ORIGINALI ----------
+// ---------- FUNZIONI DI CORREZIONE COORDINATE ----------
 function fixAllCoordinates(coordStr, isLatitude = true) {
   if (!coordStr || coordStr === "" || coordStr === "0") {
     return isLatitude ? 0 : -30;
@@ -1464,7 +1555,7 @@ function getUniversalCoordinates(latStr, lonStr, name = "", country = "") {
   return fixed;
 }
 
-// ---------- TRANSIZIONE LEARN MORE (APRE NELLA STESSA SCHEDA) ----------
+// ---------- TRANSIZIONE LEARN MORE ----------
 function startTransitionToLearnMore() {
   const buttonRect = state.learnMoreButtonArea;
   
@@ -1490,7 +1581,7 @@ function updateTransition() {
   
   if (progress >= 1) {
     transitionState.active = false;
-    // APRE NELLA STESSA SCHEDA invece che in una nuova
+    // APRE NELLA STESSA SCHEDA
     window.location.href = "learn_more_detail.html?name=" + encodeURIComponent(selectedName) + 
                           "&year=" + selectedYear + 
                           "&number=" + selectedNumber;
@@ -1534,7 +1625,7 @@ function drawTransition() {
   pop();
 }
 
-// ---------- INTERAZIONI (corrette per il navigatore originale) ----------
+// ---------- INTERAZIONI ----------
 function mousePressed() {
   if (transitionState.active) return;
 
@@ -1542,6 +1633,22 @@ function mousePressed() {
   if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
     window.location.href = "overview.html";
     return;
+  }
+
+  // NAVBAR LINKS 
+  if (state.navLinks) {
+    for (let link of state.navLinks) {
+      let textW = link.width;
+      let textH = 20;
+      let textX = link.x;
+      let textY = link.y - textH/2;
+      
+      if (mouseX > textX && mouseX < textX + textW && 
+          mouseY > textY && mouseY < textY + textH) {
+        window.location.href = link.href;
+        return;
+      }
+    }
   }
 
   // LEARN MORE BUTTON
@@ -1557,14 +1664,14 @@ function mousePressed() {
 
   if (eruptions.length <= 1) return;
 
-  // Navigazione anni con dimensioni ORIGINALI
+  // Navigazione anni con dimensioni 
   let margin = 82;
   let y = 230;
   
   textSize(48);
   let leftArrowWidth = textWidth("<");
-  let framePadding = 20; // Originale: 20
-  let frameHeight = 50; // Originale: 50
+  let framePadding = 20; 
+  let frameHeight = 50; 
   let leftFrameX = margin - framePadding;
   let leftFrameY = y - frameHeight/2;
 
@@ -1627,6 +1734,22 @@ function updateCursor() {
     isOverButton = true;
   }
 
+  // Navbar links
+  if (state.navLinks) {
+    for (let link of state.navLinks) {
+      let textW = link.width;
+      let textH = 20;
+      let textX = link.x;
+      let textY = link.y - textH/2;
+      
+      if (mouseX > textX && mouseX < textX + textW && 
+          mouseY > textY && mouseY < textY + textH) {
+        isOverButton = true;
+        break;
+      }
+    }
+  }
+
   // Learn More button
   if (state.learnMoreButtonArea &&
       mouseX > state.learnMoreButtonArea.x &&
@@ -1636,7 +1759,7 @@ function updateCursor() {
     isOverButton = true;
   }
 
-  // Frecce navigazione ORIGINALI
+  // Frecce navigazione
   if (eruptions.length > 1) {
     let margin = 82;
     let y = 230;
