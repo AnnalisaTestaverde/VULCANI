@@ -23,8 +23,7 @@ let currentIndex = 0;
 
 // Dopo le variabili globali
 let state = {
-  learnMoreButtonArea: null,
-  homeButtonArea: null
+  learnMoreButtonArea: null
 };
 
 // Variabili per animazione
@@ -33,6 +32,17 @@ let animationDuration = 1000; // Durata animazione in millisecondi
 let isAnimating = false;
 let previousSelectedNumber = null;
 let initialAnimationStarted = false; // Nuova variabile per l'animazione iniziale
+
+// ---------- VARIABILI TRANSIZIONE ----------
+let transitionState = {
+  active: false,
+  startTime: 0,
+  duration: 800,
+  startX: 0,
+  startY: 0,
+  startRadius: 0,
+  targetRadius: 0
+};
 
 // immagini vulcano
 let stratoImg, calderaImg, complexImg, cinderImg, compoundImg, craterImg, fissureImg;
@@ -44,7 +54,6 @@ let worldMap;
 
 // icoona libro
 let bookIcon;
-let homeIcon; // Aggiunta icona per Home
 
 // ---------- PRELOAD ----------
 function preload() {
@@ -73,7 +82,6 @@ function preload() {
   volcanic_fieldImg = loadImage("../assets/volcanic_field.png");
 
   bookIcon = loadImage("../assets/book_icon.png");
-  homeIcon = loadImage("../assets/home_icon.png"); 
 }
 
 // Funzione per convertire i danni da dollari 1990 a dollari 2026
@@ -107,6 +115,9 @@ function formatDamageValue(damageValue) {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   textFont("Helvetica");
+
+  // Imposta un frame rate fisso per migliorare le prestazioni
+  frameRate(60);
 
   // legge parametri ed assegna a variabili
   selectedName = getQueryParam("name");
@@ -201,40 +212,56 @@ function draw() {
     return;
   }
 
-  // recupera elemento nell'array e salva in selected
-  let selected = eruptions[currentIndex];
+  // Aggiorna la transizione se attiva
+  updateTransition();
 
-  // 1. aggiunge illustrazione di sfondo
-  drawVolcanoTypeBackground(selected.type);
-
-  // 2. aggiunge mappa per sez. location (Passiamo il Country!)
-  drawMap(selected.lat, selected.lon, selected.country);
-
-  // 3. aggiunge Back button
-  drawBackButton();
-
-  // 4. AGGIUNGI IL PULSANTE LEARN MORE E HOME
-  drawLearnMoreButton();
-
-  // 5. aggiunge testo (titolo etc.)
-  writeText();
-
-  // 6. aggiunge elementi per navigazione negli anni 
-  drawYearNavigator(selected.year);
-
-  // 7. aggiunge la descrizione (Passiamo data completa!)
-  drawVolcanoDescription(selected.type, selected.year, selected.mo, selected.dy);
-
-  // 8. DRAW IMPACT CHART
-  let dataRowIndex = findDataRowIndex(selectedName, selectedNumber);
-  if (dataRowIndex !== -1) {
-    let chartDatum = buildChartDataFromRow(dataRowIndex);
-    drawImpactChart(chartDatum);
+  // Se la transizione è attiva, disegna tutto con la transizione sopra
+  if (transitionState.active) {
+    // 1. Disegna tutti gli elementi normali
+    let selected = eruptions[currentIndex];
+    drawVolcanoTypeBackground(selected.type);
+    drawMap(selected.lat, selected.lon, selected.country);
+    drawBackButton();
+    writeText();
+    drawYearNavigator(selected.year);
+    drawVolcanoDescription(selected.type, selected.year, selected.mo, selected.dy);
+    
+    // 2. Disegna il grafico (con animazione se necessario)
+    let dataRowIndex = findDataRowIndex(selectedName, selectedNumber);
+    if (dataRowIndex !== -1) {
+      let chartDatum = buildChartDataFromRow(dataRowIndex);
+      drawImpactChart(chartDatum);
+    } else {
+      drawChartPlaceholder();
+    }
+    
+    // 3. Disegna il pulsante Learn More
+    drawLearnMoreButton();
+    
+    // 4. Disegna la transizione SOPRA tutto
+    drawTransition();
+    
   } else {
-    drawChartPlaceholder();
+    // Disegno normale (senza transizione)
+    let selected = eruptions[currentIndex];
+    drawVolcanoTypeBackground(selected.type);
+    drawMap(selected.lat, selected.lon, selected.country);
+    drawBackButton();
+    drawLearnMoreButton();
+    writeText();
+    drawYearNavigator(selected.year);
+    drawVolcanoDescription(selected.type, selected.year, selected.mo, selected.dy);
+    
+    let dataRowIndex = findDataRowIndex(selectedName, selectedNumber);
+    if (dataRowIndex !== -1) {
+      let chartDatum = buildChartDataFromRow(dataRowIndex);
+      drawImpactChart(chartDatum);
+    } else {
+      drawChartPlaceholder();
+    }
   }
 
-  // 9. AGGIORNA IL CURSORE (manina per i pulsanti)
+  // 9. AGGIORNA IL CURSORE (sempre, anche durante transizione)
   updateCursor();
 }
 
@@ -958,20 +985,12 @@ function drawYearNavigator(year) {
 
 /* INTERAZIONI (mousePressed) - mantiene la navigazione e back */
 function mousePressed() {
+  // Se la transizione è attiva, disabilita tutti gli altri click
+  if (transitionState.active) return;
+
   // BACK BUTTON
   if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
     window.location.href = "overview.html";
-    return;
-  }
-
-  // HOME BUTTON
-  if (state.homeButtonArea &&
-      mouseX > state.homeButtonArea.x &&
-      mouseX < state.homeButtonArea.x + state.homeButtonArea.width &&
-      mouseY > state.homeButtonArea.y &&
-      mouseY < state.homeButtonArea.y + state.homeButtonArea.height) {
-    
-    window.location.href = "../index.html";
     return;
   }
 
@@ -982,7 +1001,8 @@ function mousePressed() {
       mouseY > state.learnMoreButtonArea.y &&
       mouseY < state.learnMoreButtonArea.y + state.learnMoreButtonArea.height) {
     
-    window.open("learn_more_detail.html", "_blank");
+    // Avvia la transizione invece di aprire direttamente
+    startTransitionToLearnMore();
     return;
   }
 
@@ -1585,69 +1605,11 @@ function drawArcSegment(r1, r2, start, end) {
 
 function drawLearnMoreButton() {
   const buttonWidth = 160; // Stessa larghezza di overview
-  const buttonHeight = 35; // Altezza consistente
-  const buttonSpacing = 10; // Spazio tra i pulsanti
+  const buttonHeight = 40; // Altezza consistente
   
   // Posizionato in alto a destra con margine - Learn More a destra
   const buttonX = width - buttonWidth - 50; // Allineato con overview
   const buttonY = 720; // Allineato con il back button
-  
-  // Home button a sinistra di Learn More
-  const homeButtonX = buttonX - buttonWidth - buttonSpacing;
-  
-  // --- HOME BUTTON ---
-  stroke(245, 40, 0); // Usa il rosso del tema
-  strokeWeight(1);
-  noFill();
-  rect(homeButtonX, buttonY, buttonWidth, buttonHeight, 5);
-
-  // Icona casa (se l'immagine è caricata, altrimenti placeholder)
-  if (homeIcon) {
-    push();
-    imageMode(CENTER);
-    // Ridimensiona l'icona (circa 24x24 pixel)
-    let iconSize = 24;
-    // Posiziona l'icona a sinistra nel pulsante
-    let iconX = homeButtonX + 25;
-    let iconY = buttonY + buttonHeight/2;
-    
-    // Applica il colore rosso all'icona usando tint
-    tint(245, 40, 0); // Colore rosso del tema
-    image(homeIcon, iconX, iconY, iconSize, iconSize);
-    tint(255, 255, 255); // Ripristina il colore normale
-    pop();
-  } else {
-    // Fallback se l'icona non è caricata
-    push();
-    translate(homeButtonX + 25, buttonY + buttonHeight/2);
-    // Disegna una semplice icona casa
-    stroke(245, 40, 0);
-    strokeWeight(1);
-    noFill();
-    // Quadrato
-    rect(-8, -8, 16, 16, 3);
-    // Tetto triangolare
-    triangle(-10, -8, 0, -15, 10, -8);
-    // Porta
-    fill(245, 40, 0);
-    rect(-3, 0, 6, 8, 2);
-    pop();
-  }
-
-  // Testo "Home"
-  fill(0); // Testo nero per contrasto
-  noStroke();
-  textSize(16);
-  textAlign(LEFT, CENTER);
-  text("Home", homeButtonX + 50, buttonY + buttonHeight/2);
-
-  // Memorizza l'area per l'interazione
-  state.homeButtonArea = {
-    x: homeButtonX,
-    y: buttonY,
-    width: buttonWidth,
-    height: buttonHeight
-  };
 
   // --- LEARN MORE BUTTON (come in overview) ---
   stroke(245, 40, 0);
@@ -1695,17 +1657,14 @@ function drawLearnMoreButton() {
 function updateCursor() {
   let isOverButton = false;
 
-  // Controlla se il mouse è sopra il Back button
-  if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
-    isOverButton = true;
+  // Se la transizione è attiva, usa cursore normale
+  if (transitionState.active) {
+    cursor(ARROW);
+    return;
   }
 
-  // Controlla se il mouse è sopra il Home button
-  if (state.homeButtonArea &&
-      mouseX > state.homeButtonArea.x &&
-      mouseX < state.homeButtonArea.x + state.homeButtonArea.width &&
-      mouseY > state.homeButtonArea.y &&
-      mouseY < state.homeButtonArea.y + state.homeButtonArea.height) {
+  // Controlla se il mouse è sopra il Back button
+  if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
     isOverButton = true;
   }
 
@@ -1720,7 +1679,7 @@ function updateCursor() {
 
   // Controlla se il mouse è sopra le frecce di navigazione
   let margin = 82;
-  let y = 230;
+  let y =230;
   let navigatorX = margin;
 
   textSize(48);
@@ -1764,4 +1723,101 @@ function updateCursor() {
   } else {
     cursor(ARROW);
   }
+}
+
+// ---------- FUNZIONI TRANSIZIONE ----------
+
+/**
+ * Funzione di easing per transizione fluida
+ */
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+/**
+ * Avvia la transizione al Learn More
+ */
+function startTransitionToLearnMore() {
+  const buttonRect = state.learnMoreButtonArea;
+  
+  // Calcola punto di partenza (centro del pulsante)
+  transitionState.startX = buttonRect.x + buttonRect.width / 2;
+  transitionState.startY = buttonRect.y + buttonRect.height / 2;
+  
+  // Raggio iniziale (dimensione del pulsante)
+  transitionState.startRadius = Math.max(buttonRect.width, buttonRect.height) / 2;
+  
+  // Raggio target (copre tutto lo schermo)
+  transitionState.targetRadius = dist(
+    transitionState.startX, 
+    transitionState.startY, 
+    width/2, 
+    height/2
+  ) + Math.max(width, height) / 2;
+  
+  // Attiva la transizione
+  transitionState.active = true;
+  transitionState.startTime = millis();
+  
+  // Disabilita eventuali altre animazioni durante la transizione
+  isAnimating = false;
+}
+
+/**
+ * Aggiorna lo stato della transizione
+ */
+function updateTransition() {
+  if (!transitionState.active) return;
+  
+  const elapsed = millis() - transitionState.startTime;
+  const progress = constrain(elapsed / transitionState.duration, 0, 1);
+  
+  if (progress >= 1) {
+    transitionState.active = false;
+    // Apri la pagina Learn More in una nuova scheda
+    window.open("learn_more_detail.html", "_blank");
+  }
+}
+
+/**
+ * Disegna la transizione a schermo intero
+ */
+function drawTransition() {
+  if (!transitionState.active) return;
+  
+  const elapsed = millis() - transitionState.startTime;
+  const progress = constrain(elapsed / transitionState.duration, 0, 1);
+  const easedProgress = easeOutCubic(progress);
+  
+  const currentRadius = lerp(
+    transitionState.startRadius,
+    transitionState.targetRadius,
+    easedProgress
+  );
+  
+  push();
+  
+  // Cerchio rosso che si espande
+  fill(chartMainColor);
+  noStroke();
+  
+  ellipse(
+    transitionState.startX,
+    transitionState.startY,
+    currentRadius * 2,
+    currentRadius * 2
+  );
+  
+  // Bordo per effetto "onda"
+  stroke(200, 30, 0, 100);
+  strokeWeight(2);
+  noFill();
+  ellipse(
+    transitionState.startX,
+    transitionState.startY,
+    currentRadius * 2,
+    currentRadius * 2
+  );
+  
+  pop();
 }

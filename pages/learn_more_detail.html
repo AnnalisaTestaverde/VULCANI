@@ -172,6 +172,47 @@
         #about-methodology-btn:focus {
             outline: none;
         }
+        
+        /* Nuove classi per gli elenchi puntati */
+        .impact-list, .controls-list {
+            margin: 15px 0 25px 20px;
+            padding: 0;
+        }
+        
+        .impact-list li, .controls-list li {
+            margin-bottom: 15px;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #000000;
+            list-style-type: disc;
+        }
+        
+        .bold-white {
+            color: #FFFFFF !important;
+            font-weight: bold;
+        }
+        
+        /* Fix per l'altezza iniziale */
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Forza il ridimensionamento iniziale */
+        #main-sketch-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        #text-container {
+            position: fixed !important;
+        }
     </style>
 </head>
 <body>
@@ -184,61 +225,57 @@
         <div id="text-scroll-area" class="scroll-enabled">
             <!-- Contenuto testuale completo -->
             <div id="text-content">
-                <!-- Sezione 1: Il grafico -->
-                <div class="section-title">THE GRAPH: A MAP OF VOLCANIC POWER</div>
+                <!-- Sezione 1: THE GRAPH: THE IMPACT OF THE ERUPTION -->
+                <div class="section-title">THE GRAPH: THE IMPACT OF THE ERUPTION</div>
                 <div class="section-text">
-                    This visualization transforms volcanic eruption data into an interactive map that tells the story of Earth's destructive power. Each black dot represents a real event, positioned on a large concentric circle. Its position is not random: it is determined by an <span class="bold-white">Impact Score</span>, a score between 1 and 16, calculated by adding five key indicators.
+                    The detailed visualization is dedicated to an in-depth analysis of a single volcanic eruption and conveys its overall impact through a clear and readable breakdown of its effects. While the <span class="bold-white">overview</span> allows for quick comparison between different events, this section encourages the viewer to focus on a <span class="bold-white">single episode</span>, highlighting its human, material, and economic consequences.
+                </div>
+                <div class="section-text">
+                    At the center of the visualization is the <span class="bold-white">impact of the eruption</span>, expressed as the result of the combination of several damage categories. Each element contributes to building a more complete interpretation of the event, transforming numerical data into a <span class="bold-white">narrative</span> of the eruption's intensity and severity.
                 </div>
                 
-                <!-- Sezione 2: Sistema di punteggio -->
+                <!-- Sezione 2: THE IMPACT SCORE SYSTEM -->
                 <div class="section-title">THE IMPACT SCORE SYSTEM</div>
                 <div class="section-text">
-                    The <span class="bold-white">Impact Score</span> (from 1 to 16) is calculated by summing five indicators, each rated from 0 to 4:
+                    The impact of each eruption is calculated through an <span class="bold-white">Impact Score</span>, obtained by summing five standardized categories. Each category is evaluated with a score ranging from <span class="bold-white">1 to 4</span>, where higher values indicate more severe consequences.
+                </div>
+                <div class="section-text">
+                    The five categories considered are:
                 </div>
                 
-                <!-- Elenco puntato degli indicatori (sostituisce i box) -->
+                <!-- Elenco puntato delle categorie -->
                 <ul class="impact-list">
-                    <li><span class="bold-white">DEATHS</span> - From 1 to 4, based on the number of victims (from 1-50 to over 1,000).</li>
-                    <li><span class="bold-white">INJURIES</span> - From 1 to 4, based on injured people (from 1-50 to over 1,000).</li>
-                    <li><span class="bold-white">DESTROYED HOUSES</span> - From 1 to 4, based on lost buildings (from 1-50 to over 1,000).</li>
-                    <li><span class="bold-white">ECONOMIC DAMAGE</span> - From 1 to 4, based on estimated costs (from less than 1 million to over 25 million dollars).</li>
-                    <li><span class="bold-white">MISSING</span> - From 0 to 4, to indicate the number of missing or unidentified people (from 1-50 to over 1,000; 0 if not relevant or not documented).</li>
+                    <li><span class="bold-white">Damage</span> – Assesses the overall extent of material damage caused by the eruption.</li>
+                    <li><span class="bold-white">Injuries</span> – Measures the number of people injured during the event.</li>
+                    <li><span class="bold-white">Deaths</span> – Indicates the number of fatalities directly attributed to the eruption.</li>
+                    <li><span class="bold-white">Missing</span> – Represents the number of missing or unidentified people following the event.</li>
+                    <li><span class="bold-white">Houses Destroyed</span> – Quantifies the number of residential buildings destroyed.</li>
                 </ul>
                 
                 <div class="section-text">
-                    An eruption with a score of 16 was devastating in all aspects; one with a score of 1, instead, had minimal impact.
+                    The sum of the values assigned to each category determines the <span class="bold-white">total impact score</span> of the eruption, making it directly comparable to other events shown in the overview visualization. A <span class="bold-white">higher score</span> corresponds to an eruption with more extensive and severe consequences.
                 </div>
                 
-                <!-- Sezione 4: Come leggere il grafico -->
-                <div class="section-title" style="margin-bottom: 1px;">HOW TO READ THE GRAPH</div>
-                
-                <!-- NOTA: RIMOSSA LA LEGGENDA (div legend-container) -->
-                
+                <!-- Sezione 3: HOW TO READ THE GRAPH -->
+                <div class="section-title">HOW TO READ THE GRAPH</div>
                 <div class="section-text">
-                    <span class="bold-white">THE BLACK DOTS </span>: Each dot represents a volcanic eruption. Hovering the mouse over a dot displays a window with the <span class="bold-white">volcano's name</span> and the <span class="bold-white">eruption year</span>. Clicking on the dot directly accesses the event's <span class="bold-white">detail page</span>, where you can explore the data further.
+                    The detailed visualization translates the <span class="bold-white">impact score</span> into a clear and immediate representation of its individual components. Each category is displayed separately, allowing the viewer to understand which aspects of the eruption contributed most significantly to the event's overall severity.
                 </div>
-                
                 <div class="section-text">
-                    <span class="bold-white">THE CONCENTRIC CIRCLES</span>: The <span class="bold-white">outer ring</span> corresponds to score 1 (minimal impact), while the <span class="bold-white">bright red central point</span> represents the maximum score of 16 (maximum devastation). The closer a dot is to the center, the more severe the event was.
+                    The <span class="bold-white">total score</span> emerges as the final result of the balance between <span class="bold-white">human and material factors</span>, offering a synthetic yet data-driven reading. In this way, the user can move from an analytical view of individual categories to a <span class="bold-white">comprehensive understanding</span> of the eruption as a whole.
                 </div>
                 
-                <div class="section-text"> 
-                    <span class="bold-white">THE CONTINENTAL WEDGES</span>: The circle is divided into five <span class="bold-white">wedges</span>, each representing a continent: <span class="bold-white">Asia</span>, <span class="bold-white">Americas</span>, <span class="bold-white">Europe</span>, <span class="bold-white">Oceania</span>, <span class="bold-white">Africa</span>. Within each wedge, eruptions are arranged <span class="bold-white">clockwise</span>, starting from the oldest event (4200 BC) to <span class="bold-white">today</span>.
-                </div>
-                
-                <!-- Sezione 5: Controlli esterni -->
-                <div class="section-title">EXTERNAL CONTROLS: FILTERS AND ANIMATION</div>
-                
+                <!-- Sezione 4: ADDITIONAL INFORMATION FOR CONTEXTUALIZING THE ERUPTION -->
+                <div class="section-title">ADDITIONAL INFORMATION FOR CONTEXTUALIZING THE ERUPTION</div>
                 <div class="section-text">
-                    On the left side of the page, tools are available to explore the data dynamically.
+                    Beyond impact analysis, the detail page provides a set of information that helps contextualize the eruption in <span class="bold-white">time and space</span>. The total number of eruptions recorded for the volcano is indicated, with the possibility to navigate between <span class="bold-white">previous and subsequent events</span>, placing the eruption within the eruptive history of the volcanic system.
                 </div>
-                
-                <!-- Elenco puntato dei controlli (sostituisce i box) -->
-                <ul class="controls-list">
-                    <li><span class="bold-white">SELECT TIME FRAME</span> - With the arrows << and >>, you can select a specific time interval (for example, "800 AD - 1800 AD"). The graph updates automatically, showing only eruptions that occurred in that period.</li>
-                    <li><span class="bold-white">SELECT YEAR</span> - With the arrows < and >, you can navigate year by year among those present in the dataset. Not all years are present, as the dataset does not include records for every single year. In recent decades, however, precision increases significantly, allowing analysis of individual years like 2005.</li>
-                    <li><span class="bold-white">START ANIMATION</span> - Starts an automatic animation that scrolls through available years in succession, highlighting eruptions that occurred in each year with a <span class="bold-black">luminous pulsating effect</span> (a red glow that expands around the dot).</li>
-                </ul>
+                <div class="section-text">
+                    When available, the <span class="bold-white">exact date</span> of the eruption is reported, specifying day, month, and year. The visualization also includes a description of the <span class="bold-white">volcano type</span>, accompanied by a background illustration. It is important to note that a volcano's typology is not necessarily fixed: the same volcano may change over time in response to several factors, particularly the <span class="bold-white">composition of its magma</span>.
+                </div>
+                <div class="section-text">
+                    Finally, a <span class="bold-white">geographic map</span> locates the volcano on a global scale, allowing its position on the planet and the geographical context in which the eruption occurred to be clearly understood.
+                </div>
                 
                 <!-- Bottone About the methodology centrato nel box del testo -->
                 <div id="about-methodology-btn-container">
@@ -312,24 +349,28 @@
             scrollArea: null,
             scrollHint: null,
             buttonsContainer: null,
-            isAtBottom: false
+            isAtBottom: false,
+            
+            // Flag per controllare se l'inizializzazione è già avvenuta
+            initialized: false,
+            
+            // URL della pagina precedente
+            previousPageUrl: null
         };
 
         // ===== DATI REALI PER MERAPI 1961 =====
-        // Dati presi dalla rappresentazione reale del grafico d'impatto per Merapi 1961
-        // (Valori stimati basati su eruzione tipica del Merapi)
         const MERAPI_1961_DATA = {
             name: "Merapi",
             year: 1961,
-            death: 2,        // Livello 2 su 4 (51-100 morti)
-            inj: 1,          // Livello 1 su 4 (1-50 feriti)
-            dmg: 2,          // Livello 2 su 4 ($1-5 milioni convertiti a 2026)
-            house: 3,        // Livello 3 su 4 (101-1000 case)
-            missing: 0,      // Livello 0 su 4 (dati non disponibili)
-            impact: 8,       // Totale impatto (2+1+2+3+0 = 8)
+            death: 2,
+            inj: 1,
+            dmg: 2,
+            house: 3,
+            missing: 0,
+            impact: 8,
             rawDeath: "Some (~51 to 100 deaths)",
             rawInj: "Few (~1 to 50 injuries)", 
-            rawDmg: "Moderate (~$2.4 to $12 million in 2026 dollars)", // Convertito da $1-5 milioni nel 1990
+            rawDmg: "Moderate (~$2.4 to $12 million in 2026 dollars)",
             rawHouse: "Many (~101 to 1000 houses)",
             rawMissing: "Details not available"
         };
@@ -344,11 +385,36 @@
 
         // 2 - Inizializzazione dati
         function initializeData() {
-            // Usa sempre i dati di Merapi 1961 come riferimento fisso
+            if (state.initialized) return;
+            
+            state.initialized = true;
             state.chartData = MERAPI_1961_DATA;
             
-            // Avvia animazione iniziale
-            startAnimation();
+            // Prova a recuperare l'URL della pagina precedente dal localStorage
+            try {
+                state.previousPageUrl = localStorage.getItem('previousPageBeforeDetailView');
+                console.log("Previous page URL from localStorage:", state.previousPageUrl);
+            } catch (e) {
+                console.log("Could not read previous page URL from localStorage:", e);
+            }
+            
+            // Salva l'URL corrente come pagina di riferimento per future navigazioni
+            try {
+                localStorage.setItem('currentDetailViewPage', window.location.href);
+            } catch (e) {
+                console.log("Could not save current page to localStorage:", e);
+            }
+            
+            // Forza un ridisegno immediato
+            if (typeof redraw === 'function') {
+                redraw();
+            }
+            
+            // Avvia animazione iniziale dopo un breve ritardo
+            setTimeout(startAnimation, 100);
+            
+            // Forza il ridimensionamento iniziale
+            window.dispatchEvent(new Event('resize'));
         }
 
         // 3 - Setup iniziale
@@ -357,37 +423,38 @@
             canvas.parent('main-sketch-container');
             frameRate(60);
             
-            // Inizializza i dati
+            // Inizializza i dati immediatamente
             initializeData();
             
             // Setup degli event listener per lo scroll e i bottoni
             setupScrollListeners();
+            
+            // Forza un ridisegno iniziale
+            if (typeof redraw === 'function') {
+                redraw();
+            }
         }
 
-        // 4 - Loop principale del grafico
+        // 4 - Draw - loop principale
         function draw() {
-            // Sfondo arancione fisso
+            // Assicura che i dati siano inizializzati
+            if (!state.initialized) {
+                initializeData();
+            }
+            
             background(CONFIG.colors.background);
-            
-            // Disegna titolo
             drawTitle();
-            
-            // Disegna back button
             drawBackButton();
             
-            // Disegna il grafico d'impatto ORIGINALE
             if (state.chartData) {
                 drawImpactChart(state.chartData);
             }
             
-            // Aggiorna animazioni
             updateAnimations();
-            
-            // Aggiorna cursore
             updateCursor();
         }
 
-        // 5 - Titolo (con "GRAPHIC" in bianco)
+        // 5 - Titolo
         function drawTitle() {
             textSize(72);
             textFont('Helvetica');
@@ -396,18 +463,16 @@
             
             const titleY = CONFIG.layout.titleStartY + CONFIG.layout.topOffset;
             
-            // "ABOUT THE" in nero
             fill(CONFIG.colors.text);
             text('ABOUT THE', CONFIG.layout.marginX, titleY);
 
-            // "GRAPHIC" in BIANCO
             fill(CONFIG.colors.accent);
             text('DETAIL VIEW', CONFIG.layout.marginX, titleY + 75);
             
             textStyle(NORMAL);
         }
 
-        // 6 - Back Button (porta alla pagina di dettaglio specifica)
+        // 6 - Back Button
         function drawBackButton() {
             const buttonWidth = 160;
             const buttonHeight = 40;
@@ -415,13 +480,11 @@
             const buttonX = width - buttonWidth - 50;
             const buttonY = CONFIG.layout.startButtonY;
             
-            // Bordo NERO
             stroke(CONFIG.colors.text);
             strokeWeight(1);
             noFill();
             rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
-            // Icona con "×"
             push();
             translate(buttonX + 25, buttonY + buttonHeight/2);
             fill(CONFIG.colors.text);
@@ -432,7 +495,6 @@
             text("×", 0, 0);
             pop();
 
-            // Testo "Back" in NERO
             fill(CONFIG.colors.text);
             noStroke();
             textSize(CONFIG.layout.labelFontSize);
@@ -440,7 +502,6 @@
             textAlign(LEFT, CENTER);
             text("Back", buttonX + 50, buttonY + buttonHeight/2);
 
-            // Memorizza l'area per l'interazione
             state.backButtonArea = {
                 x: buttonX,
                 y: buttonY,
@@ -449,46 +510,32 @@
             };
         }
 
-        // 7 - Disegna il grafico d'impatto ORIGINALE (IDENTICO al codice di dettaglio)
+        // 7 - Disegna il grafico d'impatto
         function drawImpactChart(d) {
-            // DEBUG: Log dei dati per verifica
-            console.log("Drawing chart for:", d.name, d.year);
-            console.log("Values:", [d.death, d.inj, d.dmg, d.house, d.missing]);
-            console.log("Impact:", d.impact);
-            
-            // Tooltip text
-            let tooltipText = "";
-
             push();
 
-            // Overlay scuro dietro il grafico
             let panelW = CONFIG.chartSize + 60;
             let panelH = CONFIG.chartSize + 60;
             let px = width * CONFIG.chartXPercent - panelW / 2;
             let py = height * CONFIG.chartYPercent - panelH / 2;
 
-            // pannello semitrasparente
             noFill();
             noStroke();
             rect(px, py, panelW, panelH, 10);
 
-            // translate al centro del grafico
             let cx = width * CONFIG.chartXPercent;
             let cy = height * CONFIG.chartYPercent;
             translate(cx, cy);
 
-            // configurazione
             let gapAngle = radians(CONFIG.chartGapAngleDeg);
             let gapRadial = CONFIG.chartGapRadial;
             let maxChartRadius = CONFIG.chartSize / 2 + 20;
             let radiusStep = CONFIG.chartSize / (2 * CONFIG.chartLevels);
 
-            // valori e labels (ESATTAMENTE come nel codice originale)
             const values = [d.death, d.inj, d.dmg, d.house, d.missing];
             const labels = ["Deaths", "Injuries", "Damage", "Houses Destroyed", "Missing"];
             const rawValues = [d.rawDeath, d.rawInj, d.rawDmg, d.rawHouse, d.rawMissing];
             
-            // Controlla se i dati sono disponibili (ESATTAMENTE come nel codice originale)
             const isDataAvailable = [
                 !(d.death === 0 && d.rawDeath === "Details not available"),
                 !(d.inj === 0 && d.rawInj === "Details not available"),
@@ -497,21 +544,17 @@
                 !(d.missing === 0 && d.rawMissing === "Details not available")
             ];
 
-            // Calcola il progresso dell'animazione
             let animationProgress = getAnimationProgress();
             
-            // mouse in coordinate relative
             let mx = mouseX - cx;
             let my = mouseY - cy;
             let mDist = dist(0, 0, mx, my);
-
-            // angolo mouse
             let mAngle = atan2(my, mx);
             if (mAngle < 0) mAngle += TWO_PI;
 
             let sectionAngle = TWO_PI / 5;
-
             let hoveredSection = -1;
+            
             if (mDist < maxChartRadius && mDist > 20) {
                 let sectionIndex = floor(mAngle / sectionAngle);
                 let localAngle = mAngle % sectionAngle;
@@ -521,7 +564,6 @@
                 }
             }
 
-            // Prima disegna tutte le sezioni CON dati disponibili (con animazione) - IDENTICO
             for (let i = 0; i < 5; i++) {
                 if (!isDataAvailable[i]) continue;
                 
@@ -544,7 +586,6 @@
                             animatedOuterR = outerR;
                         }
                         
-                        // ROSSO come nel codice originale
                         fill(CONFIG.chartMainColor);
                         stroke(CONFIG.chartMainColor);
                         strokeWeight(1);
@@ -558,7 +599,6 @@
                 }
             }
 
-            // Poi disegna le sezioni SENZA dati disponibili (con pattern a linee oblique) - IDENTICO
             for (let i = 0; i < 5; i++) {
                 if (isDataAvailable[i]) continue;
                 
@@ -569,11 +609,9 @@
                     let innerR = radiusStep * (level - 1) + gapRadial;
                     let outerR = radiusStep * level - gapRadial;
                     
-                    // Crea una maschera per il pattern - IDENTICO
                     drawingContext.save();
                     drawingContext.beginPath();
                     
-                    // Disegna la forma dell'arco come maschera
                     for (let a = start; a <= end; a += 0.01) {
                         let x = cos(a) * outerR;
                         let y = sin(a) * outerR;
@@ -588,39 +626,32 @@
                     drawingContext.closePath();
                     drawingContext.clip();
                     
-                    // Disegna il pattern a linee oblique all'interno della maschera
-                    let patternSpacing = 6; // Spaziatura tra le linee
-                    let lineColor = color(0, 155); // Grigio trasparente
+                    let patternSpacing = 6;
+                    let lineColor = color(0, 155);
                     
                     stroke(lineColor);
                     strokeWeight(1);
                     noFill();
                     
-                    // Calcola i limiti del rettangolo che contiene l'arco
                     let minX = -outerR;
                     let maxX = outerR;
                     let minY = -outerR;
                     let maxY = outerR;
                     
-                    // Angolo per le linee oblique (45 gradi)
                     let angle = PI / 4;
                     let cosAngle = cos(angle);
                     let sinAngle = sin(angle);
                     
-                    // Disegna linee oblique
                     for (let offset = -maxX - maxY; offset < maxX + maxY; offset += patternSpacing) {
-                        // Calcola i punti per la linea corrente
                         let x1, y1, x2, y2;
                         
                         if (cosAngle !== 0) {
-                            // Linea obliqua standard
                             x1 = minX;
                             y1 = (offset - x1 * cosAngle) / sinAngle;
                             x2 = maxX;
                             y2 = (offset - x2 * cosAngle) / sinAngle;
                         }
                         
-                        // Disegna la linea solo se è all'interno dell'area visibile
                         if (y1 >= minY || y2 >= minY || y1 <= maxY || y2 <= maxY) {
                             line(x1, y1, x2, y2);
                         }
@@ -628,7 +659,6 @@
                     
                     drawingContext.restore();
                     
-                    // Bordo grigio
                     noFill();
                     stroke(0, 150);
                     strokeWeight(1);
@@ -636,9 +666,8 @@
                 }
             }
 
-            // Disegna tutte le label - ESATTAMENTE come nel codice originale
-            let detailMaxWidth = 130; // Larghezza massima testo
-            let lineHeight = 16; // Altezza di ogni linea di testo
+            let detailMaxWidth = 130;
+            let lineHeight = 16;
 
             for (let i = 0; i < 5; i++) {
                 let start = sectionAngle * i + gapAngle / 2;
@@ -650,31 +679,27 @@
                 if (!isDataAvailable[i]) {
                     fill(0, 150);
                 } else {
-                    fill(0); // NERO come nel codice originale
+                    fill(0);
                     textStyle(BOLD);
                 }
                 textSize(CONFIG.chartLabelSize);
                 textAlign(CENTER, CENTER);
 
                 let ang = (start + end) / 2;
-                let lx = cos(ang) * (CONFIG.chartSize / 2 + 60); // +60 come nel codice originale
-                let ly = sin(ang) * (CONFIG.chartSize / 2 + 55); // +55 come nel codice originale
+                let lx = cos(ang) * (CONFIG.chartSize / 2 + 60);
+                let ly = sin(ang) * (CONFIG.chartSize / 2 + 55);
                 
-                // Disegna il titolo principale (Deaths, Injuries, ecc.) - IDENTICO
                 text(labels[i], lx, ly - 25);
                 
-                // Disegna "Impact: x" - IDENTICO
                 if (isDataAvailable[i]) {
                     let levelValue = values[i];
                     let levelText = "Impact: " + levelValue;
 
-                    // Impact: x in ROSSO - IDENTICO
-                    fill(CONFIG.chartMainColor); // ROSSO
+                    fill(CONFIG.chartMainColor);
                     textSize(CONFIG.chartLabelSize);
                     textStyle(BOLD);
                     text(levelText, lx, ly - 5);
 
-                    // Valore completo descrittivo - CON TESTI SPECIFICI DI MERAPI 1961
                     let detailText = "";
                     if (i === 0) detailText = d.rawDeath;
                     else if (i === 1) detailText = d.rawInj;
@@ -682,45 +707,39 @@
                     else if (i === 3) detailText = d.rawHouse;
                     else if (i === 4) detailText = d.rawMissing;
 
-                    fill(0); // nero - IDENTICO
+                    fill(0);
                     textSize(CONFIG.chartLabelSize);
                     textStyle(NORMAL);
                     textAlign(CENTER, TOP);
                     
-                    // Calcola quante linee di testo ci sono
                     let numLines = 1;
                     if (detailText.includes('\n')) {
                         numLines = 2;
                     }
                     
-                    // Posiziona il testo in base al numero di linee
                     let textY = ly + 7;
                     text(detailText, lx - detailMaxWidth / 2, textY, detailMaxWidth);
                 }
             }
 
-            // Titolo centrale con totale impatto - IDENTICA POSIZIONE
             push();
             noStroke();
-            fill(0); // ROSSO
+            fill(0);
             textSize(CONFIG.chartTitleSize);
             textAlign(CENTER, CENTER);
             textStyle(BOLD);
             
-            // Testo "Total impact level: " + valore - IDENTICO
             let totalImpactText = "Total impact level: " + d.impact;
-            let totalImpactX = 270; // STESSA POSIZIONE X
-            let totalImpactY = -310; // STESSA POSIZIONE Y
+            let totalImpactX = 270;
+            let totalImpactY = -310;
             text(totalImpactText, totalImpactX, totalImpactY);
             
-            // Ripristina stile normale
             textStyle(NORMAL);
             pop();  
 
-            // Titolo sopra: "Visualization example: Merapi 1961" - BIANCO
             push();
             noStroke();
-            fill(CONFIG.colors.accent); // BIANCO
+            fill(CONFIG.colors.accent);
             textSize(CONFIG.chartTitleSize);
             textAlign(CENTER, CENTER);
             textStyle(BOLD);
@@ -729,7 +748,7 @@
             text(exampleText, totalImpactX, totalImpactY - 40);
             pop();
 
-            // hover tooltip content - IDENTICO
+            let tooltipText = "";
             if (hoveredSection !== -1) {
                 if (hoveredSection === 0) {
                     tooltipText = d.rawDeath;
@@ -750,13 +769,12 @@
 
             pop();
 
-            // disegno tooltip - IDENTICO
             if (tooltipText !== "") {
                 drawTooltip(tooltipText);
             }
         }
 
-        // 8 - Funzione di utilità per disegnare segmento ad arco (IDENTICA)
+        // 8 - Funzione di utilità per disegnare segmento ad arco
         function drawArcSegment(r1, r2, start, end) {
             beginShape();
             for (let a = start; a <= end; a += 0.01) {
@@ -768,19 +786,17 @@
             endShape(CLOSE);
         }
 
-        // 9 - Disegna tooltip (IDENTICO)
+        // 9 - Disegna tooltip
         function drawTooltip(txt) {
             push();
             textSize(CONFIG.chartTooltipTextSize);
             let w = textWidth(txt) + 20;
             let h = 34;
 
-            // background
             fill(255);
             stroke(CONFIG.chartMainColor);
             rect(mouseX + 15, mouseY - 10, w, h, 6);
 
-            // text
             fill(0);
             noStroke();
             textAlign(LEFT, CENTER);
@@ -795,14 +811,14 @@
         }
 
         function updateAnimations() {
-            // L'animazione viene gestita automaticamente in getAnimationProgress()
+            // Gestito automaticamente
         }
 
         function getAnimationProgress() {
             if (!state.isAnimating) return 1.0;
             
             let elapsed = millis() - state.animationStartTime;
-            let progress = constrain(elapsed / 1000, 0, 1); // 1 secondo di animazione
+            let progress = constrain(elapsed / 1000, 0, 1);
             
             if (progress >= 1.0) {
                 state.isAnimating = false;
@@ -815,7 +831,6 @@
         function updateCursor() {
             let isOverButton = false;
 
-            // Controlla se il mouse è sopra il back button
             if (state.backButtonArea &&
                 mouseX > state.backButtonArea.x &&
                 mouseX < state.backButtonArea.x + state.backButtonArea.width &&
@@ -824,7 +839,6 @@
                 isOverButton = true;
             }
 
-            // Controlla se il mouse è sopra una sezione del grafico con dati disponibili
             let cx = width * CONFIG.chartXPercent;
             let cy = height * CONFIG.chartYPercent;
             let mx = mouseX - cx;
@@ -835,7 +849,6 @@
                 isOverButton = true;
             }
 
-            // Cambia il cursore
             if (isOverButton) {
                 cursor(HAND);
             } else {
@@ -843,21 +856,45 @@
             }
         }
 
-        // 12 - Gestione click del mouse (back button porta alla pagina di dettaglio specifica)
+        // 12 - Gestione click del mouse
         function mousePressed() {
-            // Controllo per il back button (torna alla pagina di dettaglio specifica)
             if (state.backButtonArea &&
                 mouseX > state.backButtonArea.x &&
                 mouseX < state.backButtonArea.x + state.backButtonArea.width &&
                 mouseY > state.backButtonArea.y &&
                 mouseY < state.backButtonArea.y + state.backButtonArea.height) {
                 
-                // Leggi i parametri dalla URL per sapere da dove sei venuto
-                let volcanoName = getQueryParam("name");
-                let volcanoYear = getQueryParam("year");
-                let volcanoNumber = getQueryParam("number");
-                
-                // Costruisce l'URL per tornare alla pagina di dettaglio specifica
+                goBackToPreviousPage();
+                return;
+            }
+        }
+
+        // Funzione per tornare alla pagina precedente
+        function goBackToPreviousPage() {
+            // Prima prova con l'URL memorizzato nel localStorage
+            if (state.previousPageUrl) {
+                console.log("Navigating back to previous page:", state.previousPageUrl);
+                window.location.href = state.previousPageUrl;
+                return;
+            }
+            
+            // Se non c'è un URL memorizzato, usa il referrer del browser
+            if (document.referrer && document.referrer !== '' && document.referrer !== window.location.href) {
+                console.log("Using browser referrer:", document.referrer);
+                window.location.href = document.referrer;
+                return;
+            }
+            
+            // Fallback: se non c'è referrer e non c'è URL memorizzato,
+            // usa i parametri dell'URL per costruire un URL di default
+            let volcanoName = getQueryParam("name");
+            let volcanoYear = getQueryParam("year");
+            let volcanoNumber = getQueryParam("number");
+            
+            // Controlla se siamo arrivati da overview.html o detail.html
+            // in base ai parametri presenti
+            if (volcanoName || volcanoYear || volcanoNumber) {
+                // Probabilmente veniamo da detail.html
                 let backUrl = "detail.html";
                 let params = [];
                 
@@ -869,56 +906,53 @@
                     backUrl += "?" + params.join("&");
                 }
                 
-                // Torna alla pagina di dettaglio specifica
+                console.log("Fallback navigation to:", backUrl);
                 window.location.href = backUrl;
-                return;
+            } else {
+                // Default: torna alla mappa
+                console.log("Default navigation to overview.html");
+                window.location.href = "overview.html";
             }
-            
-            // Click sul grafico: NON fa nulla, è solo visualizzazione
         }
 
         // 13 - Ridimensionamento finestra
         function windowResized() {
             resizeCanvas(windowWidth, windowHeight);
+            // Forza un ridisegno dopo il ridimensionamento
+            if (typeof redraw === 'function') {
+                redraw();
+            }
         }
-
-        // ===== FUNZIONI PER LO SCROLL E I BOTTONI =====
 
         // 14 - Setup degli event listener per lo scroll e i bottoni
         function setupScrollListeners() {
-            // Ottieni gli elementi
             state.scrollArea = document.getElementById('text-scroll-area');
             state.scrollHint = document.getElementById('scroll-hint');
             state.buttonsContainer = document.getElementById('buttons-container');
             const aboutMethodologyBtnContainer = document.getElementById('about-methodology-btn-container');
             const aboutMethodologyBtn = document.getElementById('about-methodology-btn');
             
-            // Se l'elemento dello scroll esiste
             if (state.scrollArea) {
-                // Aggiungi scroll listener semplice
                 state.scrollArea.addEventListener('scroll', handleTextScroll);
-                
-                // Abilita lo scroll con la ruota del mouse su tutto il documento
                 document.addEventListener('wheel', handleGlobalWheel, { passive: false });
                 
-                // Click sulla freccia
                 if (state.scrollHint) {
                     state.scrollHint.addEventListener('click', function() {
                         scrollTextContent(300);
                     });
                 }
                 
-                // Controlla inizialmente
-                checkScrollEnd();
+                // Inizializza lo stato dello scroll
+                setTimeout(checkScrollEnd, 100);
             }
             
-            // Setup dei bottoni finali
             const backToMapBtn = document.getElementById('back-to-map-btn');
             const aboutDatasetBtn = document.getElementById('about-dataset-btn');
             
             if (backToMapBtn) {
                 backToMapBtn.addEventListener('click', function() {
-                    window.location.href = "overview.html";
+                    // Naviga alla pagina precedente invece che sempre a overview.html
+                    goBackToPreviousPage();
                 });
                 
                 backToMapBtn.addEventListener('mouseenter', function() {
@@ -932,6 +966,7 @@
             
             if (aboutDatasetBtn) {
                 aboutDatasetBtn.addEventListener('click', function() {
+                    // Modificato: NON si apre in nuova scheda
                     window.location.href = "methodology.html";
                 });
                 
@@ -944,9 +979,9 @@
                 });
             }
             
-            // Setup del bottone About the methodology centrato nel box del testo
             if (aboutMethodologyBtn) {
                 aboutMethodologyBtn.addEventListener('click', function() {
+                    // Modificato: NON si apre in nuova scheda
                     window.location.href = "methodology.html";
                 });
                 
@@ -986,18 +1021,14 @@
             const aboutMethodologyBtn = document.getElementById('about-methodology-btn');
             const buttonsContainer = document.getElementById('buttons-container');
             
-            // Nasconde COMPLETAMENTE la freccia quando si è vicini alla fine (90%)
-            // e mostra il bottone About the methodology nel box del testo
             if (scrollPercentage > 90) {
                 state.scrollHint.style.display = "none";
                 state.isAtBottom = true;
                 
-                // Mostra il bottone About the methodology centrato nel box del testo
                 if (aboutMethodologyBtnContainer) {
                     aboutMethodologyBtnContainer.style.display = "flex";
                 }
                 
-                // Mostra anche i bottoni in basso (Back to Eruptions e About the methodology)
                 if (buttonsContainer) {
                     buttonsContainer.style.display = "flex";
                 }
@@ -1005,12 +1036,10 @@
                 state.scrollHint.style.display = "block";
                 state.isAtBottom = false;
                 
-                // Nascondi il bottone About the methodology centrato nel box del testo
                 if (aboutMethodologyBtnContainer) {
                     aboutMethodologyBtnContainer.style.display = "none";
                 }
                 
-                // Nascondi anche i bottoni in basso
                 if (buttonsContainer) {
                     buttonsContainer.style.display = "none";
                 }
@@ -1024,6 +1053,21 @@
             state.scrollArea.scrollTop += pixels;
             checkScrollEnd();
         }
+
+        // 19 - Inizializzazione al caricamento della pagina
+        document.addEventListener('DOMContentLoaded', function() {
+            // Assicura che p5.js sia pronto
+            setTimeout(function() {
+                if (typeof setup === 'function' && !state.initialized) {
+                    // Forza l'inizializzazione
+                    initializeData();
+                    // Forza un ridisegno
+                    if (typeof redraw === 'function') {
+                        redraw();
+                    }
+                }
+            }, 100);
+        });
     </script>
 </body>
 </html>
