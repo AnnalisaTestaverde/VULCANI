@@ -165,7 +165,15 @@ let state = {
     searchPanelHasFocus: false,
     hoveredSearchItemIndex: -1,
     hoveredVolcanoItemIndex: -1,
-    currentHoveredVolcanoName: null
+    currentHoveredVolcanoName: null,
+    // Aggiungi stati hover per i bottoni
+    hoveredStartButton: false,
+    hoveredSearchButton: false,
+    hoveredLearnMoreButton: false,
+    hoveredTimeFrameLeft: false,
+    hoveredTimeFrameRight: false,
+    hoveredYearLeft: false,
+    hoveredYearRight: false
 };
 
 let radialBgImage;
@@ -974,6 +982,9 @@ function draw() {
     updateTransition();
     updateSearchPanelAnimation();
     
+    // Aggiorna stati hover per i bottoni
+    updateButtonHoverStates();
+    
     if (transitionState.active) {
         background(CONFIG.colors.background);
         
@@ -1028,6 +1039,51 @@ function draw() {
     updateCursor();
 }
 
+function updateButtonHoverStates() {
+    // Aggiorna stati hover per tutti i bottoni
+    state.hoveredStartButton = state.startButtonArea &&
+        mouseX > state.startButtonArea.x &&
+        mouseX < state.startButtonArea.x + state.startButtonArea.width &&
+        mouseY > state.startButtonArea.y &&
+        mouseY < state.startButtonArea.y + state.startButtonArea.height;
+    
+    state.hoveredSearchButton = state.searchButtonArea &&
+        mouseX > state.searchButtonArea.x &&
+        mouseX < state.searchButtonArea.x + state.searchButtonArea.width &&
+        mouseY > state.searchButtonArea.y &&
+        mouseY < state.searchButtonArea.y + state.searchButtonArea.height;
+    
+    state.hoveredLearnMoreButton = state.learnMoreButtonArea &&
+        mouseX > state.learnMoreButtonArea.x &&
+        mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
+        mouseY > state.learnMoreButtonArea.y &&
+        mouseY < state.learnMoreButtonArea.y + state.learnMoreButtonArea.height;
+    
+    state.hoveredTimeFrameLeft = state.timeFrameLeftArrows &&
+        mouseX > state.timeFrameLeftArrows.x &&
+        mouseX < state.timeFrameLeftArrows.x + state.timeFrameLeftArrows.width &&
+        mouseY > state.timeFrameLeftArrows.y &&
+        mouseY < state.timeFrameLeftArrows.y + state.timeFrameLeftArrows.height;
+    
+    state.hoveredTimeFrameRight = state.timeFrameRightArrows &&
+        mouseX > state.timeFrameRightArrows.x &&
+        mouseX < state.timeFrameRightArrows.x + state.timeFrameRightArrows.width &&
+        mouseY > state.timeFrameRightArrows.y &&
+        mouseY < state.timeFrameRightArrows.y + state.timeFrameRightArrows.height;
+    
+    state.hoveredYearLeft = state.yearLeftArrow &&
+        mouseX > state.yearLeftArrow.x &&
+        mouseX < state.yearLeftArrow.x + state.yearLeftArrow.width &&
+        mouseY > state.yearLeftArrow.y &&
+        mouseY < state.yearLeftArrow.y + state.yearLeftArrow.height;
+    
+    state.hoveredYearRight = state.yearRightArrow &&
+        mouseX > state.yearRightArrow.x &&
+        mouseX < state.yearRightArrow.x + state.yearRightArrow.width &&
+        mouseY > state.yearRightArrow.y &&
+        mouseY < state.yearRightArrow.y + state.yearRightArrow.height;
+}
+
 function drawTitle() {
     textSize(72);
     textFont('Helvetica');
@@ -1054,12 +1110,23 @@ function drawStartAnimationButton() {
     const buttonX = CONFIG.layout.marginX;
     const buttonY = CONFIG.layout.startButtonY;
 
-    stroke(CONFIG.colors.accent);
+    // Disegna rettangolo con hover effect
+    if (state.hoveredStartButton) {
+        fill(255, 43, 0); // Rosso
+        stroke(255, 43, 0);
+    } else {
+        noFill();
+        stroke(255, 43, 0);
+    }
     strokeWeight(1);
-    noFill();
     rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
-    fill(CONFIG.colors.accent);
+    // Icona play/pause
+    if (state.hoveredStartButton) {
+        fill(255); // Bianco
+    } else {
+        fill(255, 43, 0); // Rosso
+    }
     noStroke();
     
     if (state.isPlaying) {
@@ -1072,7 +1139,12 @@ function drawStartAnimationButton() {
         );
     }
 
-    fill(CONFIG.colors.text);
+    // Testo
+    if (state.hoveredStartButton) {
+        fill(255); // Bianco
+    } else {
+        fill(0); // Nero
+    }
     noStroke();
     textSize(CONFIG.layout.labelFontSize);
     textStyle(BOLD);
@@ -1100,10 +1172,15 @@ function drawSearchButton() {
     const buttonX = startButtonRight + 20;
     const buttonY = CONFIG.layout.startButtonY;
 
-    // Rettangolo del bottone
-    stroke(245, 40, 0);
+    // Rettangolo del bottone con hover effect
+    if (state.hoveredSearchButton) {
+        fill(255, 43, 0); // Rosso
+        stroke(255, 43, 0);
+    } else {
+        noFill();
+        stroke(245, 40, 0);
+    }
     strokeWeight(1);
-    noFill();
     rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
     // Icona lente di ingrandimento
@@ -1111,7 +1188,11 @@ function drawSearchButton() {
     translate(buttonX + 22, buttonY + buttonHeight / 2.2);
     
     // Cerchio della lente
-    stroke(245, 40, 0);
+    if (state.hoveredSearchButton) {
+        stroke(255); // Bianco
+    } else {
+        stroke(245, 40, 0); // Rosso
+    }
     strokeWeight(1.5);
     noFill();
     circle(0, 0, 18);
@@ -1126,7 +1207,11 @@ function drawSearchButton() {
     pop();
 
     // Testo
-    fill(0);
+    if (state.hoveredSearchButton) {
+        fill(255); // Bianco
+    } else {
+        fill(0); // Nero
+    }
     noStroke();
     textSize(CONFIG.layout.labelFontSize);
     textStyle(BOLD);
@@ -1502,21 +1587,30 @@ function drawLearnMoreButton() {
     const buttonX = width - buttonWidth - 50;
     const buttonY = CONFIG.layout.startButtonY;
     
-    stroke(245, 40, 0);
+    // Rettangolo del bottone con hover effect
+    if (state.hoveredLearnMoreButton) {
+        fill(255, 43, 0); // Rosso
+        stroke(255, 43, 0);
+    } else {
+        noFill();
+        stroke(245, 40, 0);
+    }
     strokeWeight(1);
-    noFill();
     rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
-    fill(245, 40, 0);
-    noStroke();
-    
+    // Icona "i" con hover effect
     push();
     translate(buttonX + 25, buttonY + buttonHeight/2);
-    stroke(245, 40, 0);
+    if (state.hoveredLearnMoreButton) {
+        stroke(255); // Bianco
+        fill(255); // Bianco
+    } else {
+        stroke(245, 40, 0);
+        fill(245, 40, 0);
+    }
     strokeWeight(1);
     noFill();
     circle(0, 0, 20);
-    fill(245, 40, 0);
     noStroke();
     textSize(16);
     textStyle(BOLD);
@@ -1524,7 +1618,12 @@ function drawLearnMoreButton() {
     text("i", 0, 0);
     pop();
 
-    fill(0);
+    // Testo
+    if (state.hoveredLearnMoreButton) {
+        fill(255); // Bianco
+    } else {
+        fill(0); // Nero
+    }
     noStroke();
     textSize(CONFIG.layout.labelFontSize);
     textStyle(BOLD);
@@ -1664,7 +1763,7 @@ function drawTemporalRangeSelector() {
 
     const leftArrowsX = startX;
     const leftArrowsY = controlsY;
-    drawDoubleArrowWithBox(leftArrowsX, leftArrowsY, 60, 40, '<<', CONFIG.colors.text, true);
+    drawDoubleArrowWithBox(leftArrowsX, leftArrowsY, 60, 40, '<<', state.hoveredTimeFrameLeft);
 
     const yearX = leftArrowsX + 60; 
     fill(CONFIG.colors.text);
@@ -1673,7 +1772,7 @@ function drawTemporalRangeSelector() {
     text(yearString, yearX + 140, leftArrowsY + 20);
 
     const rightArrowsX = yearX + 280; 
-    drawDoubleArrowWithBox(rightArrowsX, leftArrowsY, 60, 40, '>>', CONFIG.colors.text, true);
+    drawDoubleArrowWithBox(rightArrowsX, leftArrowsY, 60, 40, '>>', state.hoveredTimeFrameRight);
 
     state.timeFrameLeftArrows = {
         x: leftArrowsX,
@@ -1704,7 +1803,7 @@ function drawYearSelector() {
 
     const leftArrowX = startX;
     const leftArrowY = controlsY;
-    drawSingleArrowWithBox(leftArrowX, leftArrowY, 60, 40, '<', CONFIG.colors.accent, false);
+    drawSingleArrowWithBox(leftArrowX, leftArrowY, 60, 40, '<', state.hoveredYearLeft);
 
     const yearX = leftArrowX + 100;
     
@@ -1723,7 +1822,7 @@ function drawYearSelector() {
     text(yearText, yearX + 110, leftArrowY + 20);
 
     const rightArrowX = yearX + 240;
-    drawSingleArrowWithBox(rightArrowX, leftArrowY, 60, 40, '>', CONFIG.colors.accent, false);
+    drawSingleArrowWithBox(rightArrowX, leftArrowY, 60, 40, '>', state.hoveredYearRight);
 
     state.yearLeftArrow = {
         x: leftArrowX,
@@ -1739,26 +1838,44 @@ function drawYearSelector() {
     };
 }
 
-function drawDoubleArrowWithBox(x, y, w, h, arrows, arrowColor, isBlack) {
-    fill(255);
-    stroke(isBlack ? CONFIG.colors.text : CONFIG.colors.accent);
+function drawDoubleArrowWithBox(x, y, w, h, arrows, isHovered) {
+    if (isHovered) {
+        fill(255, 43, 0); // Rosso
+        stroke(255, 43, 0);
+    } else {
+        fill(255); // Bianco
+        stroke(CONFIG.colors.text);
+    }
     strokeWeight(1);
     rect(x, y, w, h, 5);
     
-    fill(arrowColor);
+    if (isHovered) {
+        fill(255); // Bianco
+    } else {
+        fill(CONFIG.colors.text);
+    }
     noStroke();
     textSize(25);
     textAlign(CENTER, CENTER);
     text(arrows, x + w/2, y + h/2);
 }
 
-function drawSingleArrowWithBox(x, y, w, h, arrow, arrowColor, isBlack) {
-    fill(255);
-    stroke(isBlack ? CONFIG.colors.text : CONFIG.colors.accent);
+function drawSingleArrowWithBox(x, y, w, h, arrow, isHovered) {
+    if (isHovered) {
+        fill(255, 43, 0); // Rosso
+        stroke(255, 43, 0);
+    } else {
+        fill(255); // Bianco
+        stroke(CONFIG.colors.accent);
+    }
     strokeWeight(1);
     rect(x, y, w, h, 5);
     
-    fill(arrowColor);
+    if (isHovered) {
+        fill(255); // Bianco
+    } else {
+        fill(CONFIG.colors.accent);
+    }
     noStroke();
     textSize(25);
     textAlign(CENTER, CENTER);
