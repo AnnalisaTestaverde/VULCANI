@@ -248,39 +248,55 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
   }
 }
 
-// Bottone "Explore all eruptions" - STILE MODIFICATO: solo stroke e testo bianco
+// Bottone "Explore all eruptions"
 function drawExploreButton() {
-  let buttonW = 220;
-  let buttonH = 50;
-  let buttonX = width / 2 - buttonW / 2;
-  let buttonY = height - 100;
-
+  const buttonWidth = 220;
+  const buttonHeight = 40;
+  const buttonX = width / 2 - buttonWidth / 2;
+  const buttonY = height - 100;
+  
   // Calcola scala hover
-  let scale = isHovering ? 1.05 : 1.0;
-  let scaledW = buttonW * scale;
-  let scaledH = buttonH * scale;
-  let scaledX = buttonX - (scaledW - buttonW) / 2;
-  let scaledY = buttonY - (scaledH - buttonH) / 2;
+  const scale = isHovering ? 1.05 : 1.0;
+  const scaledW = buttonWidth * scale;
+  const scaledH = buttonHeight * scale;
+  const scaledX = buttonX - (scaledW - buttonWidth) / 2;
+  const scaledY = buttonY - (scaledH - buttonHeight) / 2;
+  
+  if (isHovering) {
+    // STATO HOVER: sfondo bianco, testo e contorno rosso
+    fill(255); // Sfondo BIANCO
+    stroke(255, 43, 0); // Stroke ROSSO (#FF2B00)
+    strokeWeight(1);
+    rect(scaledX, scaledY, scaledW, scaledH, 5); // Angoli arrotondati con raggio 5
 
-  // STILE MODIFICATO: Solo contorno bianco (stroke) e testo bianco
-  noFill();
-  stroke(255); // Stroke bianco
-  strokeWeight(2);
-  rect(scaledX, scaledY, scaledW, scaledH, 25);
+    // Testo "Explore all eruptions" in ROSSO, CENTRATO
+    fill(255, 43, 0); // #FF2B00 - Testo ROSSO
+    noStroke();
+    textSize(18);
+    textStyle(BOLD);
+    textAlign(CENTER, CENTER);
+    text("Explore all eruptions", scaledX + scaledW/2, scaledY + scaledH/2);
+  } else {
+    // STATO NORMALE: contorno bianco, sfondo trasparente, testo bianco
+    noFill();
+    stroke(255); // Stroke BIANCO
+    strokeWeight(1);
+    rect(scaledX, scaledY, scaledW, scaledH, 5); // Angoli arrotondati con raggio 5
 
-  // Testo bottone — BIANCO
-  fill(255);
-  noStroke();
-  textSize(18);
-  textStyle(BOLD);
-  textAlign(CENTER, CENTER);
-  text("Explore all eruptions", scaledX + scaledW / 2, scaledY + scaledH / 2);
+    // Testo "Explore all eruptions" in BIANCO, CENTRATO
+    fill(255); // Testo BIANCO
+    noStroke();
+    textSize(18);
+    textStyle(BOLD);
+    textAlign(CENTER, CENTER);
+    text("Explore all eruptions", scaledX + scaledW/2, scaledY + scaledH/2);
+  }
 
   // Aggiorna bounds per il click
   downBounds.x = buttonX;
   downBounds.y = buttonY;
-  downBounds.w = buttonW;
-  downBounds.h = buttonH;
+  downBounds.w = buttonWidth;
+  downBounds.h = buttonHeight;
 }
 
 // Configura tutti gli event listener
@@ -418,16 +434,9 @@ function mousePressed() {
     return;
   }
   
-  // Clic sulla freccia SU (area approssimativa in alto)
-  if (currentSlide > 0 && mouseY < 100) {
-    goToSlide(currentSlide - 1);
-  }
-  // Clic sulla freccia GIÙ (area approssimativa in basso, ma non sul bottone)
-  else if (currentSlide < slides.length - 1 && mouseY > height - 120 && mouseY < height - 80) {
-    goToSlide(currentSlide + 1);
-  }
+  // NON gestire più i click sulle frecce qui - le frecce HTML hanno i loro event listener
   // Click sul bottone finale
-  else if (currentSlide === slides.length - 1) {
+  if (currentSlide === slides.length - 1) {
     if (
       mouseX >= downBounds.x &&
       mouseX <= downBounds.x + downBounds.w &&
@@ -450,28 +459,25 @@ function mouseMoved() {
       mouseY >= downBounds.y &&
       mouseY <= downBounds.y + downBounds.h
     ) {
-      isHovering = true;
-      document.body.style.cursor = 'pointer';
+      if (!isHovering) {
+        isHovering = true;
+        document.body.style.cursor = 'pointer';
+        redraw(); // Forza il redraw per mostrare il cambio di stato
+      }
       return;
     } else {
-      isHovering = false;
+      if (isHovering) {
+        isHovering = false;
+        document.body.style.cursor = 'default';
+        redraw(); // Forza il redraw per mostrare il cambio di stato
+      }
     }
   }
   
-  // Hover sulle aree delle frecce (solo quando non si sta digitando)
-  if (!isTyping) {
-    if (currentSlide > 0 && mouseY < 100) {
-      // Area freccia su (in alto)
-      document.body.style.cursor = 'pointer';
-      return;
-    } else if (currentSlide < slides.length - 1 && mouseY > height - 120 && mouseY < height - 80) {
-      // Area freccia giù (in basso, sopra il bottone)
-      document.body.style.cursor = 'pointer';
-      return;
-    }
+  // NON gestire più hover sulle aree delle frecce qui - le frecce HTML hanno i loro stili CSS
+  if (!isHovering) {
+    document.body.style.cursor = 'default';
   }
-  
-  document.body.style.cursor = 'default';
 }
 
 // Aggiorna gli indicatori delle schermate
@@ -499,6 +505,17 @@ function updateArrowsVisibility() {
         const upArrow = document.createElement('div');
         upArrow.className = 'scroll-hint up-arrow';
         upArrow.innerHTML = 'V';
+        // Aggiungi event listener per il click
+        upArrow.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (currentSlide > 0) {
+            if (isTyping) {
+              completeTyping();
+            }
+            goToSlide(currentSlide - 1);
+          }
+        });
         arrows.appendChild(upArrow);
       }
       
@@ -507,6 +524,17 @@ function updateArrowsVisibility() {
         const downArrow = document.createElement('div');
         downArrow.className = 'scroll-hint down-arrow';
         downArrow.innerHTML = 'V';
+        // Aggiungi event listener per il click
+        downArrow.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (currentSlide < slides.length - 1) {
+            if (isTyping) {
+              completeTyping();
+            }
+            goToSlide(currentSlide + 1);
+          }
+        });
         arrows.appendChild(downArrow);
       }
     }
@@ -591,7 +619,7 @@ function addInlineStyles() {
       width: 40px;
       height: 40px;
       animation: bounce 2s infinite;
-      pointer-events: auto;
+      pointer-events: auto !important; /* IMPORTANTE: permette i click */
       opacity: 1 !important;
       -webkit-font-smoothing: antialiased !important;
       -moz-osx-font-smoothing: grayscale !important;
@@ -602,7 +630,7 @@ function addInlineStyles() {
     /* Freccia SU - posizionata in alto, ruotata di 180 gradi */
     .up-arrow {
       top: 40px;
-      left: 49.585%;
+      left: 50%;
       transform: translateX(-50%) rotate(180deg);
     }
     
@@ -648,6 +676,7 @@ function addInlineStyles() {
       top: 0;
       left: 0;
       z-index: 1;
+      pointer-events: none; /* IMPORTANTE: il canvas non deve intercettare i click */
     }
     
     /* Body e HTML per coprire tutto */
@@ -659,6 +688,16 @@ function addInlineStyles() {
       height: 100%;
       background-color: #FF2B00;
       font-family: 'Helvetica', Arial, sans-serif;
+    }
+    
+    /* Aggiungi effetto hover per le frecce */
+    .scroll-hint:hover {
+      opacity: 0.8 !important;
+      transform: translateX(-50%) scale(1.1);
+    }
+    
+    .up-arrow:hover {
+      transform: translateX(-50%) rotate(180deg) scale(1.1);
     }
   `;
   document.head.appendChild(style);
