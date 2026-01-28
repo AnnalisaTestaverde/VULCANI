@@ -1327,7 +1327,7 @@ function drawSearchPanel() {
     // 2. Pannello principale (con la sua altezza normale)
     fill(255);
     stroke(245, 40, 0);
-    strokeWeight(2);
+    strokeWeight(1);
     rect(panelX, panelY - currentPanelHeight, state.searchPanelWidth, currentPanelHeight, 8);
     
     // 3. Contenuto del pannello (solo se il pannello è abbastanza alto)
