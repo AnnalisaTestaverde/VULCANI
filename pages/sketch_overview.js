@@ -82,6 +82,8 @@ const TIMELINE_ANIMATION_SPEED_NORMAL = 500;
 const TIMELINE_ANIMATION_SPEED_FAST = 800;
 const TIMELINE_PAUSE_BETWEEN_CYCLES = 1000;
 
+const SEARCH_PANEL_ANIM_DURATION = 300;
+
 let state = {
     volcanoData: [],
     filteredData: [],
@@ -140,7 +142,30 @@ let state = {
         pauseStart: 0,
         explosionStart: 0
     },
-    learnMoreButtonArea: null
+    learnMoreButtonArea: null,
+    searchButtonArea: null,
+    searchPanelOpen: false,
+    searchPanelX: 0,
+    searchPanelY: 0,
+    searchPanelWidth: 220,
+    searchPanelHeight: 0,
+    searchSelectedContinent: null,
+    searchContinentsPanelOpen: true,
+    searchVolcanoesPanelOpen: false,
+    searchPanelAnimProgress: 0,
+    searchPanelAnimStart: null,
+    hoveredSearchVolcano: null,
+    searchPanelVolcanoes: [],
+    searchPanelScrollY: 0,
+    searchPanelMaxHeight: 400,
+    searchPanelItemHeight: 30,
+    isScrollingSearch: false,
+    scrollStartY: 0,
+    scrollStartOffset: 0,
+    searchPanelHasFocus: false,
+    hoveredSearchItemIndex: -1,
+    hoveredVolcanoItemIndex: -1,
+    currentHoveredVolcanoName: null
 };
 
 let radialBgImage;
@@ -591,6 +616,17 @@ function updateDotAnimations() {
     }
 }
 
+function updateSearchPanelAnimation() {
+    if (state.searchPanelAnimStart !== null) {
+        const elapsed = millis() - state.searchPanelAnimStart;
+        state.searchPanelAnimProgress = constrain(elapsed / SEARCH_PANEL_ANIM_DURATION, 0, 1);
+        
+        if (state.searchPanelAnimProgress >= 1) {
+            state.searchPanelAnimStart = null;
+        }
+    }
+}
+
 function startFastDotAnimations() {
     state.useFastAnimations = true;
     state.dotAnimationStart = millis();
@@ -936,6 +972,7 @@ function startTransitionToLearnMore() {
 
 function draw() {
     updateTransition();
+    updateSearchPanelAnimation();
     
     if (transitionState.active) {
         background(CONFIG.colors.background);
@@ -947,6 +984,7 @@ function draw() {
         
         drawTitle();
         drawStartAnimationButton();
+        drawSearchButton();
         drawLearnMoreButton();
         drawLegend();
         drawTemporalRangeSelector();
@@ -972,6 +1010,7 @@ function draw() {
         
         drawTitle();
         drawStartAnimationButton();
+        drawSearchButton();
         drawLearnMoreButton();
         drawLegend();
         drawTemporalRangeSelector();
@@ -1047,6 +1086,413 @@ function drawStartAnimationButton() {
         width: buttonWidth,
         height: buttonHeight
     };
+}
+
+function drawSearchButton() {
+    // Calcola la posizione tra Start Animation e Learn More
+    const startButtonRight = state.startButtonArea.x + state.startButtonArea.width;
+    const learnMoreButtonLeft = state.learnMoreButtonArea ? state.learnMoreButtonArea.x : width - 160 - 50;
+    const availableSpace = learnMoreButtonLeft - startButtonRight;
+    
+    // Adatta la larghezza in base allo spazio disponibile
+    const buttonWidth = min(190, availableSpace - 40);
+    const buttonHeight = 40;
+    const buttonX = startButtonRight + 20;
+    const buttonY = CONFIG.layout.startButtonY;
+
+    // Rettangolo del bottone
+    stroke(245, 40, 0);
+    strokeWeight(1);
+    noFill();
+    rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
+
+    // Icona lente di ingrandimento
+    push();
+    translate(buttonX + 22, buttonY + buttonHeight / 2.2);
+    
+    // Cerchio della lente
+    stroke(245, 40, 0);
+    strokeWeight(1.5);
+    noFill();
+    circle(0, 0, 18);
+    
+    // Manico della lente
+    const handleLength = 8;
+    const handleAngle = PI / 4;
+    const handleX = cos(handleAngle) * 9;
+    const handleY = sin(handleAngle) * 9;
+    line(handleX, handleY, handleX + cos(handleAngle) * handleLength, handleY + sin(handleAngle) * handleLength);
+    
+    pop();
+
+    // Testo
+    fill(0);
+    noStroke();
+    textSize(CONFIG.layout.labelFontSize);
+    textStyle(BOLD);
+    textAlign(LEFT, CENTER);
+    text("Search Eruptions", buttonX + 43, buttonY + buttonHeight / 2);
+
+    // Salva l'area cliccabile
+    state.searchButtonArea = {
+        x: buttonX,
+        y: buttonY,
+        width: buttonWidth,
+        height: buttonHeight
+    };
+
+    // Disegna il pannello di ricerca se aperto
+    if (state.searchPanelOpen) {
+        drawSearchPanel();
+    }
+}
+
+function drawSearchPanel() {
+    const startX = state.searchButtonArea.x + state.searchButtonArea.width + 10; // A destra del bottone
+    const startY = state.searchButtonArea.y + 40; // Allineato in basso con il bottone
+    
+    // Anima l'altezza
+    let panelHeight = state.searchPanelHeight * state.searchPanelAnimProgress;
+    
+    // Sfondo del pannello - MODIFICATO: SOLIDO, nessuna trasparenza
+    fill(255); // BIANCO SOLIDO
+    stroke(245, 40, 0); // BORDO ROSSO
+    strokeWeight(1);
+    // Disegna PRIMA il rettangolo di sfondo (senza trasparenza)
+    rect(startX, startY - panelHeight, state.searchPanelWidth, panelHeight, 8);
+    
+    // Ora disegna il contenuto sopra
+    push();
+    translate(startX, startY - panelHeight);
+    
+    // IMPORTANTE: Disegna un altro rettangolo bianco per coprire eventuali trasparenze
+    // Questo risolve il problema della leggenda che si vede sotto
+    fill(255);
+    noStroke();
+    rect(0, 0, state.searchPanelWidth, panelHeight, 8);
+    
+    // Mostra continenti O vulcani nello stesso box
+    if (state.searchContinentsPanelOpen) {
+        drawContinentsList(panelHeight);
+    } else if (state.searchVolcanoesPanelOpen) {
+        drawVolcanoesList(panelHeight);
+    }
+    
+    pop();
+}
+
+function drawContinentsList(panelHeight) {
+    const margin = 15;
+    const itemHeight = 35;
+    const titleHeight = 40;
+    
+    // Titolo
+    fill(245, 40, 0);
+    noStroke();
+    textSize(14);
+    textStyle(BOLD);
+    textAlign(LEFT, CENTER);
+    text("SELECT CONTINENT", margin, titleHeight / 2);
+    
+    // Linea separatrice
+    stroke(245, 40, 0, 100);
+    strokeWeight(1);
+    line(margin, titleHeight, state.searchPanelWidth - margin, titleHeight);
+    
+    // Lista continenti
+    let y = titleHeight + 10;
+    CONTINENTS.forEach((continent, index) => {
+        // Controlla se l'elemento è visibile nell'altezza animata
+        if (y + itemHeight <= panelHeight) {
+            const isHovered = mouseX > state.searchButtonArea.x + margin &&
+                             mouseX < state.searchButtonArea.x + state.searchPanelWidth - margin &&
+                             mouseY > state.searchButtonArea.y - panelHeight + y &&
+                             mouseY < state.searchButtonArea.y - panelHeight + y + itemHeight;
+            
+            // Background hover (rosso trasparente)
+            if (isHovered) {
+                fill(245, 40, 0, 15);
+                noStroke();
+                rect(margin, y, state.searchPanelWidth - 2 * margin, itemHeight, 6);
+                
+                // Salva l'indice dell'item hovered
+                state.hoveredSearchItemIndex = index;
+            }
+            
+            // Nome continente
+            fill(0);
+            noStroke();
+            textSize(14);
+            textStyle(NORMAL);
+            textAlign(LEFT, CENTER);
+            text(continent, margin + 10, y + itemHeight / 2);
+            
+            // Numero vulcani
+            const count = state.continentCounts[continent] || 0;
+            fill(245, 40, 0);
+            textSize(12);
+            textStyle(BOLD);
+            textAlign(RIGHT, CENTER);
+            text(`(${count})`, state.searchPanelWidth - margin - 10, y + itemHeight / 2);
+        }
+        
+        y += itemHeight + 5;
+    });
+    
+    // Calcola altezza totale
+    const totalHeight = y + 5;
+    
+    // Aggiorna altezza pannello (se non in animazione)
+    if (state.searchPanelAnimProgress === 1) {
+        state.searchPanelHeight = min(totalHeight, state.searchPanelMaxHeight);
+    }
+}
+
+function drawVolcanoesList(panelHeight) {
+    const margin = 15;
+    const itemHeight = 32;
+    const titleHeight = 40;
+    const scrollbarWidth = 6;
+    
+    // Titolo con freccia per tornare indietro
+    push();
+    translate(0, titleHeight / 2);
+    
+    // Freccia per tornare indietro
+    fill(245, 40, 0);
+    noStroke();
+    textSize(18);
+    textStyle(BOLD);
+    textAlign(LEFT, CENTER);
+    text("←", margin, 0);
+    
+    // Nome continente
+    textSize(14);
+    text(state.searchSelectedContinent.toUpperCase(), margin + 25, 0);
+    
+    pop();
+    
+    // Linea separatrice
+    stroke(245, 40, 0, 100);
+    strokeWeight(1);
+    line(margin, titleHeight, state.searchPanelWidth - margin, titleHeight);
+    
+    // Area scorrevole
+    const totalItems = state.searchPanelVolcanoes.length;
+    const contentHeight = totalItems * itemHeight;
+    const visibleHeight = min(panelHeight - titleHeight, contentHeight);
+    const needsScroll = contentHeight > visibleHeight;
+    
+    // Maschera per l'area visibile
+    drawingContext.save();
+    drawingContext.beginPath();
+    drawingContext.rect(0, titleHeight, state.searchPanelWidth, visibleHeight);
+    drawingContext.clip();
+    
+    // Lista vulcani
+    let hoveredVolcanoName = null;
+    for (let i = 0; i < totalItems; i++) {
+        const volcano = state.searchPanelVolcanoes[i];
+        const y = titleHeight + i * itemHeight - state.searchPanelScrollY;
+        
+        // Controlla se l'elemento è visibile
+        if (y + itemHeight < titleHeight || y > titleHeight + visibleHeight) continue;
+        
+        const isHovered = mouseX > state.searchButtonArea.x + margin &&
+                         mouseX < state.searchButtonArea.x + state.searchPanelWidth - margin - (needsScroll ? scrollbarWidth : 0) &&
+                         mouseY > state.searchButtonArea.y - panelHeight + y &&
+                         mouseY < state.searchButtonArea.y - panelHeight + y + itemHeight;
+        
+        // Background hover (rosso trasparente)
+        if (isHovered) {
+            fill(245, 40, 0, 15);
+            noStroke();
+            rect(margin, y, state.searchPanelWidth - 2 * margin - (needsScroll ? scrollbarWidth : 0), itemHeight, 6);
+            
+            // Salva l'indice dell'item hovered
+            state.hoveredVolcanoItemIndex = i;
+            
+            // Salva il nome del vulcano per l'hover nel grafico
+            hoveredVolcanoName = volcano.name;
+        }
+        
+        // Nome vulcano
+        fill(0);
+        noStroke();
+        textSize(12);
+        textStyle(NORMAL);
+        textAlign(LEFT, CENTER);
+        
+        // Tronca il nome se troppo lungo
+        let volcanoName = volcano.name;
+        const maxWidth = state.searchPanelWidth - 2 * margin - (needsScroll ? scrollbarWidth : 0) - 10;
+        textSize(12);
+        while (textWidth(volcanoName) > maxWidth && volcanoName.length > 20) {
+            volcanoName = volcanoName.substring(0, volcanoName.length - 4) + '...';
+        }
+        
+        text(volcanoName, margin + 5, y + itemHeight / 2);
+    }
+    
+    drawingContext.restore();
+    
+    // Scrollbar se necessario
+    if (needsScroll) {
+        const scrollbarX = state.searchPanelWidth - scrollbarWidth - 4;
+        const scrollbarHeight = visibleHeight * (visibleHeight / contentHeight);
+        const scrollbarY = titleHeight + map(state.searchPanelScrollY, 0, contentHeight - visibleHeight, 0, visibleHeight - scrollbarHeight);
+        
+        // Track
+        fill(240);
+        noStroke();
+        rect(scrollbarX, titleHeight, scrollbarWidth, visibleHeight, 3);
+        
+        // Thumb
+        fill(200);
+        rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 3);
+        
+        // Thumb hover
+        if (mouseX > state.searchButtonArea.x + scrollbarX &&
+            mouseX < state.searchButtonArea.x + scrollbarX + scrollbarWidth &&
+            mouseY > state.searchButtonArea.y - panelHeight + scrollbarY &&
+            mouseY < state.searchButtonArea.y - panelHeight + scrollbarY + scrollbarHeight) {
+            fill(180);
+            rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 3);
+        }
+    }
+    
+    // Aggiorna il vulcano hovered per il grafico
+    state.currentHoveredVolcanoName = hoveredVolcanoName;
+}
+
+function openSearchPanel() {
+    state.searchPanelOpen = true;
+    state.searchPanelAnimStart = millis();
+    state.searchPanelAnimProgress = 0;
+    state.searchContinentsPanelOpen = true;
+    state.searchVolcanoesPanelOpen = false;
+    state.searchSelectedContinent = null;
+    state.searchPanelVolcanoes = [];
+    state.currentHoveredVolcanoName = null;
+    state.searchPanelScrollY = 0;
+    state.hoveredSearchItemIndex = -1;
+    state.hoveredVolcanoItemIndex = -1;
+    
+    // Calcola altezza iniziale per l'animazione
+    const margin = 15;
+    const itemHeight = 35;
+    const titleHeight = 40;
+    const totalHeight = titleHeight + 10 + (CONTINENTS.length * (itemHeight + 5)) + 5;
+    state.searchPanelHeight = min(totalHeight, state.searchPanelMaxHeight);
+    
+    // Imposta il focus sul pannello di ricerca
+    state.searchPanelHasFocus = true;
+}
+
+function closeSearchPanel() {
+    state.searchPanelOpen = false;
+    state.searchPanelAnimStart = null;
+    state.searchPanelAnimProgress = 0;
+    state.searchContinentsPanelOpen = true;
+    state.searchVolcanoesPanelOpen = false;
+    state.searchSelectedContinent = null;
+    state.searchPanelVolcanoes = [];
+    state.currentHoveredVolcanoName = null;
+    state.searchPanelScrollY = 0;
+    state.hoveredSearchItemIndex = -1;
+    state.hoveredVolcanoItemIndex = -1;
+    
+    // Rimuovi il focus
+    state.searchPanelHasFocus = false;
+}
+
+function selectContinentInSearch(continent) {
+    state.searchSelectedContinent = continent;
+    state.searchContinentsPanelOpen = false;
+    state.searchVolcanoesPanelOpen = true;
+    
+    // Raccogli tutti i vulcani di questo continente
+    const continentVolcanoes = state.filteredData.filter(v => v.continent === continent);
+    
+    // Raggruppa per nome del vulcano e prendi la prima eruzione
+    const volcanoMap = new Map();
+    continentVolcanoes.forEach(v => {
+        if (!volcanoMap.has(v.name) || v.year < volcanoMap.get(v.name).year) {
+            volcanoMap.set(v.name, v);
+        }
+    });
+    
+    state.searchPanelVolcanoes = Array.from(volcanoMap.values())
+        .sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Calcola nuova altezza per l'animazione
+    const margin = 15;
+    const itemHeight = 32;
+    const titleHeight = 40;
+    const totalHeight = titleHeight + min(state.searchPanelVolcanoes.length * itemHeight, state.searchPanelMaxHeight - titleHeight);
+    state.searchPanelHeight = min(totalHeight + 10, state.searchPanelMaxHeight);
+    
+    state.searchPanelScrollY = 0;
+    state.hoveredVolcanoItemIndex = -1;
+    state.currentHoveredVolcanoName = null;
+}
+
+function selectVolcanoInSearch(volcano) {
+    // Trova tutte le eruzioni di questo vulcano
+    const allEruptions = state.filteredData.filter(v => v.name === volcano.name);
+    
+    if (allEruptions.length > 0) {
+        // Trova la prima eruzione in ordine cronologico
+        const firstEruption = allEruptions.reduce((earliest, current) => 
+            current.year < earliest.year ? current : earliest
+        );
+        
+        // Avvia l'animazione dell'eruzione per la prima eruzione
+        const key = `${firstEruption.name}-${firstEruption.year}-${firstEruption.deaths}`;
+        const angle = state.volcanoPositions.get(key);
+        if (angle !== undefined) {
+            const radius = getRadiusForImpact(firstEruption.impact);
+            const x = state.centerX + cos(angle) * radius;
+            const y = state.centerY + sin(angle) * radius;
+            
+            console.log("💥 AVVIO ANIMAZIONE per:", firstEruption.name);
+            triggerVolcanoEruption(firstEruption, x, y);
+        }
+    }
+    
+    // Chiudi il pannello di ricerca
+    closeSearchPanel();
+}
+
+function highlightAllVolcanoEruptions(volcanoName) {
+    // Trova TUTTE le eruzioni di questo vulcano (per nome)
+    const eruptions = state.filteredData.filter(v => v.name === volcanoName);
+    
+    eruptions.forEach(v => {
+        const key = `${v.name}-${v.year}-${v.deaths}`;
+        const angle = state.volcanoPositions.get(key);
+        if (angle !== undefined) {
+            const radius = getRadiusForImpact(v.impact);
+            const x = state.centerX + cos(angle) * radius;
+            const y = state.centerY + sin(angle) * radius;
+            
+            // Disegna un cerchio di evidenziazione più grande con alone rosso
+            fill(245, 40, 0, 30);
+            noStroke();
+            circle(x, y, 35);
+            
+            // Disegna il punto rosso al centro
+            fill(245, 40, 0);
+            noStroke();
+            circle(x, y, 10);
+            
+            // Aggiungi un bordo bianco per maggiore visibilità
+            stroke(255, 255, 255, 200);
+            strokeWeight(1.5);
+            noFill();
+            circle(x, y, 12);
+        }
+    });
 }
 
 function drawLearnMoreButton() {
@@ -1139,16 +1585,8 @@ function drawLegend() {
     // cerchio centrale
     circle(0, 0, r * 2);
 
-    // cerchio centrale
-    //circle(0, 0, r2 * 2);
-
     // linea verticale
     line(0, R + 2, 0, 4);
-   
-
-    // punta della freccia
-    //line(0, 1, -2, 5);
-    //line(0, 1, 2, 5);
 
     fill(CONFIG.colors.accent);
     triangle (0, 1, -2, 6, 2, 6);
@@ -1178,7 +1616,6 @@ function drawLegend() {
     // lati dello spicchio
     line(0, 0, cos(a1) * A, sin(a1) * A);
     line(0, 0, cos(a2) * A, sin(a2) * A);
-
 
     // arco
     arc(0, 0, A * 2, A * 2, a1, a2);
@@ -1401,6 +1838,11 @@ function drawMainCircle() {
     
     if (state.filteredData.length > 0) {
         drawVolcanoes();
+    }
+    
+    // MOSTRA TUTTE LE ERUZIONI DEL VULCANO HOVERED NEL PANNEL DI RICERCA
+    if (state.currentHoveredVolcanoName) {
+        highlightAllVolcanoEruptions(state.currentHoveredVolcanoName);
     }
     
     pop();
@@ -1629,6 +2071,7 @@ function updateLayout() {
 }
 
 function mousePressed() {
+    // Controlla click sul bottone Learn More
     if (state.learnMoreButtonArea &&
         mouseX > state.learnMoreButtonArea.x &&
         mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
@@ -1636,6 +2079,103 @@ function mousePressed() {
         mouseY < state.learnMoreButtonArea.y + state.learnMoreButtonArea.height) {
         
         startTransitionToLearnMore();
+        return;
+    }
+
+    // Controlla click sul bottone Search
+    if (state.searchButtonArea &&
+        mouseX > state.searchButtonArea.x &&
+        mouseX < state.searchButtonArea.x + state.searchButtonArea.width &&
+        mouseY > state.searchButtonArea.y &&
+        mouseY < state.searchButtonArea.y + state.searchButtonArea.height) {
+        
+        if (state.searchPanelOpen) {
+            closeSearchPanel();
+        } else {
+            openSearchPanel();
+        }
+        return;
+    }
+
+    // Controlla click all'interno del pannello di ricerca se aperto
+    if (state.searchPanelOpen && state.searchPanelAnimProgress > 0) {
+        const panelX = state.searchButtonArea.x;
+        const panelY = state.searchButtonArea.y - state.searchPanelHeight * state.searchPanelAnimProgress;
+        const panelHeight = state.searchPanelHeight * state.searchPanelAnimProgress;
+        
+        if (mouseX > panelX && mouseX < panelX + state.searchPanelWidth &&
+            mouseY > panelY && mouseY < state.searchButtonArea.y) {
+            
+            const margin = 15;
+            const titleHeight = 40;
+            const localX = mouseX - panelX;
+            const localY = mouseY - panelY;
+            
+            // Gestisci sia continenti che vulcani
+            if (state.searchContinentsPanelOpen) {
+                // Click su un continente
+                if (localY > titleHeight) {
+                    const itemHeight = 35;
+                    const itemIndex = Math.floor((localY - titleHeight) / (itemHeight + 5));
+                    if (itemIndex >= 0 && itemIndex < CONTINENTS.length) {
+                        const continent = CONTINENTS[itemIndex];
+                        selectContinentInSearch(continent);
+                        return;
+                    }
+                }
+                
+            } else if (state.searchVolcanoesPanelOpen) {
+                // Click sulla freccia per tornare ai continenti
+                if (localY < titleHeight && localX < margin + 20) {
+                    state.searchContinentsPanelOpen = true;
+                    state.searchVolcanoesPanelOpen = false;
+                    state.searchSelectedContinent = null;
+                    state.searchPanelVolcanoes = [];
+                    state.currentHoveredVolcanoName = null;
+                    state.searchPanelScrollY = 0;
+                    state.hoveredVolcanoItemIndex = -1;
+                    return;
+                }
+                
+                // Click su un vulcano
+                const itemHeight = 32;
+                if (localY > titleHeight) {
+                    const scrollY = state.searchPanelScrollY;
+                    const visibleY = localY - titleHeight + scrollY;
+                    const itemIndex = Math.floor(visibleY / itemHeight);
+                    
+                    if (itemIndex >= 0 && itemIndex < state.searchPanelVolcanoes.length) {
+                        const volcano = state.searchPanelVolcanoes[itemIndex];
+                        selectVolcanoInSearch(volcano);
+                        return;
+                    }
+                }
+                
+                // Click sulla scrollbar
+                const visibleHeight = panelHeight - titleHeight;
+                const contentHeight = state.searchPanelVolcanoes.length * itemHeight;
+                
+                if (contentHeight > visibleHeight) {
+                    const scrollbarWidth = 6;
+                    const scrollbarX = state.searchPanelWidth - scrollbarWidth - 4;
+                    
+                    if (localX > scrollbarX && localX < scrollbarX + scrollbarWidth &&
+                        localY > titleHeight && localY < titleHeight + visibleHeight) {
+                        
+                        // Inizia lo scroll
+                        state.isScrollingSearch = true;
+                        state.scrollStartY = mouseY;
+                        state.scrollStartOffset = state.searchPanelScrollY;
+                        return;
+                    }
+                }
+            }
+            
+            return;
+        }
+        
+        // Chiudi il pannello se clicchi fuori
+        closeSearchPanel();
         return;
     }
 
@@ -1817,6 +2357,113 @@ function mousePressed() {
     }
 }
 
+function mouseDragged() {
+    if (state.isScrollingSearch && state.searchVolcanoesPanelOpen) {
+        const itemHeight = 32;
+        const titleHeight = 40;
+        const panelHeight = state.searchPanelHeight * state.searchPanelAnimProgress;
+        const visibleHeight = panelHeight - titleHeight;
+        const contentHeight = state.searchPanelVolcanoes.length * itemHeight;
+        
+        if (contentHeight > visibleHeight) {
+            const deltaY = mouseY - state.scrollStartY;
+            const scrollRatio = contentHeight / visibleHeight;
+            const newScrollY = state.scrollStartOffset + deltaY * scrollRatio;
+            
+            state.searchPanelScrollY = constrain(newScrollY, 0, contentHeight - visibleHeight);
+        }
+    }
+}
+
+function mouseReleased() {
+    state.isScrollingSearch = false;
+}
+
+function mouseWheel(event) {
+    // Gestisce lo scroll della rotellina del mouse
+    if (state.searchPanelOpen && state.searchVolcanoesPanelOpen && state.searchPanelAnimProgress === 1) {
+        const panelX = state.searchButtonArea.x;
+        const panelY = state.searchButtonArea.y - state.searchPanelHeight;
+        
+        if (mouseX > panelX && mouseX < panelX + state.searchPanelWidth &&
+            mouseY > panelY && mouseY < state.searchButtonArea.y) {
+            
+            const itemHeight = 32;
+            const titleHeight = 40;
+            const visibleHeight = state.searchPanelHeight - titleHeight;
+            const contentHeight = state.searchPanelVolcanoes.length * itemHeight;
+            
+            if (contentHeight > visibleHeight) {
+                const scrollAmount = event.delta * 0.5;
+                state.searchPanelScrollY = constrain(state.searchPanelScrollY + scrollAmount, 0, contentHeight - visibleHeight);
+                return false;
+            }
+        }
+    }
+    
+    return true;
+}
+
+function keyPressed() {
+    // Gestisce le frecce della tastiera per navigare nei pannelli di ricerca
+    if (state.searchPanelOpen && state.searchPanelAnimProgress === 1) {
+        if (state.searchVolcanoesPanelOpen) {
+            const itemHeight = 32;
+            const titleHeight = 40;
+            const visibleHeight = state.searchPanelHeight - titleHeight;
+            const contentHeight = state.searchPanelVolcanoes.length * itemHeight;
+            
+            if (contentHeight > visibleHeight) {
+                if (keyCode === UP_ARROW) {
+                    state.searchPanelScrollY = max(0, state.searchPanelScrollY - itemHeight);
+                    return false;
+                } else if (keyCode === DOWN_ARROW) {
+                    state.searchPanelScrollY = min(contentHeight - visibleHeight, state.searchPanelScrollY + itemHeight);
+                    return false;
+                } else if (keyCode === ENTER || keyCode === RETURN) {
+                    if (state.hoveredVolcanoItemIndex >= 0 && state.hoveredVolcanoItemIndex < state.searchPanelVolcanoes.length) {
+                        const volcano = state.searchPanelVolcanoes[state.hoveredVolcanoItemIndex];
+                        selectVolcanoInSearch(volcano);
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        if (state.searchContinentsPanelOpen) {
+            if (keyCode === UP_ARROW) {
+                if (state.hoveredSearchItemIndex > 0) {
+                    state.hoveredSearchItemIndex--;
+                } else {
+                    state.hoveredSearchItemIndex = CONTINENTS.length - 1;
+                }
+                return false;
+            } else if (keyCode === DOWN_ARROW) {
+                if (state.hoveredSearchItemIndex < CONTINENTS.length - 1) {
+                    state.hoveredSearchItemIndex++;
+                } else {
+                    state.hoveredSearchItemIndex = 0;
+                }
+                return false;
+            } else if (keyCode === ENTER || keyCode === RETURN) {
+                if (state.hoveredSearchItemIndex >= 0 && state.hoveredSearchItemIndex < CONTINENTS.length) {
+                    const continent = CONTINENTS[state.hoveredSearchItemIndex];
+                    selectContinentInSearch(continent);
+                    return false;
+                }
+            }
+        }
+        
+        // ESC - chiudi il pannello
+        if (keyCode === ESCAPE) {
+            closeSearchPanel();
+            return false;
+        }
+    }
+    
+    return true;
+}
+
 function formatYear(year) {
     return Math.abs(year) + (year < 0 ? ' BC' : ' AD');
 }
@@ -1851,6 +2498,14 @@ function updateCursor() {
         mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
         mouseY > state.learnMoreButtonArea.y &&
         mouseY < state.learnMoreButtonArea.y + state.learnMoreButtonArea.height) {
+        isOverButton = true;
+    }
+
+    if (state.searchButtonArea &&
+        mouseX > state.searchButtonArea.x &&
+        mouseX < state.searchButtonArea.x + state.searchButtonArea.width &&
+        mouseY > state.searchButtonArea.y &&
+        mouseY < state.searchButtonArea.y + state.searchButtonArea.height) {
         isOverButton = true;
     }
 
@@ -1892,6 +2547,49 @@ function updateCursor() {
         mouseY > state.yearRightArrow.y &&
         mouseY < state.yearRightArrow.y + state.yearRightArrow.height) {
         isOverButton = true;
+    }
+
+    // Controlla gli elementi nel pannello di ricerca
+    if (state.searchPanelOpen && state.searchPanelAnimProgress > 0) {
+        const panelX = state.searchButtonArea.x;
+        const panelHeight = state.searchPanelHeight * state.searchPanelAnimProgress;
+        const panelY = state.searchButtonArea.y - panelHeight;
+        
+        if (mouseX > panelX && mouseX < panelX + state.searchPanelWidth &&
+            mouseY > panelY && mouseY < state.searchButtonArea.y) {
+            
+            const margin = 15;
+            const titleHeight = 40;
+            const localY = mouseY - panelY;
+            
+            if (state.searchContinentsPanelOpen) {
+                const itemHeight = 35;
+                if (localY > titleHeight) {
+                    isOverButton = true;
+                }
+            } else if (state.searchVolcanoesPanelOpen) {
+                const itemHeight = 32;
+                const scrollbarWidth = 6;
+                const localX = mouseX - panelX;
+                
+                // Vulcani
+                if (localY > titleHeight) {
+                    isOverButton = true;
+                }
+                
+                // Scrollbar
+                const visibleHeight = panelHeight - titleHeight;
+                const contentHeight = state.searchPanelVolcanoes.length * itemHeight;
+                
+                if (contentHeight > visibleHeight) {
+                    const scrollbarX = state.searchPanelWidth - scrollbarWidth - 4;
+                    if (localX > scrollbarX && localX < scrollbarX + scrollbarWidth &&
+                        localY > titleHeight && localY < titleHeight + visibleHeight) {
+                        isOverButton = true;
+                    }
+                }
+            }
+        }
     }
 
     const distFromCenter = dist(mouseX, mouseY, state.centerX, state.centerY);
