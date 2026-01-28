@@ -254,6 +254,7 @@ header {
     color: #000000;
     position: relative;
     z-index: 1;
+    scroll-margin-top: 90px;
 }
 
 .content-flex-container {
@@ -279,7 +280,7 @@ header {
     display: inline-block;
     margin-top: 40px;
     padding: 12px 30px; /* Padding leggermente aumentato */
-    border-radius: 10px; /* Cambiato da 20px a 0 per angoli squadrati */
+    border-radius: 5px; /* Cambiato da 20px a 0 per angoli squadrati */
     background-color: transparent;
     border: 2px solid #FF2B00;
     color: #FF2B00;
