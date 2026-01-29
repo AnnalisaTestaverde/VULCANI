@@ -30,11 +30,11 @@ A supporto delle pagine d’insieme e di dettaglio abbiamo creato due pagine “
 Nonostante le nostre visualizzazioni si concentrino sulle eruzioni piuttosto che sul singolo vulcano, abbiamo voluto visualizzare la posizione dei vulcani coinvolti con una mappa equirettangolare. È stato utile il supporto di DeepSeek, che ha permesso di individuare e correggere gli errori nelle coordinate (Latitude e Longitude) presenti nel dataset originale, in modo che ne risultasse una visualizzazione quanto più fedele alla realtà sulla mappa.  Strumenti AI come DeepSeek e ChatGPT sono stati utilizzati anche per la gestione dello scrolling, per le animazioni complesse e per la risoluzione di bug legati alla resa visiva dei dati.
 
 Il lavoro è stato così suddiviso tra i membri del gruppo:
-Alice Comini: codice, visualizzazione della mappa, visualizzazione dei dati 
-Matilde Curino: analisi e rielaborazione del dataset, illustrazioni, debugging 
-Greta Franco: codice, illustrazioni, descrizione metodologia 
-Carlo Galli: prototipazione e mockup su Figma, codice, debugging 
-Ilaria La Spada: codice, visualizzazione dei dati, animazioni
-Annalisa Testaverde: codice, pagine “Learn More”, suddivisione dei compiti
+\n Alice Comini: codice, visualizzazione della mappa, visualizzazione dei dati 
+\n Matilde Curino: analisi e rielaborazione del dataset, illustrazioni, debugging 
+\n Greta Franco: codice, illustrazioni, descrizione metodologia 
+\n Carlo Galli: prototipazione e mockup su Figma, codice, debugging 
+\n Ilaria La Spada: codice, visualizzazione dei dati, animazioni
+\n Annalisa Testaverde: codice, pagine “Learn More”, suddivisione dei compiti
 
 
