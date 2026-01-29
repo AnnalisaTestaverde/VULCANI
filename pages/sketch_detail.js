@@ -32,6 +32,10 @@ let animationDuration = 1000;
 let isAnimating = false;
 let initialAnimationStarted = false;
 
+// Variabili per hover
+let hoveredArrow = null; // "left" o "right"
+let hoveredLearnMore = false;
+
 // ---------- VARIABILI TRANSIZIONE ----------
 let transitionState = {
   active: false,
@@ -50,14 +54,8 @@ let currentVolcanoImage = null;
 let imageCache = {};
 let imagesLoaded = false;
 
-// Variabili per le immagini vulcano
-let stratoImg, calderaImg, complexImg, cinderImg, compoundImg, craterImg, fissureImg;
-let lava_coneImg, lava_domeImg, maarImg, pumiceImg, pyroclastic_coneImg, pyroclastic_shieldImg;
-let shieldImg, subglacialImg, submarineImg, tuffImg, volcanic_fieldImg;
-
 // ---------- PRELOAD OTTIMIZZATO ----------
 function preload() {
-  // CARICA SOLO L'ESSENZIALE ASSOLUTO
   data = loadTable("../assets/data_impatto.csv", "csv", "header");
   worldMap = loadImage("../assets/Equirectangular_projection.jpg");
   bookIcon = loadImage("../assets/book_icon.png");
@@ -75,31 +73,25 @@ function preload() {
 
 // ---------- SETUP VELOCE ----------
 function setup() {
-  // Salva la pagina precedente
   localStorage.setItem('previousPageBeforeDetailView', window.location.href);
   
   createCanvas(windowWidth, windowHeight);
   textFont("Helvetica");
   frameRate(60);
   
-  // Legge parametri URL
   selectedName = getQueryParam("name");
   selectedYear = int(getQueryParam("year"));
   selectedNumber = int(getQueryParam("number"));
 
   if (!selectedName) return;
 
-  // Processa i dati in modo OTTIMIZZATO
   processDataFast();
   
-  // Avvia subito l'animazione
   startAnimation();
   initialAnimationStarted = true;
   
-  // Carica l'immagine del vulcano corrente in background
   loadVolcanoImageAsync();
   
-  // Carica altre immagini in background DOPO 2 secondi (dopo che la pagina è visibile)
   setTimeout(loadOtherImagesBackground, 2000);
 }
 
@@ -107,10 +99,8 @@ function setup() {
 function processDataFast() {
   eruptions = [];
   
-  // Ottimizzazione: cerca solo per il nome selezionato
   for (let i = 0; i < data.getRowCount(); i++) {
     if (data.getString(i, "Name") === selectedName) {
-      // Usa le funzioni di correzione coordinate originali
       let coords = getUniversalCoordinates(
         data.getString(i, "Latitude"),
         data.getString(i, "Longitude"),
@@ -132,10 +122,8 @@ function processDataFast() {
     }
   }
 
-  // Ordina (max 20-30 elementi, veloce)
   eruptions.sort((a, b) => a.year - b.year);
   
-  // Trova indice
   if (!isNaN(selectedNumber) && selectedNumber > 0) {
     const idxByNumber = eruptions.findIndex(e => e.number === selectedNumber);
     if (idxByNumber !== -1) currentIndex = idxByNumber;
@@ -159,10 +147,8 @@ function loadVolcanoImageAsync() {
   const selected = eruptions[currentIndex];
   const type = normalizeType(selected.type);
   
-  // Determina quale immagine serve
   let imageKey = null;
   
-  // Controlla prima nelle immagini già caricate
   if (type.includes("stratovolcano") || type.includes("strato")) {
     imageKey = "strato";
   } else if (type.includes("caldera")) {
@@ -201,14 +187,12 @@ function loadVolcanoImageAsync() {
     imageKey = "volcanic_field";
   }
   
-  // Se l'immagine è già in cache, usala
   if (imageKey && imageCache[imageKey]) {
     currentVolcanoImage = imageCache[imageKey];
     return;
   }
   
-  // Altrimenti caricala
-  if (!imageKey) imageKey = "strato"; // Fallback
+  if (!imageKey) imageKey = "strato";
   
   const imagePaths = {
     "strato": "../assets/stratovolcano.png",
@@ -232,16 +216,14 @@ function loadVolcanoImageAsync() {
   };
   
   if (imagePaths[imageKey]) {
-    // Carica in background
     loadImage(imagePaths[imageKey], (img) => {
       currentVolcanoImage = img;
-      imageCache[imageKey] = img; // Salva in cache
+      imageCache[imageKey] = img;
     });
   }
 }
 
 function loadOtherImagesBackground() {
-  // Carica altre immagini DOPO 2 secondi, una alla volta con intervalli casuali
   const otherImages = [
     "../assets/complex_volcano.png",
     "../assets/cinder_cone.png",
@@ -260,15 +242,13 @@ function loadOtherImagesBackground() {
     "../assets/volcanic_field.png"
   ];
   
-  // Carica una immagine ogni 300-800ms per non sovraccaricare
   otherImages.forEach((path, index) => {
     setTimeout(() => {
       loadImage(path, (img) => {
         const name = path.split('/').pop().replace('.png', '');
         imageCache[name] = img;
-        console.log(`Immagine caricata in background: ${name}`);
       });
-    }, 300 + index * 350); // Spread più ampio
+    }, 300 + index * 350);
   });
 }
 
@@ -284,7 +264,6 @@ function draw() {
   updateTransition();
 
   if (transitionState.active) {
-    // Durante transizione, disegna solo l'essenziale
     let selected = eruptions[currentIndex];
     if (currentVolcanoImage) {
       drawVolcanoTypeBackgroundOptimized(selected.type);
@@ -295,7 +274,6 @@ function draw() {
     writeText();
     drawTransition();
   } else {
-    // Disegno completo
     drawFullContentOptimized();
   }
 
@@ -305,15 +283,12 @@ function draw() {
 function drawFullContentOptimized() {
   let selected = eruptions[currentIndex];
   
-  // Sfondo (se l'immagine è caricata)
   if (currentVolcanoImage) {
     drawVolcanoTypeBackgroundOptimized(selected.type);
   }
   
-  // Mappa
   drawMap(selected.lat, selected.lon, selected.country);
   
-  // Interfaccia
   drawBackButton();
   drawLearnMoreButton();
   drawNavBar();
@@ -321,7 +296,6 @@ function drawFullContentOptimized() {
   drawYearNavigator(selected.year);
   drawVolcanoDescription(selected.type, selected.year, selected.mo, selected.dy);
   
-  // Grafico
   let dataRowIndex = findDataRowIndexFast();
   if (dataRowIndex !== -1) {
     let chartDatum = buildChartDataFromRow(dataRowIndex);
@@ -335,16 +309,13 @@ function drawFullContentOptimized() {
 function drawNavBar() {
   push();
   
-  // Barra di navigazione fissa in alto
   let navHeight = 70;
   let navY = 0;
   
-  // Sfondo della navbar
   fill(255);
   noStroke();
   rect(0, navY, width, navHeight);
   
-  // Logo
   fill(0);
   textSize(15);
   textFont("Helvetica");
@@ -352,7 +323,6 @@ function drawNavBar() {
   textAlign(LEFT, CENTER);
   text("Significant Volcanic Eruptions", 40, navHeight/2);
   
-  // Links di navigazione
   let navLinks = [
     { name: "Homepage", href: "../index.html", x: 0 },
     { name: "Team", href: "team.html", x: 0 },
@@ -360,7 +330,6 @@ function drawNavBar() {
     { name: "Explore", href: "overview.html", x: 0, isExplore: true }
   ];
   
-  // Calcola posizione dei link (allineati a destra)
   let totalLinksWidth = 0;
   let linkSpacing = 40;
   let linkFontSize = 15;
@@ -368,14 +337,12 @@ function drawNavBar() {
   textSize(linkFontSize);
   textStyle(NORMAL);
   
-  // Calcola larghezza totale
   for (let link of navLinks) {
     link.width = textWidth(link.name);
     totalLinksWidth += link.width;
   }
   totalLinksWidth += (navLinks.length - 1) * linkSpacing;
   
-  // Posiziona i links
   let startX = width - totalLinksWidth - 40;
   let currentX = startX;
   
@@ -384,7 +351,6 @@ function drawNavBar() {
     link.x = currentX;
     link.y = navHeight/2;
     
-    // Disegna link
     if (link.isExplore) {
       fill("#FF2B00");
       textStyle(BOLD);
@@ -395,7 +361,6 @@ function drawNavBar() {
     
     text(link.name, link.x, link.y);
     
-    // Controlla hover
     let textW = link.width;
     let textH = 20;
     let textX = link.x;
@@ -413,7 +378,6 @@ function drawNavBar() {
     currentX += link.width + linkSpacing;
   }
   
-  // Salva i link per l'interazione
   state.navLinks = navLinks;
   
   pop();
@@ -428,7 +392,6 @@ function drawVolcanoTypeBackgroundOptimized(typeRaw) {
   imageMode(CENTER);
   tint(255, 50);
 
-  // Dimensione ottimizzata
   let imgWidth = min(1100, width * 0.95);
   let imgHeight = imgWidth * (750/1000);
 
@@ -437,7 +400,6 @@ function drawVolcanoTypeBackgroundOptimized(typeRaw) {
   pop();
 }
 
-/* MAPPA CON CORREZIONE RESPONSIVE DEL MARKER */
 function drawMap(lat, lon, country) {
   let margin = 60;
   let mapW = 320;
@@ -446,7 +408,6 @@ function drawMap(lat, lon, country) {
   let mapY = height - mapH - margin;
   let cornerRadius = 10;
 
-  // Titolo
   let titleY = mapY - 30;
   push();
   fill(chartMainColor);
@@ -462,11 +423,9 @@ function drawMap(lat, lon, country) {
   textStyle(NORMAL);
   textAlign(LEFT, TOP);
 
-  // Label rossa
   fill(0);
   text(label, mapX, titleY);
 
-  // Valore nero
   fill(chartMainColor);
   textStyle(BOLD);
   text(value, mapX + 7 + textWidth(label), titleY);
@@ -474,7 +433,6 @@ function drawMap(lat, lon, country) {
 
   pop();
 
-  // Cornice e sfondo
   push();
   fill(255, 230);
   noStroke();
@@ -488,7 +446,6 @@ function drawMap(lat, lon, country) {
   rect(mapX, mapY, mapW, mapH, cornerRadius);
   pop();
 
-  // Immagine mappa
   let innerX = mapX + 2;
   let innerY = mapY + 2;
   let innerW = mapW - 4;
@@ -505,66 +462,50 @@ function drawMap(lat, lon, country) {
   drawingContext.restore();
   pop();
 
-  // Indicatore posizione
   if (lat !== undefined && lon !== undefined && !isNaN(lat) && !isNaN(lon)) {
-    // Normalizza la longitudine se necessario
     let lonAdjusted = lon;
     while (lonAdjusted > 180) lonAdjusted -= 360;
     while (lonAdjusted < -180) lonAdjusted += 360;
     
-    // Calcola la posizione X (longitudine)
     let markerX = map(lonAdjusted, -180, 180, innerX, innerX + innerW);
     
-    // Calcola la posizione Y (latitudine)
     let latAdjusted = constrain(lat, -90, 90);
     let markerY = map(latAdjusted, 90, -90, innerY, innerY + innerH);
     
-    // CORREZIONE RESPONSIVE: usa percentuale della mappa invece di mm fissi
-    // 1.8% della larghezza della mappa (circa 5-6 pixel su schermi normali)
     let offsetPercent = -0.018;
     let offsetPixels = offsetPercent * innerW;
     
     markerX += offsetPixels;
     
-    // Disegna l'indicatore RESPONSIVE
     drawResponsiveLocationMarker(markerX, markerY);
   }
 }
 
-/* FUNZIONE PER DISEGNARE INDICATORE RESPONSIVE */
 function drawResponsiveLocationMarker(x, y) {
   push();
   noStroke();
   
-  // DIMENSIONI RESPONSIVE basate sulla larghezza dello schermo
-  // Usa come riferimento uno schermo di 1920px (Full HD)
   let scaleFactor = width / 1920;
-  // Limita il fattore di scala tra 0.7 e 1.5 per evitare dimensioni estreme
   scaleFactor = constrain(scaleFactor, 0.7, 1.5);
   
-  // Dimensioni base (per schermo 1920px)
   let baseSize = 30 * scaleFactor;
   
-  // Glow esterno (3 livelli)
   for (let i = 0; i < 3; i++) {
-    let size = baseSize * (1 + i * 0.3); // Cresce del 30% ogni livello
+    let size = baseSize * (1 + i * 0.3);
     let alpha = map(i, 0, 2, 25, 8);
     fill(255, 100, 0, alpha);
     ellipse(x, y, size, size);
   }
   
-  // Cerchio intermedio
   strokeWeight(max(1, baseSize * 0.07));
   stroke(255, 50, 0);
   noFill();
   ellipse(x, y, baseSize * 0.6, baseSize * 0.6);
   
-  // Punto centrale
   noStroke();
   fill(255, 0, 0);
   ellipse(x, y, baseSize * 0.4, baseSize * 0.4);
   
-  // Nucleo brillante
   fill(255, 255, 200);
   ellipse(x, y, baseSize * 0.2, baseSize * 0.2);
   
@@ -572,7 +513,6 @@ function drawResponsiveLocationMarker(x, y) {
 }
 
 function findDataRowIndexFast() {
-  // Ricerca ottimizzata
   for (let i = 0; i < data.getRowCount(); i++) {
     if (data.getString(i, "Name") === selectedName && 
         String(data.getString(i, "Number")) === String(selectedNumber)) {
@@ -584,12 +524,10 @@ function findDataRowIndexFast() {
 
 // ---------- FUNZIONI DEL GRAFICO ----------
 function getDetailText(value, descCode, type, chartData = null) {
-  // Se il valore numerico esiste, restituiamo quello
   if (value !== "" && value !== 0 && !isNaN(value)) {
     return value;
   }
 
-  // Se non c'è valore, usiamo il codice descrizione
   let code = parseInt(descCode);
 
   if (isNaN(code) || code < 1 || code > 4) {
@@ -633,39 +571,31 @@ function getDetailText(value, descCode, type, chartData = null) {
 }
 
 function drawImpactChart(d) {
-  // Tooltip text
   let tooltipText = "";
 
   push();
 
-  // Overlay scuro dietro il grafico
   let panelW = chartSize + 60;
   let panelH = chartSize + 60;
   let px = width * chartXPercent - panelW / 2;
   let py = height * chartYPercent - panelH / 2;
 
-  // pannello semitrasparente
   noFill();
   noStroke();
   rect(px, py, panelW, panelH, 10);
 
-  // translate al centro del grafico
   let cx = width * chartXPercent;
   let cy = height * chartYPercent;
   translate(cx, cy);
 
-  // configurazione
   let gapAngle = radians(chartGapAngleDeg);
   let gapRadial = chartGapRadial;
   let maxChartRadius = chartSize / 2 + 20;
   let radiusStep = chartSize / (2 * chartLevels);
 
-  // valori e labels
   const values = [d.death, d.inj, d.dmg, d.house, d.missing];
   const labels = ["Deaths", "Injuries", "Damage", "Houses Destroyed", "Missing"];
-  const rawValues = [d.rawDeath, d.rawInj, d.rawDmg, d.rawHouse, d.rawMissing];
   
-  // Controlla se i dati sono disponibili
   const isDataAvailable = [
     !(d.death === 0 && d.rawDeath === "Details not available"),
     !(d.inj === 0 && d.rawInj === "Details not available"),
@@ -674,15 +604,12 @@ function drawImpactChart(d) {
     !(d.missing === 0 && d.rawMissing === "Details not available")
   ];
 
-  // Calcola il progresso dell'animazione
   let animationProgress = getAnimationProgress();
   
-  // mouse in coordinate relative
   let mx = mouseX - cx;
   let my = mouseY - cy;
   let mDist = dist(0, 0, mx, my);
 
-  // angolo mouse
   let mAngle = atan2(my, mx);
   if (mAngle < 0) mAngle += TWO_PI;
 
@@ -698,7 +625,7 @@ function drawImpactChart(d) {
     }
   }
 
-  // Prima disegna tutte le sezioni CON dati disponibili (con animazione)
+  // Prima disegna le sezioni con dati disponibili
   for (let i = 0; i < 5; i++) {
     if (!isDataAvailable[i]) continue;
     
@@ -734,7 +661,7 @@ function drawImpactChart(d) {
     }
   }
 
-  // Poi disegna le sezioni SENZA dati disponibili (con pattern a linee oblique)
+  // Poi disegna le sezioni SENZA dati disponibili
   for (let i = 0; i < 5; i++) {
     if (isDataAvailable[i]) continue;
     
@@ -745,11 +672,9 @@ function drawImpactChart(d) {
       let innerR = radiusStep * (level - 1) + gapRadial;
       let outerR = radiusStep * level - gapRadial;
       
-      // Crea una maschera per il pattern
       drawingContext.save();
       drawingContext.beginPath();
       
-      // Disegna la forma dell'arco come maschera
       for (let a = start; a <= end; a += 0.01) {
         let x = cos(a) * outerR;
         let y = sin(a) * outerR;
@@ -764,7 +689,6 @@ function drawImpactChart(d) {
       drawingContext.closePath();
       drawingContext.clip();
       
-      // Disegna il pattern a linee oblique all'interno della maschera
       let patternSpacing = 6;
       let lineColor = color(180, 180, 180);
       
@@ -772,18 +696,15 @@ function drawImpactChart(d) {
       strokeWeight(1);
       noFill();
       
-      // Calcola i limiti del rettangolo che contiene l'arco
       let minX = -outerR;
       let maxX = outerR;
       let minY = -outerR;
       let maxY = outerR;
       
-      // Angolo per le linee oblique (45 gradi)
       let angle = PI / 4;
       let cosAngle = cos(angle);
       let sinAngle = sin(angle);
       
-      // Disegna linee oblique
       for (let offset = -maxX - maxY; offset < maxX + maxY; offset += patternSpacing) {
         let x1, y1, x2, y2;
         
@@ -801,7 +722,6 @@ function drawImpactChart(d) {
       
       drawingContext.restore();
       
-      // Bordo grigio
       noFill();
       stroke(150, 150, 150);
       strokeWeight(1);
@@ -809,7 +729,6 @@ function drawImpactChart(d) {
     }
   }
 
-  // Disegna tutte le label
   let detailMaxWidth = 130;
   let lineHeight = 16;
 
@@ -832,26 +751,22 @@ function drawImpactChart(d) {
     let lx = cos(ang) * (chartSize / 2 + 60);
     let ly = sin(ang) * (chartSize / 2 + 55);
     
-    // Disegna il titolo principale (Deaths, Injuries, ecc.)
     textStyle(BOLD);
     text(labels[i], lx, ly - 25);
     
-    // AGGIUNTA: Disegna "Lvl. x" sotto ogni etichetta
     if (isDataAvailable[i]) {
       let levelValue = values[i];
       let levelText = "Impact: " + levelValue;
 
-      // --- Impact: x ---
       fill(chartMainColor);
       textSize(chartLabelSize);
       textStyle(BOLD);
       text(levelText, lx, ly - 5);
 
-      // --- Valore completo descrittivo ---
       let detailText = "";
       if (i === 0) detailText = getDetailText(d.rawDeath, d.death, "deaths");
       else if (i === 1) detailText = getDetailText(d.rawInj, d.inj, "injuries");
-      else if (i === 2) detailText = d.rawDmg;
+      else if (i === 2) detailText = getDetailText(d.rawDmg, d.dmg, "damage");
       else if (i === 3) detailText = getDetailText(d.rawHouse, d.house, "houses");
       else if (i === 4) detailText = getDetailText(d.rawMissing, d.missing, "missing");
 
@@ -870,23 +785,6 @@ function drawImpactChart(d) {
     }
   }
 
-  // Titolo "Total impact level: " al centro in alto
-  push();
-  noStroke();
-  fill(245, 40, 0);
-  textSize(chartTitleSize);
-  textAlign(CENTER, CENTER);
-  textStyle(BOLD);
-  
-  let totalImpactText = "Total impact level: " + d.impact;
-  let totalImpactX = 270;
-  let totalImpactY = -310;
-  text(totalImpactText, totalImpactX, totalImpactY);
-  
-  textStyle(NORMAL);
-  pop();
-
-  // hover tooltip content
   if (hoveredSection !== -1) {
     if (hoveredSection === 0) {
       tooltipText = getDetailText(d.rawDeath, d.death, "deaths");
@@ -895,7 +793,7 @@ function drawImpactChart(d) {
       tooltipText = getDetailText(d.rawInj, d.inj, "injuries");
     }
     else if (hoveredSection === 2) {
-      tooltipText = d.rawDmg;
+      tooltipText = tooltipText = getDetailText(d.rawDmg, d.dmg, "damage");
     }
     else if (hoveredSection === 3) {
       tooltipText = getDetailText(d.rawHouse, d.house, "houses");
@@ -905,27 +803,49 @@ function drawImpactChart(d) {
     }
   }
 
+  pop(); // Fine del push() iniziale - ora le coordinate tornano a essere assolute
+
+  // TITOLO "Total impact level: " SPOSTATO A DESTRA DELLA MAPPA
+  // Deve essere disegnato DOPO il pop() per usare coordinate assolute della finestra
+  push();
+  noStroke();
+  fill(245, 40, 0);
+  textSize(chartTitleSize);
+  textAlign(LEFT, CENTER);
+  textStyle(BOLD);
+  
+  let totalImpactText = "Total impact level: " + d.impact;
+  
+  // Calcola la posizione: a destra della mappa
+  let mapMargin = 60;
+  let mapW = 320;
+  let mapX = mapMargin;
+  let mapY = height - 180 - mapMargin;
+  
+  // Posizione a destra della mappa con un po' di margine
+  let totalImpactX = mapX + mapW + 40;
+  let totalImpactY = mapY + 90;
+  
+  text(totalImpactText, totalImpactX, totalImpactY);
+  
+  textStyle(NORMAL);
   pop();
 
-  // disegno tooltip
   if (tooltipText !== "") {
     drawTooltip(tooltipText);
   }
 }
 
-/* tooltip box */
 function drawTooltip(txt) {
   push();
   textSize(chartTooltipTextSize);
   let w = textWidth(txt) + 20;
   let h = 34;
 
-  // background
   fill(255);
   stroke(chartMainColor);
   rect(mouseX + 15, mouseY - 10, w, h, 6);
 
-  // text
   fill(0);
   noStroke();
   textAlign(LEFT, CENTER);
@@ -933,7 +853,6 @@ function drawTooltip(txt) {
   pop();
 }
 
-/* funzione di utilità per disegnare segmento ad arco tra r1 e r2 */
 function drawArcSegment(r1, r2, start, end) {
   beginShape();
   for (let a = start; a <= end; a += 0.01) {
@@ -1126,28 +1045,22 @@ function writeText() {
 function drawVolcanoDescription(typeRaw, y, mo, dy) {
   let margin = 60;
   
-  // Spostiamo tutto leggermente in giù per far spazio alla data
   let dateY = 340; 
   let titleY = 365; 
   let descriptionY = 410;
 
-  // INIZIO: il testo è allineato al punto d'inizio della mappa
   let mapW = 320;
-  // LARGHEZZA: il testo va a capo quando raggiunge il bordo della mappa
   let textWidthValue = mapW;
 
-  // --- DATA COMPLETA ---
   let dayAvailable = (dy && dy !== "0" && dy !== "");
   let monthAvailable = (mo && mo !== "0" && mo !== "");
 
   let dayText = dayAvailable ? dy + getOrdinalSuffix(int(dy)) : "??";
   let monthText = monthAvailable ? getMonthName(mo) : "???";
 
-  // Anno con BC
   let yearText = (y < 0) ? Math.abs(y) + " BC" : y.toString();
 
   let fullDate = `${dayText} ${monthText} ${yearText}`;
-
 
   push();
   fill(chartMainColor);
@@ -1160,19 +1073,16 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   textAlign(LEFT, TOP);
   textStyle(NORMAL);
 
-  // Label rossa
   fill(0);
   text("Date: ", margin, dateY);
 
-  // Valore nero
   fill(chartMainColor);
   textStyle(BOLD);
-  text(fullDate, margin + textWidth("Date: "), dateY);
+  text(fullDate, margin + textWidth("Date: ") + 5, dateY);
   pop();
 
   pop();
 
-  // --- TITOLO TIPO VULCANO ---
   push();
   fill(chartMainColor);
   textSize(mainTextSize);
@@ -1180,7 +1090,6 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   text(typeRaw, margin, titleY+20);
   pop();
 
-  // --- DESCRIZIONE ---
   let description = getVolcanoDescription(typeRaw);
   push();
   fill(0);
@@ -1268,7 +1177,6 @@ function drawYearNavigator(year) {
   textSize(48);
   let leftArrowWidth = textWidth("<");
   
-  // Calcolo larghezza anno corrente per posizionamento
   textSize(72);
   let yearFormatted = formatYear(year);
   let yearWidth = textWidth(yearFormatted);
@@ -1276,7 +1184,6 @@ function drawYearNavigator(year) {
   textSize(48);
   let rightArrowWidth = textWidth(">");
 
-  // altezza e padding cornice
   let spaceBetween = 40;
   let framePadding = 20;
   let frameHeight = 50; 
@@ -1289,20 +1196,73 @@ function drawYearNavigator(year) {
   let leftFrameX = leftArrowX - framePadding;
   let leftFrameY = y - frameHeight/2;
 
-  // FRECCIA SINISTRA: cornice
+  // Controllo se la freccia è hoverata
+  let isLeftArrowHovered = (hoveredArrow === "left") && hasMultipleEruptions;
+  
   push();
-  stroke(arrowColor);
-  strokeWeight(1);
-  noFill();
-  rect(leftFrameX, leftFrameY, leftArrowWidth + framePadding*2, frameHeight, 10);
-  pop();
-
-  // FRECCIA SINISTRA: disegno "<"
-  push();
-  fill(arrowColor);
-  textSize(48);
-  textStyle(NORMAL);
-  text("<", leftArrowX, y);
+  if (isLeftArrowHovered) {
+    fill(chartMainColor);
+    stroke(chartMainColor);
+    strokeWeight(1);
+    rect(leftFrameX, leftFrameY, leftArrowWidth + framePadding*2, frameHeight, 10);
+    
+    // Testo bianco su sfondo rosso
+    push();
+    fill(255);
+    textSize(48);
+    textStyle(NORMAL);
+    text("<", leftArrowX, y);
+    pop();
+  } else {
+    // Disegno normale per frecce grigie o rosse
+    if (hasMultipleEruptions) {
+      stroke(arrowColor);
+      strokeWeight(1);
+      noFill();
+      rect(leftFrameX, leftFrameY, leftArrowWidth + framePadding*2, frameHeight, 10);
+    } else {
+      // Disegna pattern a linee diagonali per frecce disabilitate
+      // MODIFICA: linee da in basso a sinistra a in alto a destra
+      drawingContext.save();
+      drawingContext.beginPath();
+      drawingContext.roundRect(leftFrameX, leftFrameY, leftArrowWidth + framePadding*2, frameHeight, 10);
+      drawingContext.clip();
+      
+      stroke(180, 180, 180);
+      strokeWeight(1);
+      noFill();
+      
+      // Disegna linee diagonali nell'altro verso
+      let patternSpacing = 8;
+      let frameWidth = leftArrowWidth + framePadding*2;
+      
+      // Linee da in basso a sinistra a in alto a destra
+      for (let offset = -frameHeight; offset < frameWidth; offset += patternSpacing) {
+        // Punto di partenza: in basso a sinistra
+        let startX = leftFrameX + offset;
+        let startY = leftFrameY + frameHeight;
+        
+        // Punto di arrivo: in alto a destra
+        let endX = leftFrameX + offset + frameHeight;
+        let endY = leftFrameY;
+        
+        line(startX, startY, endX, endY);
+      }
+      
+      drawingContext.restore();
+      
+      // Bordo grigio
+      stroke(150, 150, 150);
+      strokeWeight(1);
+      noFill();
+      rect(leftFrameX, leftFrameY, leftArrowWidth + framePadding*2, frameHeight, 10);
+    }
+    
+    fill(arrowColor);
+    textSize(48);
+    textStyle(NORMAL);
+    text("<", leftArrowX, y);
+  }
   pop();
 
   // ANNO (tra le frecce)
@@ -1319,20 +1279,73 @@ function drawYearNavigator(year) {
   let rightFrameX = rightArrowX - framePadding;
   let rightFrameY = y - frameHeight/2;
 
-  // FRECCIA DESTRA: cornice
+  // Controllo se la freccia è hoverata
+  let isRightArrowHovered = (hoveredArrow === "right") && hasMultipleEruptions;
+  
   push();
-  stroke(arrowColor);
-  strokeWeight(1);
-  noFill();
-  rect(rightFrameX, rightFrameY, rightArrowWidth + framePadding*2, frameHeight, 10);
-  pop();
-
-  // FRECCIA DESTRA: disegno ">"
-  push();
-  fill(arrowColor);
-  textSize(48);
-  textStyle(NORMAL);
-  text(">", rightArrowX, y);
+  if (isRightArrowHovered) {
+    fill(chartMainColor);
+    stroke(chartMainColor);
+    strokeWeight(1);
+    rect(rightFrameX, rightFrameY, rightArrowWidth + framePadding*2, frameHeight, 10);
+    
+    // Testo bianco su sfondo rosso
+    push();
+    fill(255);
+    textSize(48);
+    textStyle(NORMAL);
+    text(">", rightArrowX, y);
+    pop();
+  } else {
+    // Disegno normale per frecce grigie o rosse
+    if (hasMultipleEruptions) {
+      stroke(arrowColor);
+      strokeWeight(1);
+      noFill();
+      rect(rightFrameX, rightFrameY, rightArrowWidth + framePadding*2, frameHeight, 10);
+    } else {
+      // Disegna pattern a linee diagonali per frecce disabilitate
+      // MODIFICA: linee da in basso a sinistra a in alto a destra
+      drawingContext.save();
+      drawingContext.beginPath();
+      drawingContext.roundRect(rightFrameX, rightFrameY, rightArrowWidth + framePadding*2, frameHeight, 10);
+      drawingContext.clip();
+      
+      stroke(180, 180, 180);
+      strokeWeight(1);
+      noFill();
+      
+      // Disegna linee diagonali nell'altro verso
+      let patternSpacing = 8;
+      let frameWidth = rightArrowWidth + framePadding*2;
+      
+      // Linee da in basso a sinistra a in alto a destra
+      for (let offset = -frameHeight; offset < frameWidth; offset += patternSpacing) {
+        // Punto di partenza: in basso a sinistra
+        let startX = rightFrameX + offset;
+        let startY = rightFrameY + frameHeight;
+        
+        // Punto di arrivo: in alto a destra
+        let endX = rightFrameX + offset + frameHeight;
+        let endY = rightFrameY;
+        
+        line(startX, startY, endX, endY);
+      }
+      
+      drawingContext.restore();
+      
+      // Bordo grigio
+      stroke(150, 150, 150);
+      strokeWeight(1);
+      noFill();
+      rect(rightFrameX, rightFrameY, rightArrowWidth + framePadding*2, frameHeight, 10);
+    }
+    
+    fill(arrowColor);
+    textSize(48);
+    textStyle(NORMAL);
+    text(">", rightArrowX, y);
+  }
   pop();
 
   // COUNTER
@@ -1354,15 +1367,13 @@ function drawYearNavigator(year) {
     textSize(mainTextSize);
     textAlign(LEFT);
 
-    // Label nera
     textStyle(NORMAL);
     fill(0);
     text(label, margin - 22, counterY);
 
-    // Valore rosso
     fill(chartMainColor);
     textStyle(BOLD);
-    text(value, margin - 11.25 + textWidth(label), counterY);
+    text(value, margin - 20 + textWidth(label), counterY);
     pop();
 
     pop();
@@ -1376,32 +1387,62 @@ function drawLearnMoreButton() {
   const buttonX = width - buttonWidth - 50;
   const buttonY = 720;
 
-  stroke(245, 40, 0);
-  strokeWeight(1);
-  noFill();
-  rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
+  // Disegna il bordo del bottone
+  if (hoveredLearnMore) {
+    // Hover: riempimento rosso
+    fill(chartMainColor);
+    stroke(chartMainColor);
+    strokeWeight(1);
+    rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
+    
+    // Icona "i" bianca
+    push();
+    translate(buttonX + 25, buttonY + buttonHeight/2);
+    stroke(255);
+    strokeWeight(1);
+    noFill();
+    circle(0, 0, 20);
+    fill(255);
+    noStroke();
+    textSize(16);
+    textAlign(CENTER, CENTER);
+    text("i", 0, 0);
+    pop();
+    
+    // Testo bianco
+    fill(255);
+    noStroke();
+    textSize(16);
+    textAlign(LEFT, CENTER);
+    text("Learn More", buttonX + 50, buttonY + buttonHeight/2);
+  } else {
+    // Stato normale: bordo rosso, testo nero
+    stroke(245, 40, 0);
+    strokeWeight(1);
+    noFill();
+    rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
-  fill(245, 40, 0);
-  noStroke();
-  
-  push();
-  translate(buttonX + 25, buttonY + buttonHeight/2);
-  stroke(245, 40, 0);
-  strokeWeight(1);
-  noFill();
-  circle(0, 0, 20);
-  fill(245, 40, 0);
-  noStroke();
-  textSize(16);
-  textAlign(CENTER, CENTER);
-  text("i", 0, 0);
-  pop();
+    // Icona "i" rossa
+    push();
+    translate(buttonX + 25, buttonY + buttonHeight/2);
+    stroke(245, 40, 0);
+    strokeWeight(1);
+    noFill();
+    circle(0, 0, 20);
+    fill(245, 40, 0);
+    noStroke();
+    textSize(16);
+    textAlign(CENTER, CENTER);
+    text("i", 0, 0);
+    pop();
 
-  fill(0);
-  noStroke();
-  textSize(16);
-  textAlign(LEFT, CENTER);
-  text("Learn More", buttonX + 50, buttonY + buttonHeight/2);
+    // Testo nero
+    fill(0);
+    noStroke();
+    textSize(16);
+    textAlign(LEFT, CENTER);
+    text("Learn More", buttonX + 50, buttonY + buttonHeight/2);
+  }
 
   state.learnMoreButtonArea = {
     x: buttonX,
@@ -1581,7 +1622,6 @@ function updateTransition() {
   
   if (progress >= 1) {
     transitionState.active = false;
-    // APRE NELLA STESSA SCHEDA
     window.location.href = "learn_more_detail.html?name=" + encodeURIComponent(selectedName) + 
                           "&year=" + selectedYear + 
                           "&number=" + selectedNumber;
@@ -1717,12 +1757,13 @@ function updateCurrentEruption() {
   selectedNumber = eruptions[currentIndex].number;
   startAnimation();
   
-  // Carica nuova immagine se necessario
   loadVolcanoImageAsync();
 }
 
 function updateCursor() {
   let isOverButton = false;
+  hoveredArrow = null;
+  hoveredLearnMore = false;
 
   if (transitionState.active) {
     cursor(ARROW);
@@ -1757,6 +1798,7 @@ function updateCursor() {
       mouseY > state.learnMoreButtonArea.y &&
       mouseY < state.learnMoreButtonArea.y + state.learnMoreButtonArea.height) {
     isOverButton = true;
+    hoveredLearnMore = true;
   }
 
   // Frecce navigazione
@@ -1785,6 +1827,7 @@ function updateCursor() {
         mouseY > leftFrameY &&
         mouseY < leftFrameY + frameHeight) {
       isOverButton = true;
+      hoveredArrow = "left";
     }
 
     // Freccia destra
@@ -1793,6 +1836,7 @@ function updateCursor() {
         mouseY > leftFrameY &&
         mouseY < leftFrameY + frameHeight) {
       isOverButton = true;
+      hoveredArrow = "right";
     }
   }
 
