@@ -1491,14 +1491,10 @@ function drawYearNavigator(year) {
 }
 
 // ---------- LEARN MORE BUTTON ----------
-// ---------- LEARN MORE BUTTON ----------
 function drawLearnMoreButton() {
     const buttonWidth = 160;
     const buttonHeight = 40;
-    
-    // POSIZIONAMENTO COME IN OVERVIEW:
-    // - Destra: 50px dal bordo destro
-    // - Basso: sopra il fondo (stesso posizionamento relativo)
+  
     
     // Usa la stessa logica di posizionamento della pagina overview
     const bottomMargin = 40; // Margine dal fondo (come in overview)
