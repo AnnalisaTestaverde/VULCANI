@@ -11,64 +11,6 @@
     
     <!-- Stile CSS aggiuntivo per i bottoni e scroll -->
     <style>
-        /* Stile per i bottoni in basso - MODIFICATO: MESSI PIÙ IN ALTO */
-        #buttons-container {
-            display: none; /* NASCOSTO INIZIALMENTE */
-            position: fixed;
-            bottom: 100px; /* PIÙ IN ALTO */
-            left: 0;
-            right: 0;
-            justify-content: center;
-            z-index: 1000;
-            padding: 0 40px;
-            opacity: 1;
-            transition: opacity 0.3s ease;
-        }
-        
-        .buttons-row {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .bottom-button {
-            background-color: transparent;
-            color: #FFFFFF; /* Testo bianco */
-            border: 2px solid #FFFFFF; /* Stroke bianco */
-            border-radius: 5px; /* Squadrato come la methodology */
-            padding: 14px 40px;
-            font-size: 16px;
-            font-weight: bold;
-            font-family: 'Helvetica', Arial, sans-serif;
-            cursor: default; /* Default cursor, cambia in pointer su hover */
-            text-align: center;
-            flex: 1;
-            transition: all 0.3s ease;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: 0.5px;
-        }
-        
-        .bottom-button:hover {
-            background-color: #FFFFFF !important; /* Bianco su hover */
-            color: #FF2B00 !important; /* Testo rosso su hover */
-            cursor: pointer !important; /* Manina su hover */
-        }
-        
-        .button-spacer {
-            width: 30px;
-        }
-        
-        /* Rimuovi lo stile predefinito dei bottoni */
-        .bottom-button:focus {
-            outline: none;
-        }
-        
         /* Stile per la freccia di scroll - COME ORIGINALE */
         #scroll-hint {
             position: absolute;
@@ -132,51 +74,6 @@
         #legend-container {
             margin-top: 15px !important; /* PIÙ SPAZIO SOPRA */
             margin-bottom: 25px !important; /* PIÙ SPAZIO SOTTO */
-        }
-        
-        /* Bottone About the methodology centrato nel box del testo */
-        #about-methodology-btn-container {
-            position: absolute;
-            bottom: 40px; /* Posizione dal basso del text container */
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 40px); /* Stessa larghezza del text container con margini */
-            max-width: 800px;
-            display: none; /* Nascondi inizialmente */
-            justify-content: center;
-            z-index: 10;
-        }
-        
-        #about-methodology-btn {
-            background-color: transparent;
-            color: #FFFFFF; /* Testo bianco */
-            border: 2px solid #FFFFFF; /* Stroke bianco */
-            border-radius: 5px; /* Squadrato come la methodology */
-            padding: 14px 40px;
-            font-size: 16px;
-            font-weight: bold;
-            font-family: 'Helvetica', Arial, sans-serif;
-            cursor: default; /* Default cursor, cambia in pointer su hover */
-            text-align: center;
-            transition: all 0.3s ease;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: 0.5px;
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
-        }
-        
-        #about-methodology-btn:hover {
-            background-color: #FFFFFF !important; /* Bianco su hover */
-            color: #FF2B00 !important; /* Testo rosso su hover */
-            cursor: pointer !important; /* Manina su hover */
-        }
-        
-        #about-methodology-btn:focus {
-            outline: none;
         }
     </style>
 </head>
@@ -247,11 +144,6 @@
                     <li><span class="bold-white">START ANIMATION</span> - Starts an automatic animation that scrolls through available years in succession, highlighting eruptions that occurred in each year with a <span class="bold-black">luminous pulsating effect</span> (a red glow that expands around the dot).</li>
                 </ul>
                 
-                <!-- Bottone About the methodology centrato nel box del testo -->
-                <div id="about-methodology-btn-container">
-                    <button id="about-methodology-btn">About the methodology</button>
-                </div>
-                
                 <!-- Spazio finale ridotto (per accorciare il box) -->
                 <div style="height: 150px;"></div>
             </div>
@@ -259,15 +151,6 @@
         
         <!-- Freccia al centro in basso per indicare lo scroll - STILE ORIGINALE -->
         <div id="scroll-hint" class="text-scroll-hint">V</div>
-    </div>
-    
-    <!-- Bottoni finali - SEMPRE VISIBILI E PIÙ IN ALTO -->
-    <div id="buttons-container">
-        <div class="buttons-row">
-            <button class="bottom-button" id="back-to-map-btn">Back to Eruptions</button>
-            <div class="button-spacer"></div>
-            <button class="bottom-button" id="about-dataset-btn">About the methodology</button>
-        </div>
     </div>
     
     <!-- Codice JavaScript p5.js principale -->
@@ -372,17 +255,21 @@
             // Controlli animazioni
             disableDotEntryAnimation: false,
             
-            // Per il back button (posizionato come learn more button nel codice originale)
+            // Per i bottoni
             backButtonArea: null,
+            methodologyButtonArea: null,
             
-            // Stato per hover sul back button
+            // Stato per hover sui bottoni
             isBackButtonHovered: false,
+            isMethodologyButtonHovered: false,
             
             // Per lo scroll semplice
             scrollArea: null,
             scrollHint: null,
-            buttonsContainer: null,
-            isAtBottom: false
+            isAtBottom: false,
+            
+            // Stato per mostrare/nascondere il bottone methodology
+            showMethodologyButton: false
         };
 
         // Immagine di sfondo
@@ -486,6 +373,7 @@
             });
             
             state.disableDotEntryAnimation = false;
+            state.showMethodologyButton = false; // Inizialmente nascosto
         }
 
         // 4 - Calcolo dati continenti
@@ -649,7 +537,12 @@
             updateDotAnimations();
             
             drawTitle();
-            drawBackButton(); // Posizionato come il learn more button
+            drawBackButton(); // Bottone Back (a destra)
+            
+            // Disegna il bottone methodology solo se è visibile
+            if (state.showMethodologyButton) {
+                drawMethodologyButton();
+            }
             
             drawMainCircle();
             drawContinentLabels();
@@ -680,50 +573,96 @@
             textStyle(NORMAL);
         }
 
-        // 12 - Back Button MODIFICATO: STROKE NERO E SENZA CERCHIO
-        function drawBackButton() {
-            const buttonWidth = 160;
-            const buttonHeight = 40;
-            
-            // POSIZIONE: width - buttonWidth - 50 (come il learn more button originale)
-            const buttonX = width - buttonWidth - 50;
-            const buttonY = CONFIG.layout.startButtonY;
-            
-            // Bordo NERO (modificato)
-            stroke(CONFIG.colors.infoBox); // NERO
-            strokeWeight(1);
-            noFill();
-            rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
-
-            // Icona con "×" - SENZA CERCHIO ATTORNO
-            push();
-            translate(buttonX + 25, buttonY + buttonHeight/2);
-            fill(CONFIG.colors.infoBox); // NERO (testo della X)
-            noStroke(); // NESSUNO STROKE
-            textSize(20); // Leggermente più grande
-            textStyle(BOLD);
-            textAlign(CENTER, CENTER);
-            text("×", 0, 0);
-            pop();
-
-            // Testo "Back" in NERO
-            fill(CONFIG.colors.infoBox); // NERO
-            noStroke();
-            textSize(CONFIG.layout.labelFontSize);
-            textStyle(BOLD);
-            textAlign(LEFT, CENTER);
-            text("Back", buttonX + 50, buttonY + buttonHeight/2);
-
-            // Memorizza l'area per l'interazione
-            state.backButtonArea = {
-                x: buttonX,
-                y: buttonY,
-                width: buttonWidth,
-                height: buttonHeight
-            };
+        // 12 - Back Button MODIFICATO: STROKE NERO E SENZA CERCHIO - CON HOVER EFFECT
+    function drawBackButton() {
+        const buttonWidth = 160;
+        const buttonHeight = 40;
+        
+        // POSIZIONE: width - buttonWidth - 50 (come il learn more button originale)
+        const buttonX = width - buttonWidth - 50;
+        const buttonY = CONFIG.layout.startButtonY;
+        
+        // NO FILL di default - solo su hover
+        if (state.isBackButtonHovered) {
+            // FILL BIANCO solo su hover
+            fill(CONFIG.colors.accent); // Bianco
+        } else {
+            noFill(); // Nessun fill di default
         }
+        
+        // Bordo - Bianco su hover, Nero di default
+        stroke(state.isBackButtonHovered ? CONFIG.colors.accent : CONFIG.colors.infoBox);
+        strokeWeight(1);
+        rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
-        // 13 - Info box per hover sui vulcani - AGGIORNATO con dimensioni originali
+        // Icona con "×" - SENZA CERCHIO ATTORNO
+        push();
+        translate(buttonX + 25, buttonY + buttonHeight/2);
+        fill(state.isBackButtonHovered ? CONFIG.colors.background : CONFIG.colors.infoBox); // Nero di default, Rosso su hover
+        noStroke(); // NESSUNO STROKE
+        textSize(20); // Leggermente più grande
+        textStyle(BOLD);
+        textAlign(CENTER, CENTER);
+        text("×", 0, 0);
+        pop();
+
+        // Testo "Back" - Nero di default, Rosso su hover
+        fill(state.isBackButtonHovered ? CONFIG.colors.background : CONFIG.colors.infoBox);
+        noStroke();
+        textSize(CONFIG.layout.labelFontSize);
+        textStyle(BOLD);
+        textAlign(LEFT, CENTER);
+        text("Back", buttonX + 50, buttonY + buttonHeight/2);
+
+        // Memorizza l'area per l'interazione
+        state.backButtonArea = {
+            x: buttonX,
+            y: buttonY,
+            width: buttonWidth,
+            height: buttonHeight
+        };
+    }
+
+    // 13 - Methodology Button - IDENTICO AL BACK BUTTON MA A SINISTRA - CON HOVER EFFECT
+    function drawMethodologyButton() {
+        const buttonWidth = 200; // Leggermente più largo per il testo più lungo
+        const buttonHeight = 40;
+        
+        // POSIZIONE: a sinistra, stessa altezza del back button
+        const buttonX = 50; // Margine sinistro
+        const buttonY = CONFIG.layout.startButtonY; // Stessa altezza del back button
+        
+        // NO FILL di default - solo su hover
+        if (state.isMethodologyButtonHovered) {
+            // FILL BIANCO solo su hover
+            fill(CONFIG.colors.accent); // Bianco
+        } else {
+            noFill(); // Nessun fill di default
+        }
+        
+        // Bordo - Bianco su hover, Nero di default
+        stroke(state.isMethodologyButtonHovered ? CONFIG.colors.accent : CONFIG.colors.infoBox);
+        strokeWeight(1);
+        rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
+
+        // Testo "About the Methodology" - Nero di default, Rosso su hover
+        fill(state.isMethodologyButtonHovered ? CONFIG.colors.background : CONFIG.colors.infoBox);
+        noStroke();
+        textSize(CONFIG.layout.labelFontSize);
+        textStyle(BOLD);
+        textAlign(LEFT, CENTER);
+        text("About the Methodology", buttonX + 12, buttonY + buttonHeight/2);
+
+        // Memorizza l'area per l'interazione
+        state.methodologyButtonArea = {
+            x: buttonX,
+            y: buttonY,
+            width: buttonWidth,
+            height: buttonHeight
+        };
+    }
+
+        // 14 - Info box per hover sui vulcani - AGGIORNATO con dimensioni originali
         function drawInfobox() {
             if (state.hoveredVolcano) {
                 const volcano = state.hoveredVolcano;
@@ -757,7 +696,7 @@
             }
         }
 
-        // 14 - Cerchio principale con cerchi di impatto - COMPLETAMENTE AGGIORNATO
+        // 15 - Cerchio principale con cerchi di impatto - COMPLETAMENTE AGGIORNATO
         function drawMainCircle() {
             push();
             translate(state.centerX, state.centerY);
@@ -800,7 +739,7 @@
             pop();
         }
 
-        // 15 - Divisori tra continenti - INVARIATO
+        // 16 - Divisori tra continenti - INVARIATO
         function drawContinentDividers() {
             stroke(CONFIG.colors.circle); // Colore originale
             strokeWeight(1);
@@ -815,7 +754,7 @@
             });
         }
 
-        // 16 - Disegna tutti i vulcani - INVARIATO
+        // 17 - Disegna tutti i vulcani - INVARIATO
         function drawVolcanoes() {
             state.filteredData.forEach(v => {
                 let key = `${v.name}-${v.year}-${v.deaths}`;
@@ -858,7 +797,7 @@
             });
         }
 
-        // 17 - Puntini dei vulcani con animazione - AGGIORNATO
+        // 18 - Puntini dei vulcani con animazione - AGGIORNATO
         function drawVolcanoDotAnimated(x, y, isHovered, volcano, key) {
             let entryProgress = 1;
             
@@ -887,7 +826,7 @@
             circle(x, y, finalSize);
         }
 
-        // 18 - Bagliore dei vulcani quando in hover - INVARIATO
+        // 19 - Bagliore dei vulcani quando in hover - INVARIATO
         function drawVolcanoGlow(volcano, x, y, hoverProgress) {
             let entryProgress = 1;
             const key = `${volcano.name}-${volcano.year}-${volcano.deaths}`;
@@ -916,7 +855,7 @@
             circle(x, y, glowSize);
         }
 
-        // 19 - Etichette dei continenti in grassetto - AGGIORNATO
+        // 20 - Etichette dei continenti in grassetto - AGGIORNATO
         function drawContinentLabels() {
             CONTINENTS.forEach(cont => {
                 const angles = state.continentAngles[cont];
@@ -955,7 +894,7 @@
             });
         }
 
-        // 20 - Controllo hover su vulcani e bottoni - INVARIATO
+        // 21 - Controllo hover su vulcani e bottoni - AGGIORNATO PER ENTRAMBI I BOTTONI
         function checkHover() {
             if (state.filteredData.length === 0) {
                 state.hoveredVolcano = null;
@@ -983,8 +922,10 @@
                 state.hoveredVolcano = newHovered;
             }
             
-            // Controllo hover sul back button
+            // Controllo hover sui bottoni
             state.isBackButtonHovered = false;
+            state.isMethodologyButtonHovered = false;
+            
             if (state.backButtonArea &&
                 mouseX > state.backButtonArea.x &&
                 mouseX < state.backButtonArea.x + state.backButtonArea.width &&
@@ -992,17 +933,25 @@
                 mouseY < state.backButtonArea.y + state.backButtonArea.height) {
                 state.isBackButtonHovered = true;
             }
+            
+            if (state.showMethodologyButton && state.methodologyButtonArea &&
+                mouseX > state.methodologyButtonArea.x &&
+                mouseX < state.methodologyButtonArea.x + state.methodologyButtonArea.width &&
+                mouseY > state.methodologyButtonArea.y &&
+                mouseY < state.methodologyButtonArea.y + state.methodologyButtonArea.height) {
+                state.isMethodologyButtonHovered = true;
+            }
         }
 
-        // 21 - Aggiornamento layout in base alle dimensioni della finestra - INVARIATO
+        // 22 - Aggiornamento layout in base alle dimensioni della finestra - INVARIATO
         function updateLayout() {
             state.centerX = width * CONFIG.layout.centerXRatio;
             state.centerY = height / 2 + CONFIG.layout.centerYOffset;
         }
 
-        // 22 - Gestione click del mouse - MODIFICATO PER overview.html
+        // 23 - Gestione click del mouse - AGGIORNATO PER ENTRAMBI I BOTTONI
         function mousePressed() {
-            // Controllo per il back button (posizionato come learn more button)
+            // Controllo per il back button
             if (state.backButtonArea &&
                 mouseX > state.backButtonArea.x &&
                 mouseX < state.backButtonArea.x + state.backButtonArea.width &&
@@ -1013,20 +962,32 @@
                 window.location.href = "overview.html";
                 return;
             }
+            
+            // Controllo per il methodology button (solo se visibile)
+            if (state.showMethodologyButton && state.methodologyButtonArea &&
+                mouseX > state.methodologyButtonArea.x &&
+                mouseX < state.methodologyButtonArea.x + state.methodologyButtonArea.width &&
+                mouseY > state.methodologyButtonArea.y &&
+                mouseY < state.methodologyButtonArea.y + state.methodologyButtonArea.height) {
+                
+                // Vai alla pagina methodology.html
+                window.location.href = "methodology.html";
+                return;
+            }
         }
 
-        // 23 - Formattazione anno esteso (es: "1500 AD" o "500 BC") - INVARIATO
+        // 24 - Formattazione anno esteso (es: "1500 AD" o "500 BC") - INVARIATO
         function formatYear(year) {
             return Math.abs(year) + (year < 0 ? ' BC' : ' AD');
         }
 
-        // 24 - Ridimensionamento finestra - INVARIATO
+        // 25 - Ridimensionamento finestra - INVARIATO
         function windowResized() {
             resizeCanvas(windowWidth, windowHeight);
             updateLayout();
         }
 
-        // 25 - Setup iniziale del canvas principale
+        // 26 - Setup iniziale del canvas principale
         function setup() {
             let canvas = createCanvas(windowWidth, windowHeight);
             canvas.parent('main-sketch-container');
@@ -1034,23 +995,28 @@
             frameRate(60);
             console.log("Learn More - Setup completato");
             
-            // Setup degli event listener per lo scroll e i bottoni
+            // Setup degli event listener per lo scroll
             setupScrollListeners();
             
             // Inizializza anche la leggenda
             initializeLegend();
         }
 
-        // 26 - Aggiorna il cursore in base a cosa c'è sotto il mouse - AGGIORNATO
+        // 27 - Aggiorna il cursore in base a cosa c'è sotto il mouse - AGGIORNATO PER ENTRAMBI I BOTTONI
         function updateCursor() {
             let isOverButton = false;
 
-            // Controlla se il mouse è sopra il back button
-            if (state.backButtonArea &&
+            // Controlla se il mouse è sopra i bottoni
+            if ((state.backButtonArea &&
                 mouseX > state.backButtonArea.x &&
                 mouseX < state.backButtonArea.x + state.backButtonArea.width &&
                 mouseY > state.backButtonArea.y &&
-                mouseY < state.backButtonArea.y + state.backButtonArea.height) {
+                mouseY < state.backButtonArea.y + state.backButtonArea.height) ||
+                (state.showMethodologyButton && state.methodologyButtonArea &&
+                mouseX > state.methodologyButtonArea.x &&
+                mouseX < state.methodologyButtonArea.x + state.methodologyButtonArea.width &&
+                mouseY > state.methodologyButtonArea.y &&
+                mouseY < state.methodologyButtonArea.y + state.methodologyButtonArea.height)) {
                 isOverButton = true;
             }
 
@@ -1083,16 +1049,13 @@
             }
         }
 
-        // ===== FUNZIONI PER LO SCROLL E I BOTTONI - VERSIONE SEMPLIFICATA =====
+        // ===== FUNZIONI PER LO SCROLL - VERSIONE SEMPLIFICATA =====
 
-        // 29 - Setup degli event listener per lo scroll e i bottoni - VERSIONE SEMPLIFICATA
+        // 28 - Setup degli event listener per lo scroll
         function setupScrollListeners() {
             // Ottieni gli elementi
             state.scrollArea = document.getElementById('text-scroll-area');
             state.scrollHint = document.getElementById('scroll-hint');
-            state.buttonsContainer = document.getElementById('buttons-container');
-            const aboutMethodologyBtnContainer = document.getElementById('about-methodology-btn-container');
-            const aboutMethodologyBtn = document.getElementById('about-methodology-btn');
             
             // Se l'elemento dello scroll esiste
             if (state.scrollArea) {
@@ -1112,59 +1075,9 @@
                 // Controlla inizialmente
                 checkScrollEnd();
             }
-            
-            // Setup dei bottoni finali - I BOTTONI SONO VISIBILI SOLO QUANDO IL TESTO È FINITO
-            const backToMapBtn = document.getElementById('back-to-map-btn');
-            const aboutDatasetBtn = document.getElementById('about-dataset-btn');
-            
-            if (backToMapBtn) {
-                backToMapBtn.addEventListener('click', function() {
-                    window.location.href = "overview.html";
-                });
-                
-                // Aggiungi gestione hover per cursore
-                backToMapBtn.addEventListener('mouseenter', function() {
-                    backToMapBtn.style.cursor = 'pointer';
-                });
-                
-                backToMapBtn.addEventListener('mouseleave', function() {
-                    backToMapBtn.style.cursor = 'default';
-                });
-            }
-            
-            if (aboutDatasetBtn) {
-                aboutDatasetBtn.addEventListener('click', function() {
-                    window.location.href = "methodology.html";
-                });
-                
-                // Aggiungi gestione hover per cursore
-                aboutDatasetBtn.addEventListener('mouseenter', function() {
-                    aboutDatasetBtn.style.cursor = 'pointer';
-                });
-                
-                aboutDatasetBtn.addEventListener('mouseleave', function() {
-                    aboutDatasetBtn.style.cursor = 'default';
-                });
-            }
-            
-            // Setup del bottone About the methodology centrato nel box del testo
-            if (aboutMethodologyBtn) {
-                aboutMethodologyBtn.addEventListener('click', function() {
-                    window.location.href = "methodology.html";
-                });
-                
-                // Aggiungi gestione hover per cursore (gestita dal CSS)
-                aboutMethodologyBtn.addEventListener('mouseenter', function() {
-                    aboutMethodologyBtn.style.cursor = 'pointer';
-                });
-                
-                aboutMethodologyBtn.addEventListener('mouseleave', function() {
-                    aboutMethodologyBtn.style.cursor = 'default';
-                });
-            }
         }
 
-        // 30 - Gestione scroll globale - SEMPLICE
+        // 29 - Gestione scroll globale - SEMPLICE
         function handleGlobalWheel(e) {
             // Se abbiamo un'area di scroll
             if (state.scrollArea) {
@@ -1179,12 +1092,12 @@
             }
         }
 
-        // 31 - Gestione scroll del testo
+        // 30 - Gestione scroll del testo
         function handleTextScroll() {
             checkScrollEnd();
         }
 
-        // 32 - Controlla se siamo alla fine dello scroll - MOSTRA BOTTONE E NASCONDI FRECCIA
+        // 31 - Controlla se siamo alla fine dello scroll - AGGIORNATO PER NASCONDERE FRECCIA E MOSTRARE BOTTONE METHODOLOGY
         function checkScrollEnd() {
             if (!state.scrollArea || !state.scrollHint) return;
             
@@ -1192,42 +1105,19 @@
             const scrollHeight = state.scrollArea.scrollHeight - state.scrollArea.clientHeight;
             const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
             
-            const aboutMethodologyBtnContainer = document.getElementById('about-methodology-btn-container');
-            const aboutMethodologyBtn = document.getElementById('about-methodology-btn');
-            const buttonsContainer = document.getElementById('buttons-container');
-            
-            // Nasconde COMPLETAMENTE la freccia quando si è vicini alla fine (90%)
-            // e mostra il bottone About the methodology nel box del testo
+            // Nasconde la freccia e mostra il bottone methodology quando si è vicini alla fine (90%)
             if (scrollPercentage > 90) {
                 state.scrollHint.style.display = "none";
                 state.isAtBottom = true;
-                
-                // Mostra il bottone About the methodology centrato nel box del testo
-                if (aboutMethodologyBtnContainer) {
-                    aboutMethodologyBtnContainer.style.display = "flex";
-                }
-                
-                // Mostra anche i bottoni in basso (Back to Eruptions e About the methodology)
-                if (buttonsContainer) {
-                    buttonsContainer.style.display = "flex";
-                }
+                state.showMethodologyButton = true; // Mostra il bottone
             } else {
                 state.scrollHint.style.display = "block";
                 state.isAtBottom = false;
-                
-                // Nascondi il bottone About the methodology centrato nel box del testo
-                if (aboutMethodologyBtnContainer) {
-                    aboutMethodologyBtnContainer.style.display = "none";
-                }
-                
-                // Nascondi anche i bottoni in basso
-                if (buttonsContainer) {
-                    buttonsContainer.style.display = "none";
-                }
+                state.showMethodologyButton = false; // Nascondi il bottone
             }
         }
 
-        // 33 - Scroll del contenuto testo
+        // 32 - Scroll del contenuto testo
         function scrollTextContent(pixels) {
             if (!state.scrollArea) return;
             
@@ -1237,13 +1127,13 @@
 
         // ===== FUNZIONI PER LA LEGGENDA =====
         
-        // 27 - Inizializza la leggenda p5.js - FUNZIONE RINOMINATA
+        // 33 - Inizializza la leggenda p5.js - FUNZIONE RINOMINATA
         function initializeLegend() {
             // Crea un nuovo sketch p5.js per la leggenda
             new p5(legendSketch, 'legend-container');
         }
 
-        // 28 - Sketch p5.js per la leggenda - AGGIORNATO esattamente come nel codice originale
+        // 34 - Sketch p5.js per la leggenda - AGGIORNATO esattamente come nel codice originale
         function legendSketch(sketch) {
             sketch.setup = function() {
                 const container = document.getElementById('legend-container');
@@ -1267,7 +1157,7 @@
                 // Prima riga: Volcanic eruption (pallino nero)
                 const y1 = startY;
                 
-                // Icona: pallino nero SENZA bordo
+                // Icona: pallino nero SENDO bordo
                 sketch.fill(0); // Nero
                 sketch.noStroke();
                 sketch.circle(startX + 20, y1 + 12, 12);
