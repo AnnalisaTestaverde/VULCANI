@@ -523,7 +523,7 @@ function drawMap(lat, lon, country) {
   let mapW = 320;
   let mapH = 180;
   let mapX = margin;
-  let mapY = height - mapH - margin;
+  let mapY = height - mapH - 40;
   let cornerRadius = 10;
 
   let titleY = mapY - 30;
@@ -1155,9 +1155,9 @@ function writeText() {
 function drawVolcanoDescription(typeRaw, y, mo, dy) {
   let margin = 60;
   
-  let dateY = 340; 
-  let titleY = 365; 
-  let descriptionY = 410;
+  let dateY = 325; 
+  let titleY = 330; 
+  let descriptionY = 370;
 
   let mapW = 320;
   let textWidthValue = mapW;
@@ -1205,7 +1205,7 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   fill(0);
   textSize(mainTextSize);
   textStyle(NORMAL);
-  textLeading(20);
+  textLeading(16);
   textAlign(LEFT, TOP);
   text(description, margin, descriptionY, textWidthValue);
   pop();
