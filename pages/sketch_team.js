@@ -1,4 +1,5 @@
 let imgs = [];
+
 let names = [
   "Alice Comini",
   "Matilde Curino", 
@@ -8,7 +9,6 @@ let names = [
   "Annalisa Testaverde"
 ];
 
-// Ruoli dei membri
 let roles = [
   "Frontend Development, \nData Visualization & Map-making.",
   "Data Analysis & Visualization,\nIllustrations and Debugging.",
@@ -18,7 +18,8 @@ let roles = [
   "Web Support, Learn More \nand Call Management."
 ];
 
-// Dimensioni di visualizzazione uniformi
+/*IMMAGINI - array per regolare ogni immagine 
+all'interno del cerchio */
 let displayConfigs = [];
 
 function preload() {
@@ -31,14 +32,14 @@ function preload() {
 }
 
 function setup() {
-  // Calcola altezza totale del contenuto
+  // calcolo dell'altezza del contenuto
   const contentHeight = calculateContentHeight();
   
-  // Crea canvas con altezza calcolata
+  // creazione canvas con altezza calcolata
   let canvas = createCanvas(window.innerWidth, contentHeight);
   canvas.parent('sketch-container');
   
-  // Stili per il canvas
+  // stili per il canvas
   canvas.style('display', 'block');
   canvas.style('position', 'relative');
   canvas.style('width', '100%');
@@ -47,91 +48,64 @@ function setup() {
   textFont("Helvetica");
   textAlign(CENTER);
   
-  // Configurazione per ogni immagine
+  // configurazione per ogni immagine!
   setupImageConfigs();
 }
 
 function setupImageConfigs() {
-  // Configurazioni specifiche per ogni immagine per uniformità
+  // IMMAGINI - aggiustamento dimensioni
   displayConfigs = [
-    { scale: 1.0, offsetY: 0, offsetX: 0 },   // Alice
+    { scale: 1.15, offsetY: -10, offsetX: 0 },   // Alice
     { scale: 1.0, offsetY: 0, offsetX: 0 },   // Matilde
-    { scale: 1.0, offsetY: 0, offsetX: 0 },   // Greta
-    { scale: 1.0, offsetY: 0, offsetX: 0 },   // Carlo
-    { scale: 1.0, offsetY: 0, offsetX: 0 },   // Ilaria
-    { scale: 1.0, offsetY: 0, offsetX: 0 }    // Annalisa
+    { scale: 1.15, offsetY: 0, offsetX: 0 },   // Greta
+    { scale: 0.90, offsetY: 0, offsetX: 0 },   // Carlo
+    { scale: 1.40, offsetY: 0, offsetX: 0 },   // Ilaria
+    { scale: 1.15, offsetY: 0, offsetX: 0 }    // Annalisa
   ];
 }
 
 function draw() {
   background(255);
   
-  // Disegna titoli
   drawTitles();
   
-  // Disegna tutti i membri
   drawMembers();
 }
 
-/* ---------------- TITOLI ---------------- */
+/* TESTO - per titolo e testi */
 
 function drawTitles() {
   textAlign(CENTER);
 
   fill(0);
-  textSize(window.innerWidth > 768 ? 48 : 36);
+  textSize(48);
   textStyle(BOLD);
   text("TEAM'S PROJECT", width / 2, 100);
 
   fill("#FF2B00");
-  textSize(window.innerWidth > 768 ? 28 : 22);
+  textSize(28);
   text("THE PEOPLE WHO MADE IT POSSIBLE.", width / 2, 150);
 
   fill(50);
-  textSize(window.innerWidth > 768 ? 16 : 14);
+  textSize(16);
   textStyle(NORMAL);
 
   let t = "Hi! We are second-year students of Communication Design from Section C2\nof the Computer Graphics Laboratory course at Politecnico di Milano.";
   
-  if (window.innerWidth <= 768) {
-    t = "Hi! We are second-year students of Communication Design\nfrom Section C2 of the Computer Graphics Laboratory\ncourse at Politecnico di Milano.";
-  }
-  
   text(t, width / 2, 200);
 }
 
-/* ---------------- GRIGLIA MEMBRI ---------------- */
+/* GRIGLIA MEMBRI - per disposizione team */
 
 function drawMembers() {
-  // Calcola layout basato sulla larghezza
-  let cols, colW, rowH, startY, circleRadius;
+  // layout fisso per desktop
+  let cols = 3;
+  let colW = 320;
+  let rowH = 380;
+  let startY = 280;
+  let circleRadius = 100;
   
-  if (window.innerWidth > 1024) {
-    cols = 3;
-    colW = 320;
-    rowH = 380;
-    startY = 280;
-    circleRadius = 100; // Cerchio grande
-  } else if (window.innerWidth > 768) {
-    cols = 3;
-    colW = 240;
-    rowH = 360;
-    startY = 260;
-    circleRadius = 90;
-  } else if (window.innerWidth > 480) {
-    cols = 2;
-    colW = 280;
-    rowH = 350;
-    startY = 240;
-    circleRadius = 85;
-  } else {
-    cols = 1;
-    colW = 280;
-    rowH = 340;
-    startY = 220;
-    circleRadius = 80;
-  }
-  
+  // calcolo delle colonne (dimensione, posizionamento etc.)
   let totalW = cols * colW;
   let startX = (width - totalW) / 2;
 
@@ -145,43 +119,49 @@ function drawMembers() {
     let centerX = x + colW / 2;
     let imgCenterY = y + circleRadius + 20;
 
-    // 1. PRIMA: Cerchio di sfondo BIANCO (stesso colore dello sfondo)
-    fill(255); // BIANCO PURO
+    /* 1. CREAZIONE CERCHIO
+    - rendo il cerchio bianco per inserimento immagine 
+    e coprire eventuali parti scoperte */
+    fill(255);
     noStroke();
     ellipse(centerX, imgCenterY, circleRadius * 2, circleRadius * 2);
 
-    // 2. POI: Immagine con clip circolare
+    /* 2. IMMAGINE
+    - riempimento del cerchio con le immagini */
     if (imgs[i]) {
       push();
       imageMode(CENTER);
       
-      // Crea maschera circolare
+      // maschera circolare
       drawingContext.save();
       drawingContext.beginPath();
       drawingContext.arc(centerX, imgCenterY, circleRadius, 0, TWO_PI);
       drawingContext.clip();
 
-      // Calcola dimensioni per riempire il cerchio
+      // calcolo delle dimensioni per riempimento
       let img = imgs[i];
       let config = displayConfigs[i] || { scale: 1.0, offsetY: 0, offsetX: 0 };
       
       let imgRatio = img.width / img.height;
       let targetDiameter = circleRadius * 2;
       
-      // Dimensioni per coprire il cerchio
       let displayW, displayH;
       
+      /* !! PATTERN - moltiplico per 1.1 in modo da
+        avere l'immagine leggermente più grande del cerchio
+        in entrambi i casi */
       if (imgRatio > 1) {
-        // Immagine più larga che alta
-        displayW = targetDiameter * 1.1 * config.scale; // Leggermente più grande del cerchio
+        // se l'immagine è più larga, calcolo l'altezza
+        displayW = targetDiameter * 1.1 * config.scale;
         displayH = displayW / imgRatio;
       } else {
-        // Immagine più alta che larga
+        // se l'immagine è più alta, calcolo la larghezza
         displayH = targetDiameter * 1.1 * config.scale;
         displayW = displayH * imgRatio;
       }
       
-      // Posiziona l'immagine al centro con eventuali offset
+      /* posizionamento dell'immagine al centro 
+      con eventuali offset */
       image(img, 
             centerX + config.offsetX, 
             imgCenterY + config.offsetY, 
@@ -191,31 +171,29 @@ function drawMembers() {
       drawingContext.restore();
       pop();
       
-      // 3. OPZIONALE: Contorno sottile per definire il cerchio (molto leggero)
-      stroke(240); // Grigio MOLTO chiaro
+      // 3. CONTORNO: aggiunta per marcare leggermente il cerchio
+      stroke(240);
       strokeWeight(0.5);
       noFill();
       ellipse(centerX, imgCenterY, circleRadius * 2, circleRadius * 2);
     }
 
-    // Nome
+    // STILE - testi nomi e ruoli
     fill(0);
-    textSize(window.innerWidth > 768 ? 18 : 16);
+    textSize(18);
     textStyle(BOLD);
     let nameY = y + circleRadius * 2 + 60;
     text(names[i], centerX, nameY);
     
-    // Ruolo
     fill(100);
-    textSize(window.innerWidth > 768 ? 14 : 12);
+    textSize(14);
     textStyle(NORMAL);
     let roleY = nameY + 25;
     text(roles[i], centerX, roleY);
   }
 }
 
-/* ---------------- CALCOLO ALTEZZA ---------------- */
-
+// ALTEZZA - calcolo dell'altezza del contenuto
 function calculateContentHeight() {
   const titleHeight = 250;
   const membersHeight = calculateMembersHeight();
@@ -224,37 +202,11 @@ function calculateContentHeight() {
   return titleHeight + membersHeight + footerSpace;
 }
 
+// ALTEZZA - calcolo altezza membri
 function calculateMembersHeight() {
-  let cols, rowH;
-  
-  if (window.innerWidth > 1024) {
-    cols = 3;
-    rowH = 380;
-  } else if (window.innerWidth > 768) {
-    cols = 3;
-    rowH = 360;
-  } else if (window.innerWidth > 480) {
-    cols = 2;
-    rowH = 350;
-  } else {
-    cols = 1;
-    rowH = 340;
-  }
+  let cols = 3;
+  let rowH = 380;
   
   const rows = Math.ceil(6 / cols);
   return rows * rowH + 50;
-}
-
-/* ---------------- RESPONSIVE ---------------- */
-
-function windowResized() {
-  const contentHeight = calculateContentHeight();
-  resizeCanvas(window.innerWidth, contentHeight);
-  
-  const canvas = document.querySelector('canvas');
-  if (canvas) {
-    canvas.style.height = contentHeight + 'px';
-  }
-  
-  redraw();
 }
