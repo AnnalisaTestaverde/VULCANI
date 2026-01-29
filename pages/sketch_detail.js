@@ -1280,7 +1280,7 @@ function drawYearNavigator(year) {
   let inactiveColor = color(180);
   let arrowColor = hasMultipleEruptions ? activeColor : inactiveColor;
 
-  let margin = 61;
+  let margin = 62;
   let y = 230;
   let navigatorX = margin;
 
