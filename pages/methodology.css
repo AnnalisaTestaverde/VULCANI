@@ -23,45 +23,49 @@ body, html {
     scroll-behavior: smooth;
 }
 
-/* Navbar FISSA */
+/* HEADER - per impostazione nav dinamica */
 header {
     width: 100%;
     padding: 25px 40px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     position: fixed;
     top: 0;
     z-index: 1000;
     background-color: white;
-    border-bottom: 1px solid #eee;
-    height: 90px;
-}
-
-header a {
-    text-decoration: none;
-    color: #000000;
-    margin-left: 40px;
-    font-size: 15px;
-    transition: color 0.2s;
-}
-
-header a.explore {
-    text-decoration: none;
-    color:#FF2B00 ;
-    font-weight: bold;
-    margin-left: 40px;
-    font-size: 15px;
-    transition: color 0.2s;
-}
-
-header a:hover {
-    color: #FF2B00;
+    transition: all 0.3s ease;
 }
 
 .logo {
     font-weight: bold;
     font-size: 15px;
     color: #000000;
+    z-index: 1001;
+}
+
+/* NAVIGATION */
+.nav-desktop {
+    display: flex;
+    gap: 40px;
+}
+
+.nav-desktop a {
+    text-decoration: none;
+    color: #000000;
+    font-size: 15px;
+    transition: color 0.2s;
+    position: relative;
+}
+
+/* Riferimento alla categoria "explore" */
+.nav-desktop a.explore {
+    color: #FF2B00;
+    font-weight: bold;
+}
+
+.nav-desktop a:hover {
+    color: #FF2B00;
 }
 
 /* Contenuto principale */

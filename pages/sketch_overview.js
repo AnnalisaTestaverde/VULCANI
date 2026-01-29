@@ -177,7 +177,8 @@ let state = {
     hoveredTimeFrameRight: false,
     hoveredYearLeft: false,
     hoveredYearRight: false,
-    searchTargetHeight: 0
+    searchTargetHeight: 0,
+    navLinks: null
 };
 
 let radialBgImage;
@@ -574,7 +575,7 @@ function applyFilters() {
             let key = `${v.name}-${v.year}-${v.deaths}`;
             const randomDelay = Math.random() * CONFIG.animation.randomDelayMax;
             state.dotAppearTimes.set(key, randomDelay);
-        });
+    });
     }
 }
 
@@ -1014,6 +1015,13 @@ function startTransitionToLearnMore() {
 }
 
 function draw() {
+    // PRIMA: pulisci il canvas
+    background(CONFIG.colors.background);
+    
+    // SECONDO: disegna la navbar
+    drawNavBar();
+    
+    // TERZO: tutto il resto
     updateTransition();
     updateSearchPanelAnimation();
     
@@ -1021,8 +1029,6 @@ function draw() {
     updateButtonHoverStates();
     
     if (transitionState.active) {
-        background(CONFIG.colors.background);
-        
         updateLayout();
         updateAnimation();
         updateDotAnimations();
@@ -1033,7 +1039,7 @@ function draw() {
         drawSearchButton();
         drawLearnMoreButton();
         
-        drawLegend(); // Ora la leggenda viene DOPO il pannello
+        drawLegend();
 
         if (state.searchPanelOpen) {
             drawSearchPanel();
@@ -1053,8 +1059,6 @@ function draw() {
         drawTransition();
         
     } else {
-        background(CONFIG.colors.background);
-        
         updateLayout();
         updateAnimation();
         updateDotAnimations();
@@ -1065,7 +1069,7 @@ function draw() {
         drawSearchButton();
         drawLearnMoreButton();
 
-        drawLegend(); // Ora la leggenda viene DOPO il pannello
+        drawLegend();
         
         // DISEGNA IL PANNEL DI RICERCA QUI (se aperto)
         // Deve essere PRIMA della leggenda per coprirla
@@ -1086,6 +1090,93 @@ function draw() {
     }
     
     updateCursor();
+}
+
+function drawNavBar() {
+    push();
+    
+    // Barra di navigazione fissa in alto
+    let navHeight = 60;
+    let navY = 0;
+    
+    // Sfondo della navbar
+    fill(255);
+    noStroke();
+    rect(0, navY, width, navHeight);
+    
+    // Logo
+    fill(0);
+    textSize(15);
+    textFont("Helvetica");
+    textStyle(BOLD);
+    textAlign(LEFT, CENTER);
+    text("Significant Volcanic Eruptions", 40, navHeight/2);
+    
+    // Links di navigazione
+    let navLinks = [
+        { name: "Homepage", href: "../index.html", x: 0 },
+        { name: "Team", href: "team.html", x: 0 },
+        { name: "Methodology", href: "methodology.html", x: 0 },
+        { name: "Explore", href: "overview.html", x: 0, isExplore: true }
+    ];
+    
+    // Calcola posizione dei link (allineati a destra)
+    let totalLinksWidth = 0;
+    let linkSpacing = 40;
+    let linkFontSize = 15;
+    
+    textSize(linkFontSize);
+    textStyle(NORMAL);
+    
+    // Calcola larghezza totale
+    for (let link of navLinks) {
+        link.width = textWidth(link.name);
+        totalLinksWidth += link.width;
+    }
+    totalLinksWidth += (navLinks.length - 1) * linkSpacing;
+    
+    // Posiziona i links
+    let startX = width - totalLinksWidth - 40;
+    let currentX = startX;
+    
+    for (let i = 0; i < navLinks.length; i++) {
+        let link = navLinks[i];
+        link.x = currentX;
+        link.y = navHeight/2;
+        
+        // Disegna link
+        if (link.isExplore) {
+            fill("#FF2B00");
+            textStyle(BOLD);
+        } else {
+            fill(0);
+            textStyle(NORMAL);
+        }
+        
+        text(link.name, link.x, link.y);
+        
+        // Controlla hover
+        let textW = link.width;
+        let textH = 20;
+        let textX = link.x;
+        let textY = link.y - textH/2;
+        
+        if (mouseX > textX && mouseX < textX + textW && 
+            mouseY > textY && mouseY < textY + textH) {
+            // Cursor verrà gestito da updateCursor()
+            if (!link.isExplore) {
+                fill("#FF2B00");
+                text(link.name, link.x, link.y);
+            }
+        }
+        
+        currentX += link.width + linkSpacing;
+    }
+    
+    // Salva i link per l'interazione
+    state.navLinks = navLinks;
+    
+    pop();
 }
 
 function updateButtonHoverStates() {
@@ -2400,6 +2491,22 @@ function updateLayout() {
 }
 
 function mousePressed() {
+    // Controlla click sui link della navbar
+    if (state.navLinks) {
+        for (let link of state.navLinks) {
+            let textW = link.width;
+            let textH = 20;
+            let textX = link.x;
+            let textY = link.y - textH/2;
+            
+            if (mouseX > textX && mouseX < textX + textW && 
+                mouseY > textY && mouseY < textY + textH) {
+                window.location.href = link.href;
+                return;
+            }
+        }
+    }
+
     // Controlla click sul bottone Learn More
     if (state.learnMoreButtonArea &&
         mouseX > state.learnMoreButtonArea.x &&
@@ -2900,6 +3007,22 @@ function setup() {
 
 function updateCursor() {
     let isOverButton = false;
+
+    // Controlla navbar links
+    if (state.navLinks) {
+        for (let link of state.navLinks) {
+            let textW = link.width;
+            let textH = 20;
+            let textX = link.x;
+            let textY = link.y - textH/2;
+            
+            if (mouseX > textX && mouseX < textX + textW && 
+                mouseY > textY && mouseY < textY + textH) {
+                isOverButton = true;
+                break;
+            }
+        }
+    }
 
     if (state.learnMoreButtonArea &&
         mouseX > state.learnMoreButtonArea.x &&
