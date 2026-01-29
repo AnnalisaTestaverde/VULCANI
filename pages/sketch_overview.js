@@ -15,7 +15,7 @@ const CONFIG = {
         continentLabelOffset: 15,
         europeAsiaOffset: 15,
         infoBoxWidth: 220,
-        infoBoxHeight: 90,
+        infoBoxHeight: 100,
         bottomControlY: 100,
         marginX: 40,
         fontSizeControls: 16,
@@ -207,31 +207,88 @@ function applyScaleToConfig(scale) {
     }
     
     const original = window.originalConfig;
+    const availableHeight = windowHeight;
+    const bottomMargin = 40;
     
-    //fattore di scala applicato a tutte le dimensioni nel layout
-    CONFIG.layout.maxRadius = original.maxRadius * scale;
-    CONFIG.layout.minRadius = original.minRadius * scale;
-    CONFIG.layout.continentLabelOffset = original.continentLabelOffset * scale;
-    CONFIG.layout.europeAsiaOffset = original.europeAsiaOffset * scale;
-    CONFIG.layout.infoBoxWidth = original.infoBoxWidth * scale;
-    CONFIG.layout.infoBoxHeight = original.infoBoxHeight * scale;
-    CONFIG.layout.bottomControlY = original.bottomControlY * scale;
-    CONFIG.layout.marginX = 40;
+    // ============ DIMENSIONI CHE SI SCALANO ============
     CONFIG.layout.fontSizeControls = original.fontSizeControls * scale;
-    CONFIG.layout.centerYOffset = original.centerYOffset * scale;
-    CONFIG.layout.topOffset = original.topOffset * scale;
-    CONFIG.layout.leftPanelWidth = original.leftPanelWidth * scale;
-    CONFIG.layout.controlButtonHeight = original.controlButtonHeight * scale;
-    CONFIG.layout.controlButtonWidth = original.controlButtonWidth * scale;
     CONFIG.layout.timeframeFontSize = original.timeframeFontSize * scale;
     CONFIG.layout.yearFontSize = original.yearFontSize * scale;
     CONFIG.layout.labelFontSize = original.labelFontSize * scale;
-    CONFIG.layout.titleStartY = original.titleStartY * scale;
-    CONFIG.layout.buttonStartY = original.buttonStartY * scale;
-    CONFIG.layout.timeframeStartY = original.timeframeStartY * scale;
-    CONFIG.layout.yearStartY = original.yearStartY * scale;
-    CONFIG.layout.legendStartY = original.legendStartY * scale;
-    CONFIG.layout.startButtonY = original.startButtonY * scale;
+    CONFIG.layout.leftPanelWidth = original.leftPanelWidth * scale;
+    CONFIG.layout.controlButtonHeight = original.controlButtonHeight * scale;
+    CONFIG.layout.controlButtonWidth = original.controlButtonWidth * scale;
+    
+    // ============ DIMENSIONI DEL GRAFICO (SCALATE MENO O NON SCALATE) ============
+    // Mantieni il grafico circolare più grande
+    const graphScale = min(scale * 1.3, 1.2); // Aumenta lo scaling del grafico
+    CONFIG.layout.maxRadius = original.maxRadius * graphScale;
+    CONFIG.layout.minRadius = original.minRadius * graphScale;
+    CONFIG.layout.continentLabelOffset = original.continentLabelOffset * graphScale;
+    CONFIG.layout.europeAsiaOffset = original.europeAsiaOffset * graphScale;
+    
+    // Tooltip più grande (scala di meno)
+    const tooltipScale = min(scale * 1.2, 1.1);
+    CONFIG.layout.infoBoxWidth = original.infoBoxWidth * tooltipScale;
+    CONFIG.layout.infoBoxHeight = original.infoBoxHeight * tooltipScale;
+    
+    // ============ MARGINI E POSIZIONI ============
+    CONFIG.layout.marginX = 40;
+    CONFIG.layout.centerYOffset = original.centerYOffset * scale;
+    CONFIG.layout.topOffset = original.topOffset * scale;
+    
+    // ============ TITOLO IN ALTO (FISSO) ============
+    CONFIG.layout.titleStartY = 110 * scale;
+    
+    // ============ ELEMENTI INFERIORI - ANCRAGGIO AL FONDO ============
+    // 1. Primo: posiziona il bottone Start 40px sopra il fondo
+    CONFIG.layout.startButtonY = availableHeight - bottomMargin - 40;
+    
+    // 2. Posiziona il selettore anno 120px sopra Start button
+    CONFIG.layout.yearStartY = CONFIG.layout.startButtonY - 120;
+    
+    // 3. Posiziona il selettore timeframe 100px sopra Year selector
+    CONFIG.layout.timeframeStartY = CONFIG.layout.yearStartY - 100;
+    
+    // 4. Posiziona la legenda 200px sopra Timeframe
+    CONFIG.layout.legendStartY = CONFIG.layout.timeframeStartY - 200;
+    
+    // ============ VERIFICA CHE CI SIA ABBASTANZA SPAZIO ============
+    const spaceBetweenTitleAndLegend = CONFIG.layout.legendStartY - CONFIG.layout.titleStartY;
+    
+    if (spaceBetweenTitleAndLegend < 200) {
+        console.log("Schermo piccolo: compattazione elementi inferiori");
+        
+        CONFIG.layout.legendStartY = CONFIG.layout.titleStartY + 200;
+        CONFIG.layout.timeframeStartY = CONFIG.layout.legendStartY + 150;
+        CONFIG.layout.yearStartY = CONFIG.layout.timeframeStartY + 80;
+        CONFIG.layout.startButtonY = CONFIG.layout.yearStartY + 80;
+        
+        if (CONFIG.layout.startButtonY > availableHeight - bottomMargin) {
+            CONFIG.layout.startButtonY = availableHeight - bottomMargin - 20;
+            CONFIG.layout.yearStartY = CONFIG.layout.startButtonY - 60;
+            CONFIG.layout.timeframeStartY = CONFIG.layout.yearStartY - 60;
+            CONFIG.layout.legendStartY = CONFIG.layout.timeframeStartY - 120;
+        }
+    }
+    
+    // ============ CONTROLLI FINALI DI SICUREZZA ============
+    CONFIG.layout.titleStartY = max(80, CONFIG.layout.titleStartY);
+    CONFIG.layout.startButtonY = min(CONFIG.layout.startButtonY, availableHeight - bottomMargin);
+    CONFIG.layout.yearStartY = min(CONFIG.layout.yearStartY, CONFIG.layout.startButtonY - 60);
+    CONFIG.layout.timeframeStartY = min(CONFIG.layout.timeframeStartY, CONFIG.layout.yearStartY - 60);
+    CONFIG.layout.legendStartY = min(CONFIG.layout.legendStartY, CONFIG.layout.timeframeStartY - 120);
+    CONFIG.layout.legendStartY = max(CONFIG.layout.titleStartY + 200, CONFIG.layout.legendStartY);
+    
+    console.log("Layout calcolato:");
+    console.log("- Titolo Y:", CONFIG.layout.titleStartY);
+    console.log("- Legenda Y:", CONFIG.layout.legendStartY);
+    console.log("- Timeframe Y:", CONFIG.layout.timeframeStartY);
+    console.log("- Year Y:", CONFIG.layout.yearStartY);
+    console.log("- Start button Y:", CONFIG.layout.startButtonY);
+    console.log("- Graph scale:", graphScale);
+    console.log("- Max radius:", CONFIG.layout.maxRadius);
+    console.log("- Min radius:", CONFIG.layout.minRadius);
 }
 
 const CONTINENT_MAP = {
@@ -1054,7 +1111,6 @@ function startTransitionToLearnMore() {
 
 function draw() {
     background(CONFIG.colors.background);
-    
     drawNavBar();
     
     updateTransition();
@@ -1952,7 +2008,7 @@ function drawLearnMoreButton() {
 
 function drawLegend() {
     const startX = CONFIG.layout.marginX;
-    const startY = CONFIG.layout.legendStartY;
+    const startY = CONFIG.layout.legendStartY +20;
 
     textSize(16);
     textStyle(NORMAL);
@@ -2201,6 +2257,7 @@ function drawInfobox() {
         if (y < 0) y = 0;
         if (y + boxHeight > height) y = height - boxHeight;
 
+        // Box (lasciato invariato)
         fill(CONFIG.colors.infoBox);
         stroke(CONFIG.colors.infoBoxStroke);
         strokeWeight(1);
@@ -2208,16 +2265,33 @@ function drawInfobox() {
 
         fill(CONFIG.colors.infoBoxText);
         noStroke();
-        textSize(16);
+        
+        // Dimensioni testo leggermente aumentate
+        const textSizeBase = 14; // Aumentato da 16
+        const textSizeSmall = 10; // Aumentato da 14
+        
+        // Nome del vulcano
+        textSize(textSizeBase);
         textStyle(BOLD);
         textAlign(LEFT, TOP);
-        text(volcano.name, x + 10, y + 10);
         
-        textSize(16);
+        // Tronca il nome se è troppo lungo
+        let volcanoName = volcano.name;
+        const maxNameWidth = boxWidth - 20;
+        
+        while (textWidth(volcanoName) > maxNameWidth && volcanoName.length > 10) {
+            volcanoName = volcanoName.substring(0, volcanoName.length - 4) + '...';
+        }
+        
+        text(volcanoName, x + 10, y + 10);
+        
+        // Anno (con margine)
+        textSize(textSizeSmall);
         textStyle(NORMAL);
-        text('Year: ' + formatYear(volcano.year), x + 10, y + 40);
+        text('Year: ' + formatYear(volcano.year), x + 10, y + 35);
         
-        text('Impact: ' + volcano.impact, x + 10, y + 60);
+        // Impatto (con margine aggiuntivo dal basso)
+        text('Impact: ' + volcano.impact, x + 10, y + 55);
     }
 }
 
@@ -2484,19 +2558,40 @@ function checkHover() {
 }
 
 function updateLayout() {
-    //calcolo del centro
-    //su schermi larghi sposta il grafico più a destra
+    // Calcolo del centro X
     let centerXRatio = CONFIG.layout.centerXRatio;
     
     if (width > 1920) {
         centerXRatio = 0.75;
     } else if (width < 1366) {
-        //su schermi più stretti sposta il grafico più a sinistra
         centerXRatio = 0.65;
     }
     
     state.centerX = width * centerXRatio;
-    state.centerY = height / 2 + CONFIG.layout.centerYOffset;
+    
+    // ============ MODIFICA QUI ============
+    // Calcolo del centro Y - più intelligente
+    // Usa una percentuale dell'altezza invece di un offset fisso
+    const centerYPercentage = 0.48; // Leggermente sopra il centro per lasciare spazio in basso
+    
+    // Se l'altezza è molto grande (es. Mac con schermo alto), sposta ancora più in alto
+    if (height > 1200) {
+        state.centerY = height * 0.46; // Ancora più in alto per schermi alti
+    } else if (height < 800) {
+        state.centerY = height * 0.50; // Più centrale per schermi piccoli
+    } else {
+        state.centerY = height * centerYPercentage; // Valore di default
+    }
+    
+    // ============ LOG PER DEBUG ============
+    // (opzionale, rimuovi in produzione)
+    if (frameCount % 120 === 0) {
+        console.log("Layout update:");
+        console.log("- Screen:", width, "x", height);
+        console.log("- Center:", state.centerX, state.centerY);
+        console.log("- Start button Y:", CONFIG.layout.startButtonY);
+        console.log("- Available bottom space:", height - CONFIG.layout.startButtonY);
+    }
 }
 
 function mousePressed() {
@@ -3003,36 +3098,57 @@ function formatYearShort(year) {
 }
 
 function windowResized() {
-    //ricalcola il fattore di scala
+    // Ricalcola il fattore di scala
     const newScaleFactor = calculateScaleFactor();
-    const constrainedScale = constrain(newScaleFactor, 0.7, 1.3);
+    const constrainedScale = constrain(newScaleFactor, 0.5, 1.2);
     
-    if (abs(constrainedScale - scaleFactor) > 0.05) {
+    if (abs(constrainedScale - scaleFactor) > 0.01) {
         scaleFactor = constrainedScale;
-        applyScaleToConfig(scaleFactor);
+        applyScaleToConfig(scaleFactor);  // Questa ora calcola tutto correttamente
+        console.log("Scale factor updated to:", scaleFactor);
     }
     
+    // Ridimensiona il canvas
     resizeCanvas(windowWidth, windowHeight);
+    
+    // Aggiorna il layout del cerchio centrale
     updateLayout();
-    console.log("Finestra ridimensionata. Nuovo scale factor:", scaleFactor);
+    
+    // Debug
+    console.log("=== WINDOW RESIZED ===");
+    console.log("Screen:", windowWidth, "x", windowHeight);
+    console.log("Start button Y:", CONFIG.layout.startButtonY);
+    console.log("Year selector Y:", CONFIG.layout.yearStartY);
+    console.log("Timeframe Y:", CONFIG.layout.timeframeStartY);
+    console.log("Legend Y:", CONFIG.layout.legendStartY);
+    console.log("Title Y:", CONFIG.layout.titleStartY);
 }
 
 function setup() {
+    // Calcola il fattore di scala
     scaleFactor = calculateScaleFactor();
+    scaleFactor = constrain(scaleFactor, 0.5, 1.2);
     
-    //limita il fattore di scala per evitare dimensioni troppo piccole o grandi
-    scaleFactor = constrain(scaleFactor, 0.7, 1.3);
-    
-    //applica il fattore di scala 
+    // Applica il fattore di scala (che ora posiziona tutto dal fondo)
     applyScaleToConfig(scaleFactor);
     
-    //canvas con le dimensioni della finestra
+    // Crea il canvas
     let canvas = createCanvas(windowWidth, windowHeight);
     canvas.parent('sketch-container');
+    canvas.elt.style.touchAction = 'none';
     
+    // Aggiorna il layout del cerchio centrale
     updateLayout();
     frameRate(60);
-    console.log("Setup completato. Scale factor:", scaleFactor);
+    
+    console.log("=== SETUP COMPLETATO ===");
+    console.log("Window size:", windowWidth, "x", windowHeight);
+    console.log("Bottom elements:");
+    console.log("- Start button Y:", CONFIG.layout.startButtonY);
+    console.log("- Year selector Y:", CONFIG.layout.yearStartY);
+    console.log("- Timeframe Y:", CONFIG.layout.timeframeStartY);
+    console.log("- Legend Y:", CONFIG.layout.legendStartY);
+    console.log("- Title Y:", CONFIG.layout.titleStartY);
 }
 
 function updateCursor() {
