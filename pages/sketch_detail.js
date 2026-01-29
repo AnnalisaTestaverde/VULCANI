@@ -1,3 +1,125 @@
+// ============ CONFIGURAZIONE RESPONSIVE ============
+const CONFIG = {
+    layout: {
+        marginX: 40,                // Margine sinistro fisso
+        navbarHeight: 70,           // Altezza navbar
+        titleStartY: 75,            // Titolo in alto
+        yearNavigatorY: 230,        // Navigatore anno
+        descriptionStartY: 340,     // Descrizione vulcano
+        mapBottomMargin: 60,        // Mappa dal fondo
+        chartBottomMargin: 100,     // Grafico dal fondo
+        maxChartSize: 500,          // Dimensione massima grafico
+        minChartSize: 300,          // Dimensione minima grafico
+        centerXRatio: 0.695,        // Stessa posizione orizzontale di overview
+        maxRadius: 300,             // Max radius come in overview
+        minRadius: 29,              // Min radius come in overview
+        centerYOffset: -10,         // Offset verticale
+        topOffset: -20              // Offset superiore
+    },
+    responsive: {
+        referenceWidth: 1920,
+        referenceHeight: 1080
+    }
+};
+
+// Variabile globale per scaling
+let scaleFactor = 1.0;
+
+// Funzioni per scaling responsive
+function calculateScaleFactor() {
+    const referenceWidth = CONFIG.responsive.referenceWidth;
+    const referenceHeight = CONFIG.responsive.referenceHeight;
+    
+    const widthRatio = windowWidth / referenceWidth;
+    const heightRatio = windowHeight / referenceHeight;
+    
+    return min(widthRatio, heightRatio);
+}
+
+function applyResponsiveScaling() {
+    // Calcola scaling basato sull'altezza
+    const availableHeight = windowHeight - CONFIG.layout.navbarHeight;
+    const referenceAvailableHeight = CONFIG.responsive.referenceHeight - CONFIG.layout.navbarHeight;
+    
+    scaleFactor = availableHeight / referenceAvailableHeight;
+    scaleFactor = constrain(scaleFactor, 0.7, 1.2); // Limita lo scaling
+    
+    // Aggiorna dimensioni in base al fattore di scala
+    updateResponsiveDimensions();
+}
+
+function updateResponsiveDimensions() {
+    // ---------- DIMENSIONI TESTI ----------
+    chartTitleSize = 28 * scaleFactor;
+    mainTextSize = 17 * scaleFactor;
+    chartLabelSize = 14 * scaleFactor;
+    chartTooltipTextSize = 17 * scaleFactor;
+    
+        // ---------- POSIZIONE E DIMENSIONE GRAFICO ----------
+    // Calcolo del centro X come in overview
+    let centerXRatio = CONFIG.layout.centerXRatio;
+    
+    if (windowWidth > 1920) {
+        centerXRatio = 0.75;
+    } else if (windowWidth < 1366) {
+        centerXRatio = 0.65;
+    }
+    
+    // Calcolo del centro Y - usando la stessa logica di overview
+    const centerYPercentage = 0.48;
+    let centerY;
+    
+    if (windowHeight > 1200) {
+        centerY = windowHeight * 0.46;
+    } else if (windowHeight < 800) {
+        centerY = windowHeight * 0.50;
+    } else {
+        centerY = windowHeight * centerYPercentage;
+    }
+    
+    // Imposta le percentuali per il posizionamento del grafico
+    chartXPercent = centerXRatio;  // Posizione orizzontale
+    chartYPercent = centerY / windowHeight;  // Posizione verticale
+    
+    // ---------- DIMENSIONE GRAFICO ----------
+    // Calcola dimensione ottimale per il grafico
+    // Usa la stessa logica di scaling del grafico overview
+    const graphScale = min(scaleFactor * 1.3, 1.2);
+    const baseSize = 500;  // Dimensione base
+    
+    // Aggiungi offset per la navbar
+    const availableHeight = windowHeight - CONFIG.layout.navbarHeight - 100;
+    const availableWidth = windowWidth * 0.35;
+    
+    // Prendi il valore minore, ma assicurati che sia abbastanza grande
+    const targetSize = min(availableHeight, availableWidth);
+    
+    // Scala il grafico come in overview
+    chartSize = constrain(
+        targetSize * 0.85,  // Riduci leggermente rispetto alla disponibilità
+        CONFIG.layout.minChartSize * graphScale,
+        CONFIG.layout.maxChartSize * graphScale
+    );
+    
+    // ---------- SCALING ALTRI ELEMENTI ----------
+    // Mantieni lo scaling per testi e labels
+    chartTitleSize = 28 * scaleFactor;
+    mainTextSize = 17 * scaleFactor;
+    chartLabelSize = 14 * scaleFactor;
+    chartTooltipTextSize = 17 * scaleFactor;
+    
+    // Debug
+    if (frameCount % 120 === 0) {
+        console.log("Layout aggiornato (detail):");
+        console.log("- Schermo:", windowWidth, "x", windowHeight);
+        console.log("- Chart position %:", chartXPercent, chartYPercent);
+        console.log("- Chart size:", chartSize);
+        console.log("- Scale factor:", scaleFactor);
+        console.log("- Center Y:", centerY, "windowHeight:", windowHeight);
+    }
+}
+// ============ FINE CONFIGURAZIONE RESPONSIVE ============
+
 // ---------- VARIABILI CONFIGURABILI ----------
 let chartXPercent = 0.7;
 let chartYPercent = 0.5;
@@ -78,6 +200,8 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   textFont("Helvetica");
   frameRate(60);
+
+  applyResponsiveScaling();
   
   selectedName = getQueryParam("name");
   selectedYear = int(getQueryParam("year"));
@@ -430,9 +554,8 @@ function drawMap(lat, lon, country) {
   textStyle(BOLD);
   text(value, mapX + 7 + textWidth(label), titleY);
   pop();
-
   pop();
-
+    
   push();
   fill(255, 230);
   noStroke();
@@ -575,8 +698,8 @@ function drawImpactChart(d) {
 
   push();
 
-  let panelW = chartSize + 60;
-  let panelH = chartSize + 60;
+  let panelW = chartSize + 40;
+  let panelH = chartSize + 40;
   let px = width * chartXPercent - panelW / 2;
   let py = height * chartYPercent - panelH / 2;
 
@@ -729,7 +852,7 @@ function drawImpactChart(d) {
     }
   }
 
-  let detailMaxWidth = 130;
+  let detailMaxWidth = 110;
   let lineHeight = 16;
 
   for (let i = 0; i < 5; i++) {
@@ -748,11 +871,11 @@ function drawImpactChart(d) {
     textAlign(CENTER, CENTER);
 
     let ang = (start + end) / 2;
-    let lx = cos(ang) * (chartSize / 2 + 60);
+    let lx = cos(ang) * (chartSize / 2 + 55);
     let ly = sin(ang) * (chartSize / 2 + 55);
     
     textStyle(BOLD);
-    text(labels[i], lx, ly - 25);
+    text(labels[i], lx, ly - 20);
     
     if (isDataAvailable[i]) {
       let levelValue = values[i];
@@ -761,7 +884,7 @@ function drawImpactChart(d) {
       fill(chartMainColor);
       textSize(chartLabelSize);
       textStyle(BOLD);
-      text(levelText, lx, ly - 5);
+      text(levelText, lx, ly - 3);
 
       let detailText = "";
       if (i === 0) detailText = getDetailText(d.rawDeath, d.death, "deaths");
@@ -805,20 +928,20 @@ function drawImpactChart(d) {
 
   pop(); // Fine del push() iniziale - ora le coordinate tornano a essere assolute
 
-  // TITOLO "Total impact level: " TORNATO IN ALTO A DESTRA (posizione originale)
+  // TITOLO "Total impact level: " ANCORATO A DESTRA CON MARGINE 40px (come sinistra)
   push();
   noStroke();
   fill(245, 40, 0);
   textSize(chartTitleSize);
-  textAlign(CENTER, CENTER);
+  textAlign(RIGHT, CENTER); // Allineamento a destra
   textStyle(BOLD);
-  
+
   let totalImpactText = "Total impact level: " + d.impact;
-  let totalImpactX = 260;  // Posizione originale X
-  let totalImpactY = -310; // Posizione originale Y (sopra il grafico)
-  
-  text(totalImpactText, cx + totalImpactX, cy + totalImpactY);
-  
+  let totalImpactX = width - CONFIG.layout.marginX; // Margine destro fisso di 40px
+  let totalImpactY = CONFIG.layout.navbarHeight + 30 * scaleFactor; // 60px sotto la navbar
+
+  text(totalImpactText, totalImpactX, totalImpactY);
+
   textStyle(NORMAL);
   pop();
 
@@ -1839,5 +1962,12 @@ function updateCursor() {
 
 // ---------- RESIZE ----------
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+    resizeCanvas(windowWidth, windowHeight);
+    
+    // Ricalcola tutto il layout responsive
+    applyResponsiveScaling();
+    
+    console.log("Window resized (detail):", windowWidth, "x", windowHeight);
+    console.log("- Chart position:", width * chartXPercent, height * chartYPercent);
+    console.log("- Chart size:", chartSize);
 }
