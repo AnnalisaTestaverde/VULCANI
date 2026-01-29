@@ -1153,7 +1153,7 @@ function writeText() {
 
 // ---------- DESCRIZIONE ----------
 function drawVolcanoDescription(typeRaw, y, mo, dy) {
-  let margin = 40;
+  let margin = 41;
   
   let dateY = 325; 
   let titleY = 330; 
