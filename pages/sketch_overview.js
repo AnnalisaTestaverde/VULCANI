@@ -3,15 +3,10 @@ const CONFIG = {
         background: '#ffffffff',
         text: '#000000ff',
         accent: '#FF2B00',
-        accentLight: '#FF2B00',
         circle: '#111010b3',
-        continentBase: '#FF2B00',
-        highlightGlow: '#FF2B00',
         infoBox: '#ffffffff',
         infoBoxText: '#000000ff',
-        infoBoxStroke: '#FF2B00',
-        timeline: '#FF2B00',
-        selectedContinent: '#b9b9b988'
+        infoBoxStroke: '#FF2B00'
     },
     layout: {
         centerXRatio: 0.695,
@@ -32,12 +27,12 @@ const CONFIG = {
         timeframeFontSize: 30,
         yearFontSize: 30,
         labelFontSize: 16,
-        titleStartY: 95,
-        buttonStartY: 450,
-        timeframeStartY: 520,
-        yearStartY: 620,
-        legendStartY: 350,
-        startButtonY: 720
+        titleStartY: 110,          
+        buttonStartY: 400,         
+        timeframeStartY: 600,      
+        yearStartY: 705,           
+        legendStartY: 420,         
+        startButtonY: 820 
     },
     animation: {
         dotEntryDuration: 800,
@@ -192,6 +187,52 @@ let transitionState = {
     startRadius: 0,
     targetRadius: 0
 };
+
+//responsive
+let scaleFactor = 1.0;
+
+function calculateScaleFactor() {
+    const referenceWidth = 1920;
+    const referenceHeight = 1080;
+    
+    const widthRatio = windowWidth / referenceWidth;
+    const heightRatio = windowHeight / referenceHeight;
+    
+    return min(widthRatio, heightRatio);
+}
+
+function applyScaleToConfig(scale) {
+    if (!window.originalConfig) {
+        window.originalConfig = JSON.parse(JSON.stringify(CONFIG.layout));
+    }
+    
+    const original = window.originalConfig;
+    
+    //fattore di scala applicato a tutte le dimensioni nel layout
+    CONFIG.layout.maxRadius = original.maxRadius * scale;
+    CONFIG.layout.minRadius = original.minRadius * scale;
+    CONFIG.layout.continentLabelOffset = original.continentLabelOffset * scale;
+    CONFIG.layout.europeAsiaOffset = original.europeAsiaOffset * scale;
+    CONFIG.layout.infoBoxWidth = original.infoBoxWidth * scale;
+    CONFIG.layout.infoBoxHeight = original.infoBoxHeight * scale;
+    CONFIG.layout.bottomControlY = original.bottomControlY * scale;
+    CONFIG.layout.marginX = 40;
+    CONFIG.layout.fontSizeControls = original.fontSizeControls * scale;
+    CONFIG.layout.centerYOffset = original.centerYOffset * scale;
+    CONFIG.layout.topOffset = original.topOffset * scale;
+    CONFIG.layout.leftPanelWidth = original.leftPanelWidth * scale;
+    CONFIG.layout.controlButtonHeight = original.controlButtonHeight * scale;
+    CONFIG.layout.controlButtonWidth = original.controlButtonWidth * scale;
+    CONFIG.layout.timeframeFontSize = original.timeframeFontSize * scale;
+    CONFIG.layout.yearFontSize = original.yearFontSize * scale;
+    CONFIG.layout.labelFontSize = original.labelFontSize * scale;
+    CONFIG.layout.titleStartY = original.titleStartY * scale;
+    CONFIG.layout.buttonStartY = original.buttonStartY * scale;
+    CONFIG.layout.timeframeStartY = original.timeframeStartY * scale;
+    CONFIG.layout.yearStartY = original.yearStartY * scale;
+    CONFIG.layout.legendStartY = original.legendStartY * scale;
+    CONFIG.layout.startButtonY = original.startButtonY * scale;
+}
 
 const CONTINENT_MAP = {
     'Arabia-S': 'Asia', 'Arabia-W': 'Asia', 'China-S': 'Asia', 'Halmahera-Indonesia': 'Asia',
@@ -539,11 +580,11 @@ function applyFilters() {
     calculateVolcanoPositions();
     updateAvailableYears();
     
-    // RICALCOLA L'ALTEZZA DEL PANNEL DI RICERCA SE È APERTO
+    //panel di ricerca eruzione
     if (state.searchPanelOpen) {
-        // Se stai mostrando vulcani o eruzioni, aggiorna le liste
         if (state.searchVolcanoesPanelOpen && state.searchSelectedContinent) {
-            // Raggruppa i vulcani del continente
+
+            //raggruppamento vulcani del continente
             const continentVolcanoes = state.filteredData.filter(v => v.continent === state.searchSelectedContinent);
             const volcanoMap = new Map();
             continentVolcanoes.forEach(v => {
@@ -555,13 +596,12 @@ function applyFilters() {
                 .sort((a, b) => a.name.localeCompare(b.name));
             
         } else if (state.searchEruptionsPanelOpen && state.searchSelectedVolcano) {
-            // Aggiorna le eruzioni del vulcano selezionato
+            //aggiornamento dell eruzioni del vulcano selezionato
             state.searchPanelEruptions = state.filteredData
                 .filter(v => v.name === state.searchSelectedVolcano.name)
                 .sort((a, b) => a.year - b.year);
         }
         
-        // Ricalcola l'altezza
         recalculateSearchPanelHeight();
     }
     
@@ -660,9 +700,7 @@ function updateSearchPanelAnimation() {
         const elapsed = millis() - state.searchPanelAnimStart;
         state.searchPanelAnimProgress = constrain(elapsed / SEARCH_PANEL_ANIM_DURATION, 0, 1);
         
-        // ANIMAZIONE DELL'ALTEZZA DEL PANNEL
         if (state.searchPanelAnimProgress < 1) {
-            // Interpola l'altezza corrente verso l'altezza target
             state.searchPanelHeight = lerp(0, state.searchTargetHeight, state.searchPanelAnimProgress);
         } else {
             state.searchPanelHeight = state.searchTargetHeight;
@@ -690,7 +728,7 @@ function triggerWaveAnimation() {
 }
 
 function triggerVolcanoEruption(volcano, x, y) {
-    console.log("💥 ANIMAZIONE STILIZZATA per:", volcano.name);
+    console.log("ANIMAZIONE STILIZZATA per:", volcano.name);
     
     const originalSize = map(volcano.impact, 1, 15, 5, 15);
     
@@ -750,7 +788,7 @@ function updateEruptionAnimation() {
         if (implosionProgress >= 1) {
             state.eruption.phase = 'pause';
             state.eruption.pauseStart = currentTime;
-            console.log("⏸️ PAUSA DRAMMATICA");
+            console.log("PAUSA");
         }
         
     } else if (state.eruption.phase === 'pause') {
@@ -759,7 +797,7 @@ function updateEruptionAnimation() {
         if (pauseElapsed >= CONFIG.animation.pauseDuration) {
             state.eruption.phase = 'exploding';
             state.eruption.explosionStart = currentTime;
-            console.log("💥 ESPLOSIONE!");
+            console.log("ESPLOSIONE!");
             
             for (let wave of state.eruption.shockwaves) {
                 wave.startTime = currentTime + wave.delay;
@@ -794,7 +832,7 @@ function updateEruptionAnimation() {
         
         if (explosionProgress >= 1) {
             state.eruption.phase = 'complete';
-            console.log("✅ ANIMAZIONE COMPLETATA");
+            console.log("ANIMAZIONE COMPLETATA");
             
             setTimeout(() => {
                 const v = state.eruption.volcano;
@@ -1015,17 +1053,13 @@ function startTransitionToLearnMore() {
 }
 
 function draw() {
-    // PRIMA: pulisci il canvas
     background(CONFIG.colors.background);
     
-    // SECONDO: disegna la navbar
     drawNavBar();
     
-    // TERZO: tutto il resto
     updateTransition();
     updateSearchPanelAnimation();
     
-    // Aggiorna stati hover per i bottoni
     updateButtonHoverStates();
     
     if (transitionState.active) {
@@ -1071,8 +1105,6 @@ function draw() {
 
         drawLegend();
         
-        // DISEGNA IL PANNEL DI RICERCA QUI (se aperto)
-        // Deve essere PRIMA della leggenda per coprirla
         if (state.searchPanelOpen) {
             drawSearchPanel();
         }
@@ -1095,16 +1127,16 @@ function draw() {
 function drawNavBar() {
     push();
     
-    // Barra di navigazione fissa in alto
+    //navbar fissa in alto
     let navHeight = 60;
     let navY = 0;
     
-    // Sfondo della navbar
+    //sfondo navbar
     fill(255);
     noStroke();
     rect(0, navY, width, navHeight);
     
-    // Logo
+    //logo
     fill(0);
     textSize(15);
     textFont("Helvetica");
@@ -1112,15 +1144,14 @@ function drawNavBar() {
     textAlign(LEFT, CENTER);
     text("Significant Volcanic Eruptions", 40, navHeight/2);
     
-    // Links di navigazione
+    //link
     let navLinks = [
         { name: "Homepage", href: "../index.html", x: 0 },
         { name: "Team", href: "team.html", x: 0 },
         { name: "Methodology", href: "methodology.html", x: 0 },
         { name: "Explore", href: "overview.html", x: 0, isExplore: true }
     ];
-    
-    // Calcola posizione dei link (allineati a destra)
+
     let totalLinksWidth = 0;
     let linkSpacing = 40;
     let linkFontSize = 15;
@@ -1128,14 +1159,13 @@ function drawNavBar() {
     textSize(linkFontSize);
     textStyle(NORMAL);
     
-    // Calcola larghezza totale
     for (let link of navLinks) {
         link.width = textWidth(link.name);
         totalLinksWidth += link.width;
     }
     totalLinksWidth += (navLinks.length - 1) * linkSpacing;
     
-    // Posiziona i links
+    //posizione link
     let startX = width - totalLinksWidth - 40;
     let currentX = startX;
     
@@ -1144,7 +1174,7 @@ function drawNavBar() {
         link.x = currentX;
         link.y = navHeight/2;
         
-        // Disegna link
+        //link
         if (link.isExplore) {
             fill("#FF2B00");
             textStyle(BOLD);
@@ -1155,7 +1185,7 @@ function drawNavBar() {
         
         text(link.name, link.x, link.y);
         
-        // Controlla hover
+        //hover
         let textW = link.width;
         let textH = 20;
         let textX = link.x;
@@ -1163,7 +1193,6 @@ function drawNavBar() {
         
         if (mouseX > textX && mouseX < textX + textW && 
             mouseY > textY && mouseY < textY + textH) {
-            // Cursor verrà gestito da updateCursor()
             if (!link.isExplore) {
                 fill("#FF2B00");
                 text(link.name, link.x, link.y);
@@ -1172,15 +1201,13 @@ function drawNavBar() {
         
         currentX += link.width + linkSpacing;
     }
-    
-    // Salva i link per l'interazione
     state.navLinks = navLinks;
     
     pop();
 }
 
 function updateButtonHoverStates() {
-    // Aggiorna stati hover per tutti i bottoni
+    //stati hover dei bottoni
     state.hoveredStartButton = state.startButtonArea &&
         mouseX > state.startButtonArea.x &&
         mouseX < state.startButtonArea.x + state.startButtonArea.width &&
@@ -1250,9 +1277,9 @@ function drawStartAnimationButton() {
     const buttonX = CONFIG.layout.marginX;
     const buttonY = CONFIG.layout.startButtonY;
 
-    // Disegna rettangolo con hover effect
+    //hover
     if (state.hoveredStartButton) {
-        fill(255, 43, 0); // Rosso
+        fill(255, 43, 0); //rosso
         stroke(255, 43, 0);
     } else {
         noFill();
@@ -1261,11 +1288,11 @@ function drawStartAnimationButton() {
     strokeWeight(1);
     rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
-    // Icona play/pause
+    //play/pause
     if (state.hoveredStartButton) {
-        fill(255); // Bianco
+        fill(255); //bianco
     } else {
-        fill(255, 43, 0); // Rosso
+        fill(255, 43, 0); //rosso
     }
     noStroke();
     
@@ -1279,11 +1306,11 @@ function drawStartAnimationButton() {
         );
     }
 
-    // Testo
+    //testo
     if (state.hoveredStartButton) {
-        fill(255); // Bianco
+        fill(255); //bianco
     } else {
-        fill(0); // Nero
+        fill(0); //nero
     }
     noStroke();
     textSize(CONFIG.layout.labelFontSize);
@@ -1301,20 +1328,18 @@ function drawStartAnimationButton() {
 }
 
 function drawSearchButton() {
-    // Calcola la posizione tra Start Animation e Learn More
     const startButtonRight = state.startButtonArea.x + state.startButtonArea.width;
     const learnMoreButtonLeft = state.learnMoreButtonArea ? state.learnMoreButtonArea.x : width - 160 - 50;
     const availableSpace = learnMoreButtonLeft - startButtonRight;
     
-    // Adatta la larghezza in base allo spazio disponibile
     const buttonWidth = min(190, availableSpace - 40);
     const buttonHeight = 40;
     const buttonX = startButtonRight + 10;
     const buttonY = CONFIG.layout.startButtonY;
 
-    // Rettangolo del bottone con hover effect
+    //hover
     if (state.hoveredSearchButton) {
-        fill(255, 43, 0); // Rosso
+        fill(255, 43, 0); //rosso
         stroke(255, 43, 0);
     } else {
         noFill();
@@ -1323,21 +1348,21 @@ function drawSearchButton() {
     strokeWeight(1);
     rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
-    // Icona lente di ingrandimento
+    //lente di ingrandimento
     push();
     translate(buttonX + 22, buttonY + buttonHeight / 2.2);
     
-    // Cerchio della lente
+    //cerchio della lente
     if (state.hoveredSearchButton) {
-        stroke(255); // Bianco
+        stroke(255); //bianco
     } else {
-        stroke(245, 40, 0); // Rosso
+        stroke(245, 40, 0); //rosso
     }
     strokeWeight(1.5);
     noFill();
     circle(0, 0, 18);
     
-    // Manico della lente
+    //manico della lente
     const handleLength = 8;
     const handleAngle = PI / 4;
     const handleX = cos(handleAngle) * 9;
@@ -1346,11 +1371,11 @@ function drawSearchButton() {
     
     pop();
 
-    // Testo
+    //testo
     if (state.hoveredSearchButton) {
-        fill(255); // Bianco
+        fill(255); //bianco
     } else {
-        fill(0); // Nero
+        fill(0); //nero
     }
     noStroke();
     textSize(CONFIG.layout.labelFontSize);
@@ -1358,7 +1383,7 @@ function drawSearchButton() {
     textAlign(LEFT, CENTER);
     text("Search Eruptions", buttonX + 43, buttonY + buttonHeight / 2);
 
-    // Salva l'area cliccabile
+    //area cliccabile
     state.searchButtonArea = {
         x: buttonX,
         y: buttonY,
@@ -1368,43 +1393,31 @@ function drawSearchButton() {
 }
 
 function drawSearchPanel() {
-    // Assicurati che searchButtonArea sia definita
     if (!state.searchButtonArea) return;
     
     const panelX = state.searchButtonArea.x + state.searchButtonArea.width + 10;
     const panelY = state.searchButtonArea.y + 40;
     
-    // Usa l'altezza animata (che cambia durante le transizioni)
     const currentPanelHeight = state.searchPanelHeight;
     const panelTopY = panelY - currentPanelHeight;
     
-    // 1. Rettangolo bianco di sfondo (GRANDE, copre tutto)
-    // Calcola quanto deve essere alto per coprire fino alla leggenda
     const legendStartY = CONFIG.layout.legendStartY;
     
-    // Calcola se il pannello si sovrappone alla leggenda
     const legendOverlap = legendStartY - panelTopY;
     
-    // Se c'è sovrapposizione, calcola l'altezza extra necessaria
     let extraHeight = 0;
     if (legendOverlap > 0) {
-        // Il pannello si sovrappone alla leggenda
-        // Aggiungi abbastanza altezza per coprire la leggenda completamente
-        // La leggenda è alta circa 120px (35+35+70)
-        extraHeight = legendOverlap + 120 + 20; // +20 per margine extra
+        
+        extraHeight = legendOverlap + 120 + 20; 
     }
     
-    // Assicurati che extraHeight non sia negativo
     extraHeight = max(0, extraHeight);
     
     fill(255);
     noStroke();
     
-    // Rettangolo grande che copre dal pannello fino sotto la leggenda
-    // Anima anche l'extraHeight durante le transizioni
     let animatedExtraHeight = 0;
     if (state.searchPanelAnimProgress < 1) {
-        // Durante l'animazione, interpola anche l'extraHeight
         animatedExtraHeight = extraHeight * state.searchPanelAnimProgress;
     } else {
         animatedExtraHeight = extraHeight;
@@ -1415,23 +1428,21 @@ function drawSearchPanel() {
          state.searchPanelWidth + 10, 
          currentPanelHeight + 10 + animatedExtraHeight);
     
-    // 2. Pannello principale (con la sua altezza normale)
     fill(255);
     stroke(245, 40, 0);
     strokeWeight(1);
     rect(panelX, panelY - currentPanelHeight, state.searchPanelWidth, currentPanelHeight, 8);
     
-    // 3. Contenuto del pannello (solo se il pannello è abbastanza alto)
-    if (currentPanelHeight > 20) { // Almeno 20px di altezza per mostrare qualcosa
+    
+    if (currentPanelHeight > 20) { 
         push();
         translate(panelX, panelY - currentPanelHeight);
         
-        // Sfondo bianco interno (leggermente più piccolo per il bordo)
         fill(255);
         noStroke();
         rect(2, 2, state.searchPanelWidth - 4, currentPanelHeight - 4, 6);
         
-        // Clip per evitare che il contenuto esca dal pannello
+        //clip per evitare che il contenuto esca dal pannello
         drawingContext.save();
         drawingContext.beginPath();
         drawingContext.rect(0, 0, state.searchPanelWidth, currentPanelHeight);
@@ -1455,7 +1466,7 @@ function drawContinentsList(panelHeight) {
     const itemHeight = 35;
     const titleHeight = 40;
     
-    // Titolo
+    //titolo
     fill(245, 40, 0);
     noStroke();
     textSize(14);
@@ -1463,20 +1474,19 @@ function drawContinentsList(panelHeight) {
     textAlign(LEFT, CENTER);
     text("SELECT CONTINENT", margin, titleHeight / 2);
     
-    // Linea separatrice
+    //linea separatrice
     stroke(245, 40, 0, 100);
     strokeWeight(1);
     line(margin, titleHeight, state.searchPanelWidth - margin, titleHeight);
     
-    // Lista continenti
+    //lista continenti
     let y = titleHeight + 10;
     for (let i = 0; i < CONTINENTS.length; i++) {
         const continent = CONTINENTS[i];
         
-        // Controlla se l'elemento è visibile nell'altezza animata
         if (y + itemHeight > panelHeight) break;
         
-        // Calcola hover con coordinate locali
+        //hover
         const panelX = state.searchButtonArea.x + state.searchButtonArea.width + 10;
         const panelY = state.searchButtonArea.y + 40 - panelHeight;
         const localX = mouseX - panelX;
@@ -1487,17 +1497,16 @@ function drawContinentsList(panelHeight) {
                          localY > y && 
                          localY < y + itemHeight;
         
-        // Background hover (rosso trasparente)
+        //background hover (rosso trasparente)
         if (isHovered) {
             fill(245, 40, 0, 15);
             noStroke();
             rect(margin, y, state.searchPanelWidth - 2 * margin, itemHeight, 6);
             
-            // Salva l'indice dell'item hovered
             state.hoveredSearchItemIndex = i;
         }
         
-        // Nome continente
+        //nome continente
         fill(0);
         noStroke();
         textSize(14);
@@ -1505,7 +1514,7 @@ function drawContinentsList(panelHeight) {
         textAlign(LEFT, CENTER);
         text(continent, margin + 10, y + itemHeight / 2);
         
-        // Numero di eruzioni nel continente (filtrato per periodo temporale)
+        //numero di eruzioni nel continente
         const eruptionsCount = state.filteredData.filter(v => v.continent === continent).length;
         fill(245, 40, 0);
         textSize(12);
@@ -1523,11 +1532,11 @@ function drawVolcanoesList(panelHeight) {
     const titleHeight = 40;
     const scrollbarWidth = 6;
     
-    // Titolo con freccia per tornare indietro
+    //titolo con freccia per tornare indietro
     push();
     translate(0, titleHeight / 2);
     
-    // Freccia per tornare indietro
+    //freccia per tornare indietro
     fill(245, 40, 0);
     noStroke();
     textSize(18);
@@ -1535,38 +1544,37 @@ function drawVolcanoesList(panelHeight) {
     textAlign(LEFT, CENTER);
     text("←", margin, 0);
     
-    // Nome continente
+    //nome continente
     textSize(14);
     text(state.searchSelectedContinent.toUpperCase(), margin + 25, 0);
     
     pop();
     
-    // Linea separatrice
+    //linea separatrice
     stroke(245, 40, 0, 100);
     strokeWeight(1);
     line(margin, titleHeight, state.searchPanelWidth - margin, titleHeight);
     
-    // Area scorrevole
+    //area scorrimento
     const totalItems = state.searchPanelVolcanoes.length;
     const contentHeight = totalItems * itemHeight;
     const visibleHeight = min(panelHeight - titleHeight, contentHeight);
     const needsScroll = contentHeight > visibleHeight;
     
-    // Maschera per l'area visibile
     drawingContext.save();
     drawingContext.beginPath();
     drawingContext.rect(0, titleHeight, state.searchPanelWidth, visibleHeight);
     drawingContext.clip();
     
-    // Lista vulcani
+    //lLista vulcani
     for (let i = 0; i < totalItems; i++) {
         const volcano = state.searchPanelVolcanoes[i];
         const y = titleHeight + i * itemHeight - state.searchPanelScrollY;
         
-        // Controlla se l'elemento è visibile
+        //controlla se l'elemento è visibile
         if (y + itemHeight < titleHeight || y > titleHeight + visibleHeight) continue;
         
-        // Calcola hover con coordinate locali
+        //hover
         const panelX = state.searchButtonArea.x + state.searchButtonArea.width + 10;
         const panelY = state.searchButtonArea.y + 40 - panelHeight;
         const localX = mouseX - panelX;
@@ -1577,24 +1585,24 @@ function drawVolcanoesList(panelHeight) {
                          localY > y && 
                          localY < y + itemHeight;
         
-        // Background hover (rosso trasparente)
+        //background hover (rosso trasparente)
         if (isHovered) {
             fill(245, 40, 0, 15);
             noStroke();
             rect(margin, y, state.searchPanelWidth - 2 * margin - (needsScroll ? scrollbarWidth : 0), itemHeight, 6);
             
-            // Salva l'indice dell'item hovered
+            //salva l'indice dell'item hovered
             state.hoveredVolcanoItemIndex = i;
         }
         
-        // Nome vulcano
+        //nome vulcano
         fill(0);
         noStroke();
         textSize(12);
         textStyle(NORMAL);
         textAlign(LEFT, CENTER);
         
-        // Tronca il nome se troppo lungo
+        //abbrevia il nome se troppo lungo
         let volcanoName = volcano.name;
         const maxWidth = state.searchPanelWidth - 2 * margin - (needsScroll ? scrollbarWidth : 0) - 50;
         textSize(12);
@@ -1604,7 +1612,7 @@ function drawVolcanoesList(panelHeight) {
         
         text(volcanoName, margin + 5, y + itemHeight / 2);
         
-        // Numero di eruzioni del vulcano (filtrato per periodo temporale)
+        //numero di eruzioni del vulcano 
         const eruptionsCount = state.filteredData.filter(v => v.name === volcano.name).length;
         fill(245, 40, 0);
         textSize(11);
@@ -1615,22 +1623,22 @@ function drawVolcanoesList(panelHeight) {
     
     drawingContext.restore();
     
-    // Scrollbar se necessario
+    //scrollbar 
     if (needsScroll) {
         const scrollbarX = state.searchPanelWidth - scrollbarWidth - 4;
         const scrollbarHeight = visibleHeight * (visibleHeight / contentHeight);
         const scrollbarY = titleHeight + map(state.searchPanelScrollY, 0, contentHeight - visibleHeight, 0, visibleHeight - scrollbarHeight);
         
-        // Track
+        //track
         fill(240);
         noStroke();
         rect(scrollbarX, titleHeight, scrollbarWidth, visibleHeight, 3);
         
-        // Thumb
+        //thumb
         fill(200);
         rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 3);
         
-        // Thumb hover
+        //thumb hover
         const panelX = state.searchButtonArea.x + state.searchButtonArea.width + 10;
         const panelY = state.searchButtonArea.y + 40 - panelHeight;
         const localX = mouseX - panelX;
@@ -1650,11 +1658,11 @@ function drawEruptionsList(panelHeight) {
     const titleHeight = 40;
     const scrollbarWidth = 6;
     
-    // Titolo con freccia per tornare indietro
+    //titolo con freccia per tornare indietro
     push();
     translate(0, titleHeight / 2);
     
-    // Freccia per tornare indietro
+    //freccia per tornare indietro
     fill(245, 40, 0);
     noStroke();
     textSize(18);
@@ -1662,7 +1670,7 @@ function drawEruptionsList(panelHeight) {
     textAlign(LEFT, CENTER);
     text("←", margin, 0);
     
-    // Nome vulcano (troncato se troppo lungo)
+    //nome vulcano (troncato se troppo lungo)
     let volcanoName = state.searchSelectedVolcano.name;
     textSize(14);
     const maxTitleWidth = state.searchPanelWidth - margin - 40;
@@ -1673,32 +1681,31 @@ function drawEruptionsList(panelHeight) {
     
     pop();
     
-    // Linea separatrice
+    //linea separatrice
     stroke(245, 40, 0, 100);
     strokeWeight(1);
     line(margin, titleHeight, state.searchPanelWidth - margin, titleHeight);
     
-    // Area scorrevole
+    //area scorrimento
     const totalItems = state.searchPanelEruptions.length;
     const contentHeight = totalItems * itemHeight;
     const visibleHeight = min(panelHeight - titleHeight, contentHeight);
     const needsScroll = contentHeight > visibleHeight;
     
-    // Maschera per l'area visibile
     drawingContext.save();
     drawingContext.beginPath();
     drawingContext.rect(0, titleHeight, state.searchPanelWidth, visibleHeight);
     drawingContext.clip();
     
-    // Lista eruzioni
+    //lista eruzioni
     for (let i = 0; i < totalItems; i++) {
         const eruption = state.searchPanelEruptions[i];
         const y = titleHeight + i * itemHeight - state.searchPanelScrollY;
         
-        // Controlla se l'elemento è visibile
+        //controlla se l'elemento è visibile
         if (y + itemHeight < titleHeight || y > titleHeight + visibleHeight) continue;
         
-        // Calcola hover con coordinate locali
+        //calcola hover
         const panelX = state.searchButtonArea.x + state.searchButtonArea.width + 10;
         const panelY = state.searchButtonArea.y + 40 - panelHeight;
         const localX = mouseX - panelX;
@@ -1709,7 +1716,7 @@ function drawEruptionsList(panelHeight) {
                          localY > y && 
                          localY < y + itemHeight;
         
-        // Background hover (rosso trasparente)
+        //background hover (rosso trasparente)
         if (isHovered) {
             fill(245, 40, 0, 15);
             noStroke();
@@ -1719,7 +1726,7 @@ function drawEruptionsList(panelHeight) {
             state.hoveredEruptionItemIndex = i;
         }
         
-        // Anno
+        //anno
         fill(245, 40, 0);
         noStroke();
         textSize(11);
@@ -1727,7 +1734,7 @@ function drawEruptionsList(panelHeight) {
         textAlign(LEFT, CENTER);
         text(formatYear(eruption.year), margin + 5, y + itemHeight / 2);
         
-        // Impact
+        //impact
         fill(0);
         textSize(11);
         textStyle(NORMAL);
@@ -1737,22 +1744,22 @@ function drawEruptionsList(panelHeight) {
     
     drawingContext.restore();
     
-    // Scrollbar se necessario
+    //scrollbar 
     if (needsScroll) {
         const scrollbarX = state.searchPanelWidth - scrollbarWidth - 4;
         const scrollbarHeight = visibleHeight * (visibleHeight / contentHeight);
         const scrollbarY = titleHeight + map(state.searchPanelScrollY, 0, contentHeight - visibleHeight, 0, visibleHeight - scrollbarHeight);
         
-        // Track
+        //track
         fill(240);
         noStroke();
         rect(scrollbarX, titleHeight, scrollbarWidth, visibleHeight, 3);
         
-        // Thumb
+        //thumb
         fill(200);
         rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 3);
         
-        // Thumb hover
+        //thumb hover
         const panelX = state.searchButtonArea.x + state.searchButtonArea.width + 10;
         const panelY = state.searchButtonArea.y + 40 - panelHeight;
         const localX = mouseX - panelX;
@@ -1782,10 +1789,8 @@ function openSearchPanel() {
     state.hoveredVolcanoItemIndex = -1;
     state.hoveredEruptionItemIndex = -1;
     
-    // Calcola l'altezza target
     recalculateSearchPanelHeight();
     
-    // Imposta il focus sul pannello di ricerca
     state.searchPanelHasFocus = true;
 }
 
@@ -1805,11 +1810,9 @@ function closeSearchPanel() {
     state.hoveredVolcanoItemIndex = -1;
     state.hoveredEruptionItemIndex = -1;
     
-    // Resetta l'altezza
     state.searchPanelHeight = 0;
     state.searchTargetHeight = 0;
     
-    // Rimuovi il focus
     state.searchPanelHasFocus = false;
 }
 
@@ -1819,10 +1822,10 @@ function selectContinentInSearch(continent) {
     state.searchVolcanoesPanelOpen = true;
     state.searchEruptionsPanelOpen = false;
     
-    // Raccogli tutti i vulcani di questo continente (filtrati per periodo temporale)
+    //raccolta vulcani per continenti
     const continentVolcanoes = state.filteredData.filter(v => v.continent === continent);
     
-    // Raggruppa per nome del vulcano
+    //raccolta per nome del vulcano
     const volcanoMap = new Map();
     continentVolcanoes.forEach(v => {
         if (!volcanoMap.has(v.name)) {
@@ -1833,11 +1836,9 @@ function selectContinentInSearch(continent) {
     state.searchPanelVolcanoes = Array.from(volcanoMap.values())
         .sort((a, b) => a.name.localeCompare(b.name));
     
-    // Reset scroll
     state.searchPanelScrollY = 0;
     state.hoveredVolcanoItemIndex = -1;
     
-    // Inizia animazione per cambio altezza
     state.searchPanelAnimStart = millis();
     state.searchPanelAnimProgress = 0;
     recalculateSearchPanelHeight();
@@ -1849,16 +1850,14 @@ function selectVolcanoInSearch(volcano) {
     state.searchVolcanoesPanelOpen = false;
     state.searchEruptionsPanelOpen = true;
     
-    // Raccogli tutte le eruzioni di questo vulcano (filtrate per periodo temporale)
+    //raccolta del eruzioni per vulcano 
     state.searchPanelEruptions = state.filteredData
         .filter(v => v.name === volcano.name)
         .sort((a, b) => a.year - b.year);
     
-    // Reset scroll
     state.searchPanelScrollY = 0;
     state.hoveredEruptionItemIndex = -1;
     
-    // Inizia animazione per cambio altezza
     state.searchPanelAnimStart = millis();
     state.searchPanelAnimProgress = 0;
     recalculateSearchPanelHeight();
@@ -1895,9 +1894,9 @@ function drawLearnMoreButton() {
     const buttonX = width - buttonWidth - 50;
     const buttonY = CONFIG.layout.startButtonY;
     
-    // Rettangolo del bottone con hover effect
+    //bottone con hover
     if (state.hoveredLearnMoreButton) {
-        fill(255, 43, 0); // Rosso
+        fill(255, 43, 0); //rosso
         stroke(255, 43, 0);
     } else {
         noFill();
@@ -1906,12 +1905,12 @@ function drawLearnMoreButton() {
     strokeWeight(1);
     rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
-    // Icona "i" con hover effect
+    //icona "i" con hover effect
     push();
     translate(buttonX + 25, buttonY + buttonHeight/2);
     if (state.hoveredLearnMoreButton) {
-        stroke(255); // Bianco
-        fill(255); // Bianco
+        stroke(255); //bianco
+        fill(255); //bianco
     } else {
         stroke(245, 40, 0);
         fill(245, 40, 0);
@@ -1919,6 +1918,11 @@ function drawLearnMoreButton() {
     strokeWeight(1);
     noFill();
     circle(0, 0, 20);
+    if (state.hoveredLearnMoreButton) {
+    fill(255); //bianco
+    } else {
+        fill(245, 40, 0);
+    }
     noStroke();
     textSize(16);
     textStyle(BOLD);
@@ -1926,11 +1930,11 @@ function drawLearnMoreButton() {
     text("i", 0, 0);
     pop();
 
-    // Testo
+    //testo
     if (state.hoveredLearnMoreButton) {
-        fill(255); // Bianco
+        fill(255); //bianco
     } else {
-        fill(0); // Nero
+        fill(0); //nero
     }
     noStroke();
     textSize(CONFIG.layout.labelFontSize);
@@ -1956,9 +1960,7 @@ function drawLegend() {
     stroke(CONFIG.colors.accent);
     noFill();
 
-    /* =========================
-       1. Volcanic eruption
-    ========================= */
+    //grafico visione d'insieme 
     const y1 = startY;
 
     noStroke();
@@ -1969,10 +1971,8 @@ function drawLegend() {
     fill(CONFIG.colors.text);
     text('Volcanic eruption', startX + 45, y1 + 12);
 
-    /* =========================
-       2. Distribution based on impact range
-       (cerchio + punto + freccia verticale)
-    ========================= */
+//distribuzione in base al valore d'impatto
+
     const y2 = startY + 35;
 
     push();
@@ -1986,13 +1986,13 @@ function drawLegend() {
     const r = 4;
     const r2 = 3;
 
-    // cerchio grande
+    //cerchio grande
     circle(0, 0, R * 2);
 
-    // cerchio centrale
+    //cerchio centrale
     circle(0, 0, r * 2);
 
-    // linea verticale
+    //linea verticale
     line(0, R + 2, 0, 4);
 
     fill(CONFIG.colors.accent);
@@ -2003,10 +2003,8 @@ function drawLegend() {
     fill(CONFIG.colors.text);
     text('Distribution based on impact range', startX + 45, y2 + 12);
 
-    /* =========================
-       3. Temporal order of eruptions
-       (spicchio + arco + freccia tangente)
-    ========================= */
+   //Temporal order of eruptions
+
     const y3 = startY + 70;
 
     push();
@@ -2020,14 +2018,14 @@ function drawLegend() {
     const a1 = -PI / 1.7;
     const a2 = -PI / 4;
 
-    // lati dello spicchio
+    //lati dello spicchio
     line(0, 0, cos(a1) * A, sin(a1) * A);
     line(0, 0, cos(a2) * A, sin(a2) * A);
 
-    // arco
+    //arco
     arc(0, 0, A * 2, A * 2, a1, a2);
 
-    // freccia tangente sull'arco
+    //freccia tangente sull'arco
     const ax = cos(a2) * A;
     const ay = sin(a2) * A;
 
@@ -2045,7 +2043,7 @@ function drawTemporalRangeSelector() {
     const startX = CONFIG.layout.marginX;
     const startY = CONFIG.layout.timeframeStartY;
     const labelY = startY;
-    const controlsY = startY + 30;
+    const controlsY = startY + 20;
 
     fill(CONFIG.colors.text);
     noStroke();
@@ -2100,7 +2098,7 @@ function drawYearSelector() {
     const startX = CONFIG.layout.marginX;
     const startY = CONFIG.layout.yearStartY;
     const labelY = startY;
-    const controlsY = startY + 30;
+    const controlsY = startY + 20;
 
     fill(CONFIG.colors.accent);
     noStroke();
@@ -2127,7 +2125,7 @@ function drawYearSelector() {
     fill(CONFIG.colors.accent);
     textSize(CONFIG.layout.yearFontSize);
     textAlign(CENTER, CENTER);
-    text(yearText, yearX + 110, leftArrowY + 20);
+    text(yearText, yearX + 100, leftArrowY + 20);
 
     const rightArrowX = yearX + 240;
     drawSingleArrowWithBox(rightArrowX, leftArrowY, 60, 40, '>', state.hoveredYearRight);
@@ -2148,17 +2146,17 @@ function drawYearSelector() {
 
 function drawDoubleArrowWithBox(x, y, w, h, arrows, isHovered) {
     if (isHovered) {
-        fill(255, 43, 0); // Rosso
+        fill(255, 43, 0); //rosso
         stroke(255, 43, 0);
     } else {
-        fill(255); // Bianco
+        fill(255); //bianco
         stroke(CONFIG.colors.text);
     }
     strokeWeight(1);
     rect(x, y, w, h, 5);
     
     if (isHovered) {
-        fill(255); // Bianco
+        fill(255); //bianco
     } else {
         fill(CONFIG.colors.text);
     }
@@ -2170,17 +2168,17 @@ function drawDoubleArrowWithBox(x, y, w, h, arrows, isHovered) {
 
 function drawSingleArrowWithBox(x, y, w, h, arrow, isHovered) {
     if (isHovered) {
-        fill(255, 43, 0); // Rosso
+        fill(255, 43, 0); //rosso
         stroke(255, 43, 0);
     } else {
-        fill(255); // Bianco
+        fill(255); //bianco
         stroke(CONFIG.colors.accent);
     }
     strokeWeight(1);
     rect(x, y, w, h, 5);
     
     if (isHovered) {
-        fill(255); // Bianco
+        fill(255); //bianco
     } else {
         fill(CONFIG.colors.accent);
     }
@@ -2250,7 +2248,7 @@ function drawMainCircle() {
         if (num === 1 || num === 16) {
             fill(0);
         } else {
-            fill(CONFIG.colors.accent);
+            fill(CONFIG.colors.text);
         }
         noStroke();
         textSize(16);
@@ -2366,7 +2364,7 @@ function drawVolcanoDotAnimated(x, y, isHighlighted, isHovered, volcano, key) {
     
     let color;
     if (isHighlighted) {
-        color = CONFIG.colors.highlightGlow;
+        color = CONFIG.colors.accent;
     } else if (isHovered) {
         color = CONFIG.colors.text;
     } else {
@@ -2486,12 +2484,23 @@ function checkHover() {
 }
 
 function updateLayout() {
-    state.centerX = width * CONFIG.layout.centerXRatio;
+    //calcolo del centro
+    //su schermi larghi sposta il grafico più a destra
+    let centerXRatio = CONFIG.layout.centerXRatio;
+    
+    if (width > 1920) {
+        centerXRatio = 0.75;
+    } else if (width < 1366) {
+        //su schermi più stretti sposta il grafico più a sinistra
+        centerXRatio = 0.65;
+    }
+    
+    state.centerX = width * centerXRatio;
     state.centerY = height / 2 + CONFIG.layout.centerYOffset;
 }
 
 function mousePressed() {
-    // Controlla click sui link della navbar
+    //click sui link della navbar
     if (state.navLinks) {
         for (let link of state.navLinks) {
             let textW = link.width;
@@ -2507,7 +2516,7 @@ function mousePressed() {
         }
     }
 
-    // Controlla click sul bottone Learn More
+    //click sul bottone Learn More
     if (state.learnMoreButtonArea &&
         mouseX > state.learnMoreButtonArea.x &&
         mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
@@ -2518,7 +2527,7 @@ function mousePressed() {
         return;
     }
 
-    // Controlla click sul bottone Search
+    //click sul bottone Search
     if (state.searchButtonArea &&
         mouseX > state.searchButtonArea.x &&
         mouseX < state.searchButtonArea.x + state.searchButtonArea.width &&
@@ -2533,7 +2542,7 @@ function mousePressed() {
         return;
     }
 
-    // Controlla click all'interno del pannello di ricerca se aperto
+    //click all'interno del pannello di ricerca se aperto
     if (state.searchPanelOpen && state.searchPanelAnimProgress > 0) {
         const panelX = state.searchButtonArea.x + state.searchButtonArea.width + 10;
         const panelY = state.searchButtonArea.y + 40 - state.searchPanelHeight;
@@ -2546,9 +2555,9 @@ function mousePressed() {
             const localX = mouseX - panelX;
             const localY = mouseY - panelY;
             
-            // Gestisci continenti, vulcani o eruzioni
+            //continenti, vulcani o eruzioni
             if (state.searchContinentsPanelOpen) {
-                // Click su un continente
+                //click su un continente
                 if (localY > titleHeight) {
                     const itemHeight = 35;
                     const itemIndex = Math.floor((localY - titleHeight) / (itemHeight + 5));
@@ -2560,7 +2569,7 @@ function mousePressed() {
                 }
                 
             } else if (state.searchVolcanoesPanelOpen) {
-                // Click sulla freccia per tornare ai continenti
+                //click sulla freccia per tornare ai continenti
                 if (localY < titleHeight && localX < margin + 20) {
                     state.searchContinentsPanelOpen = true;
                     state.searchVolcanoesPanelOpen = false;
@@ -2569,14 +2578,14 @@ function mousePressed() {
                     state.searchPanelVolcanoes = [];
                     state.searchPanelScrollY = 0;
                     state.hoveredVolcanoItemIndex = -1;
-                    // Ricalcola altezza quando torni indietro
+
                     state.searchPanelAnimStart = millis();
                     state.searchPanelAnimProgress = 0;
                     recalculateSearchPanelHeight();
                     return;
                 }
                 
-                // Click su un vulcano
+                //click su un vulcano
                 const itemHeight = 32;
                 if (localY > titleHeight) {
                     const scrollY = state.searchPanelScrollY;
@@ -2590,7 +2599,7 @@ function mousePressed() {
                     }
                 }
                 
-                // Click sulla scrollbar
+                //click sulla scrollbar
                 const visibleHeight = state.searchPanelHeight - titleHeight;
                 const contentHeight = state.searchPanelVolcanoes.length * itemHeight;
                 
@@ -2601,7 +2610,7 @@ function mousePressed() {
                     if (localX > scrollbarX && localX < scrollbarX + scrollbarWidth &&
                         localY > titleHeight && localY < titleHeight + visibleHeight) {
                         
-                        // Inizia lo scroll
+                        //scroll
                         state.isScrollingSearch = true;
                         state.scrollStartY = mouseY;
                         state.scrollStartOffset = state.searchPanelScrollY;
@@ -2610,7 +2619,7 @@ function mousePressed() {
                 }
                 
             } else if (state.searchEruptionsPanelOpen) {
-                // Click sulla freccia per tornare ai vulcani
+                //click sulla freccia per tornare ai vulcani
                 if (localY < titleHeight && localX < margin + 20) {
                     state.searchContinentsPanelOpen = false;
                     state.searchVolcanoesPanelOpen = true;
@@ -2619,14 +2628,14 @@ function mousePressed() {
                     state.searchPanelEruptions = [];
                     state.searchPanelScrollY = 0;
                     state.hoveredEruptionItemIndex = -1;
-                    // Ricalcola altezza quando torni indietro
+                    
                     state.searchPanelAnimStart = millis();
                     state.searchPanelAnimProgress = 0;
                     recalculateSearchPanelHeight();
                     return;
                 }
                 
-                // Click su un'eruzione
+                //click sull'eruzione
                 const itemHeight = 28;
                 if (localY > titleHeight) {
                     const scrollY = state.searchPanelScrollY;
@@ -2635,7 +2644,7 @@ function mousePressed() {
                     
                     if (itemIndex >= 0 && itemIndex < state.searchPanelEruptions.length) {
                         const eruption = state.searchPanelEruptions[itemIndex];
-                        // Avvia animazione eruzione se clicchi su un'eruzione
+                        //avvia animazione eruzione se clicchi su un'eruzione
                         const key = `${eruption.name}-${eruption.year}-${eruption.deaths}`;
                         const angle = state.volcanoPositions.get(key);
                         if (angle !== undefined) {
@@ -2648,7 +2657,7 @@ function mousePressed() {
                     }
                 }
                 
-                // Click sulla scrollbar
+                //click sulla scrollbar
                 const visibleHeight = state.searchPanelHeight - titleHeight;
                 const contentHeight = state.searchPanelEruptions.length * itemHeight;
                 
@@ -2659,7 +2668,7 @@ function mousePressed() {
                     if (localX > scrollbarX && localX < scrollbarX + scrollbarWidth &&
                         localY > titleHeight && localY < titleHeight + visibleHeight) {
                         
-                        // Inizia lo scroll
+                        //scrolling
                         state.isScrollingSearch = true;
                         state.scrollStartY = mouseY;
                         state.scrollStartOffset = state.searchPanelScrollY;
@@ -2671,7 +2680,7 @@ function mousePressed() {
             return;
         }
         
-        // Chiudi il pannello se clicchi fuori
+        //chiude il pannello se cliccho fuori
         closeSearchPanel();
         return;
     }
@@ -2848,7 +2857,7 @@ function mousePressed() {
     }
 
     if (closestVolcano && closestVolcanoPos) {
-        console.log("💥 AVVIO ANIMAZIONE STILIZZATA per:", closestVolcano.name);
+        console.log("AVVIO ANIMAZIONE per:", closestVolcano.name);
         triggerVolcanoEruption(closestVolcano, closestVolcanoPos.x, closestVolcanoPos.y);
         return;
     }
@@ -2878,7 +2887,7 @@ function mouseReleased() {
 }
 
 function mouseWheel(event) {
-    // Gestisce lo scroll della rotellina del mouse
+    //scroll mouse
     if (state.searchPanelOpen && (state.searchVolcanoesPanelOpen || state.searchEruptionsPanelOpen) && state.searchPanelAnimProgress === 1) {
         const panelX = state.searchButtonArea.x + state.searchButtonArea.width + 10;
         const panelY = state.searchButtonArea.y + 40 - state.searchPanelHeight;
@@ -2905,7 +2914,7 @@ function mouseWheel(event) {
 }
 
 function keyPressed() {
-    // Gestisce le frecce della tastiera per navigare nei pannelli di ricerca
+    //frecce della tastiera per navigare nei pannelli di ricerca
     if (state.searchPanelOpen && state.searchPanelAnimProgress === 1) {
         if (state.searchVolcanoesPanelOpen) {
             const itemHeight = 32;
@@ -2969,7 +2978,7 @@ function keyPressed() {
             }
         }
         
-        // ESC - chiudi il pannello
+        //chiudi il pannello
         if (keyCode === ESCAPE) {
             closeSearchPanel();
             return false;
@@ -2994,21 +3003,42 @@ function formatYearShort(year) {
 }
 
 function windowResized() {
+    //ricalcola il fattore di scala
+    const newScaleFactor = calculateScaleFactor();
+    const constrainedScale = constrain(newScaleFactor, 0.7, 1.3);
+    
+    if (abs(constrainedScale - scaleFactor) > 0.05) {
+        scaleFactor = constrainedScale;
+        applyScaleToConfig(scaleFactor);
+    }
+    
     resizeCanvas(windowWidth, windowHeight);
     updateLayout();
+    console.log("Finestra ridimensionata. Nuovo scale factor:", scaleFactor);
 }
 
 function setup() {
+    scaleFactor = calculateScaleFactor();
+    
+    //limita il fattore di scala per evitare dimensioni troppo piccole o grandi
+    scaleFactor = constrain(scaleFactor, 0.7, 1.3);
+    
+    //applica il fattore di scala 
+    applyScaleToConfig(scaleFactor);
+    
+    //canvas con le dimensioni della finestra
     let canvas = createCanvas(windowWidth, windowHeight);
+    canvas.parent('sketch-container');
+    
     updateLayout();
     frameRate(60);
-    console.log("Setup completato. Canvas creato.");
+    console.log("Setup completato. Scale factor:", scaleFactor);
 }
 
 function updateCursor() {
     let isOverButton = false;
 
-    // Controlla navbar links
+    //navbar links
     if (state.navLinks) {
         for (let link of state.navLinks) {
             let textW = link.width;
@@ -3080,7 +3110,7 @@ function updateCursor() {
         isOverButton = true;
     }
 
-    // Controlla gli elementi nel pannello di ricerca
+    //controlla gli elementi nel pannello di ricerca
     if (state.searchPanelOpen && state.searchPanelAnimProgress > 0) {
         const panelX = state.searchButtonArea.x + state.searchButtonArea.width + 10;
         const panelY = state.searchButtonArea.y + 40 - state.searchPanelHeight;
@@ -3102,12 +3132,12 @@ function updateCursor() {
                 const scrollbarWidth = 6;
                 const localX = mouseX - panelX;
                 
-                // Vulcani
+                //vulcani
                 if (localY > titleHeight) {
                     isOverButton = true;
                 }
                 
-                // Scrollbar
+                //scrollbar
                 const visibleHeight = state.searchPanelHeight - titleHeight;
                 const contentHeight = state.searchPanelVolcanoes.length * itemHeight;
                 
@@ -3123,12 +3153,12 @@ function updateCursor() {
                 const scrollbarWidth = 6;
                 const localX = mouseX - panelX;
                 
-                // Eruzioni
+                //eruzioni
                 if (localY > titleHeight) {
                     isOverButton = true;
                 }
                 
-                // Scrollbar
+                //scrollbar
                 const visibleHeight = state.searchPanelHeight - titleHeight;
                 const contentHeight = state.searchPanelEruptions.length * itemHeight;
                 
