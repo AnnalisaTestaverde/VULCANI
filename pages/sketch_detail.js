@@ -1,7 +1,7 @@
 // ---------- VARIABILI CONFIGURABILI ----------
 let chartXPercent = 0.7;
 let chartYPercent = 0.5;
-let chartSize = 600;
+let chartSize = 500;
 let chartLevels = 4;
 let chartMainColor = "#ff2b00";
 let chartOverlayAlpha = 200;
@@ -321,7 +321,7 @@ function drawNavBar() {
   textFont("Helvetica");
   textStyle(BOLD);
   textAlign(LEFT, CENTER);
-  text("Significant Volcanic Eruptions", 40, navHeight/2);
+  text("<   Back", 40, navHeight/2);
   
   let navLinks = [
     { name: "Homepage", href: "../index.html", x: 0 },
@@ -548,10 +548,10 @@ function getDetailText(value, descCode, type, chartData = null) {
       4: "Very Many (~1001 or more injuries)"
     },
     damage: {
-      1: "Limited (less than $1 million)",
-      2: "Moderate (~$1 to $5 million)",
-      3: "Severe (~$5 to $24 million)",
-      4: "Extreme ($25 million or more)"
+      1: "Limited (less than $2.4 million in 2026 dollars)",
+      2: "Moderate (~$2.4 to $12 million in 2026 dollars)",
+      3: "Severe (~$12 to $57.6 million in 2026 dollars)",
+      4: "Extreme ($60 million or more in 2026 dollars)"
     },
     houses: {
       1: "Few (~1 to 50 houses)",
@@ -805,28 +805,19 @@ function drawImpactChart(d) {
 
   pop(); // Fine del push() iniziale - ora le coordinate tornano a essere assolute
 
-  // TITOLO "Total impact level: " SPOSTATO A DESTRA DELLA MAPPA
-  // Deve essere disegnato DOPO il pop() per usare coordinate assolute della finestra
+  // TITOLO "Total impact level: " TORNATO IN ALTO A DESTRA (posizione originale)
   push();
   noStroke();
   fill(245, 40, 0);
   textSize(chartTitleSize);
-  textAlign(LEFT, CENTER);
+  textAlign(CENTER, CENTER);
   textStyle(BOLD);
   
   let totalImpactText = "Total impact level: " + d.impact;
+  let totalImpactX = 260;  // Posizione originale X
+  let totalImpactY = -310; // Posizione originale Y (sopra il grafico)
   
-  // Calcola la posizione: a destra della mappa
-  let mapMargin = 60;
-  let mapW = 320;
-  let mapX = mapMargin;
-  let mapY = height - 180 - mapMargin;
-  
-  // Posizione a destra della mappa con un po' di margine
-  let totalImpactX = mapX + mapW + 40;
-  let totalImpactY = mapY + 90;
-  
-  text(totalImpactText, totalImpactX, totalImpactY);
+  text(totalImpactText, cx + totalImpactX, cy + totalImpactY);
   
   textStyle(NORMAL);
   pop();
@@ -908,9 +899,12 @@ function formatDamageValue(damageValue) {
   
   let value = convertTo2026Dollars(damageValue);
   
-  if (value < 1) {
-    return `Less than $1 million (2026 dollars)`;
-  } else if (value < 1000) {
+  // Usa le stesse fasce della funzione getDetailText()
+  if (value < 2.4) {
+    return `Less than $2.4 million (2026 dollars)`;
+  } else if (value < 12) {
+    return `$${Math.round(value * 10) / 10} million (2026 dollars)`;
+  } else if (value < 57.6) {
     return `$${Math.round(value * 10) / 10} million (2026 dollars)`;
   } else {
     return `$${(value / 1000).toFixed(1)} billion (2026 dollars)`;
