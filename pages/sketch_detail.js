@@ -522,7 +522,7 @@ function drawMap(lat, lon, country) {
   let margin = 60;
   let mapW = 320;
   let mapH = 180;
-  let mapX = margin;
+  let mapX = 40;
   let mapY = height - mapH - 40;
   let cornerRadius = 10;
 
@@ -1133,7 +1133,7 @@ function drawBackButton() {
 }
 
 function writeText() {
-  let margin = 60;
+  let margin = 40;
   
   fill(0);
   textAlign(LEFT, TOP);
@@ -1153,7 +1153,7 @@ function writeText() {
 
 // ---------- DESCRIZIONE ----------
 function drawVolcanoDescription(typeRaw, y, mo, dy) {
-  let margin = 60;
+  let margin = 40;
   
   let dateY = 325; 
   let titleY = 330; 
@@ -1280,7 +1280,7 @@ function drawYearNavigator(year) {
   let inactiveColor = color(180);
   let arrowColor = hasMultipleEruptions ? activeColor : inactiveColor;
 
-  let margin = 82;
+  let margin = 62;
   let y = 230;
   let navigatorX = margin;
 
