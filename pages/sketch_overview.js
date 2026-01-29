@@ -211,10 +211,10 @@ function applyScaleToConfig(scale) {
     const bottomMargin = 40;
     
     // ============ DIMENSIONI CHE SI SCALANO ============
-    CONFIG.layout.fontSizeControls = original.fontSizeControls * scale;
+    CONFIG.layout.fontSizeControls = original.fontSizeControls;
     CONFIG.layout.timeframeFontSize = original.timeframeFontSize * scale;
     CONFIG.layout.yearFontSize = original.yearFontSize * scale;
-    CONFIG.layout.labelFontSize = original.labelFontSize ;
+    CONFIG.layout.labelFontSize = original.labelFontSize; 
     CONFIG.layout.leftPanelWidth = original.leftPanelWidth * scale;
     CONFIG.layout.controlButtonHeight = original.controlButtonHeight * scale;
     CONFIG.layout.controlButtonWidth = original.controlButtonWidth * scale;

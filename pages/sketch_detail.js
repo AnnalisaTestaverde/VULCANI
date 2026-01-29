@@ -49,11 +49,6 @@ function applyResponsiveScaling() {
 }
 
 function updateResponsiveDimensions() {
-    // ---------- DIMENSIONI TESTI ----------
-    chartTitleSize = 28 * scaleFactor;
-    mainTextSize = 17 * scaleFactor;
-    chartLabelSize = 14 * scaleFactor;
-    chartTooltipTextSize = 17 * scaleFactor;
     
         // ---------- POSIZIONE E DIMENSIONE GRAFICO ----------
     // Calcolo del centro X come in overview
@@ -102,11 +97,10 @@ function updateResponsiveDimensions() {
     );
     
     // ---------- SCALING ALTRI ELEMENTI ----------
-    // Mantieni lo scaling per testi e labels
-    chartTitleSize = 28 * scaleFactor;
-    mainTextSize = 17 * scaleFactor;
-    chartLabelSize = 14 * scaleFactor;
-    chartTooltipTextSize = 17 * scaleFactor;
+    chartTitleSize = 28;        // FISSO
+    mainTextSize = 17;          // FISSO
+    chartLabelSize = 14;        // FISSO
+    chartTooltipTextSize = 15;  // FISSO
     
     // Debug
     if (frameCount % 120 === 0) {
@@ -554,8 +548,7 @@ function drawMap(lat, lon, country) {
   textStyle(BOLD);
   text(value, mapX + 7 + textWidth(label), titleY);
   pop();
-  pop();
-    
+  pop();  
   push();
   fill(255, 230);
   noStroke();
@@ -1499,74 +1492,104 @@ function drawYearNavigator(year) {
 
 // ---------- LEARN MORE BUTTON ----------
 function drawLearnMoreButton() {
-  const buttonWidth = 160;
-  const buttonHeight = 40;
-  const buttonX = width - buttonWidth - 50;
-  const buttonY = 720;
-
-  // Disegna il bordo del bottone
-  if (hoveredLearnMore) {
-    // Hover: riempimento rosso
-    fill(chartMainColor);
-    stroke(chartMainColor);
-    strokeWeight(1);
-    rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
+    const buttonWidth = 160;
+    const buttonHeight = 40;
+  
     
-    // Icona "i" bianca
-    push();
-    translate(buttonX + 25, buttonY + buttonHeight/2);
-    stroke(255);
-    strokeWeight(1);
-    noFill();
-    circle(0, 0, 20);
-    fill(255);
-    noStroke();
-    textSize(16);
-    textAlign(CENTER, CENTER);
-    text("i", 0, 0);
-    pop();
+    // Usa la stessa logica di posizionamento della pagina overview
+    const bottomMargin = 40; // Margine dal fondo (come in overview)
+    const buttonY = height - bottomMargin - 40; // Stesso posizionamento verticale
     
-    // Testo bianco
-    fill(255);
-    noStroke();
-    textSize(16);
-    textAlign(LEFT, CENTER);
-    text("Learn More", buttonX + 50, buttonY + buttonHeight/2);
-  } else {
-    // Stato normale: bordo rosso, testo nero
-    stroke(245, 40, 0);
-    strokeWeight(1);
-    noFill();
-    rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
+    const buttonX = width - buttonWidth - 50; // Destra: 50px dal bordo
+    
+    // Calcola se la posizione è valida (non sovrapposta ad altri elementi)
+    const minValidY = CONFIG.layout.navbarHeight + 200; // Almeno 200px sotto la navbar
+    const finalY = max(buttonY, minValidY); // Assicurati che non sia troppo in alto
+    
+    // Area cliccabile
+    state.learnMoreButtonArea = {
+        x: buttonX,
+        y: finalY,
+        width: buttonWidth,
+        height: buttonHeight
+    };
+    
+    // Se il bottone si sovrappone alla mappa (in basso a sinistra), spostalo più in alto
+    const mapMargin = 60;
+    const mapW = 320;
+    const mapH = 180;
+    const mapX = mapMargin;
+    const mapY = height - mapH - mapMargin;
+    
+    // Controlla sovrapposizione con la mappa
+    const buttonRight = buttonX + buttonWidth;
+    const buttonBottom = finalY + buttonHeight;
+    const mapRight = mapX + mapW;
+    const mapBottom = mapY + mapH;
+    
+    // Se si sovrappone alla mappa, sposta il bottone più in alto
+    let adjustedY = finalY;
+    if (buttonX < mapRight && buttonRight > mapX && finalY < mapBottom && buttonBottom > mapY) {
+        adjustedY = mapY - buttonHeight - 20; // 20px sopra la mappa
+        state.learnMoreButtonArea.y = adjustedY;
+    }
+    
+    // Disegna il bordo del bottone
+    if (hoveredLearnMore) {
+        // Hover: riempimento rosso
+        fill(chartMainColor);
+        stroke(chartMainColor);
+        strokeWeight(1);
+        rect(buttonX, adjustedY, buttonWidth, buttonHeight, 5);
+        
+        // Icona "i" bianca
+        push();
+        translate(buttonX + 25, adjustedY + buttonHeight/2);
+        stroke(255);
+        strokeWeight(1);
+        noFill();
+        circle(0, 0, 20);
+        fill(255);
+        noStroke();
+        textSize(16);
+        textAlign(CENTER, CENTER);
+        text("i", 0, 0);
+        pop();
+        
+        // Testo bianco
+        fill(255);
+        noStroke();
+        textSize(16);
+        textAlign(LEFT, CENTER);
+        text("Learn More", buttonX + 50, adjustedY + buttonHeight/2);
+    } else {
+        // Stato normale: bordo rosso, testo nero
+        stroke(245, 40, 0);
+        strokeWeight(1);
+        noFill();
+        rect(buttonX, adjustedY, buttonWidth, buttonHeight, 5);
 
-    // Icona "i" rossa
-    push();
-    translate(buttonX + 25, buttonY + buttonHeight/2);
-    stroke(245, 40, 0);
-    strokeWeight(1);
-    noFill();
-    circle(0, 0, 20);
-    fill(245, 40, 0);
-    noStroke();
-    textSize(16);
-    textAlign(CENTER, CENTER);
-    text("i", 0, 0);
-    pop();
+        // Icona "i" rossa
+        push();
+        translate(buttonX + 25, adjustedY + buttonHeight/2);
+        stroke(245, 40, 0);
+        strokeWeight(1);
+        noFill();
+        circle(0, 0, 20);
+        fill(245, 40, 0);
+        noStroke();
+        textSize(16);
+        textAlign(CENTER, CENTER);
+        text("i", 0, 0);
+        pop();
 
-    // Testo nero
-    fill(0);
-    noStroke();
-    textSize(16);
-    textAlign(LEFT, CENTER);
-    text("Learn More", buttonX + 50, buttonY + buttonHeight/2);
-  }
-
-  state.learnMoreButtonArea = {
-    x: buttonX,
-    y: buttonY,
-    width: buttonWidth,
-    height: buttonHeight
-  };
+        // Testo nero
+        fill(0);
+        noStroke();
+        textSize(16);
+        textAlign(LEFT, CENTER);
+        text("Learn More", buttonX + 50, adjustedY + buttonHeight/2);
+    }
 }
 
 // ---------- ANIMAZIONI ----------
