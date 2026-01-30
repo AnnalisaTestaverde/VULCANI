@@ -390,7 +390,7 @@ function scrollToSection(sectionId) {
     switch(sectionId) {
         // (1) - leggera correzione
         case 1:
-            targetScroll = 0 - 10;
+            targetScroll = 0 - 40;
             break;
         // (2) - utile per evitare taglio titolo da parte della nav
         case 2:
