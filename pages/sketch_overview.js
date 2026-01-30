@@ -1201,7 +1201,7 @@ function drawNavBar() {
     let logoText = "Significant Volcanic Eruptions";
     let logoWidth = textWidth(logoText);
     state.logoArea = {
-        x: 40 - 10, 
+        x: 40 - 11, 
         y: navY,
         width: logoWidth + 20,
         height: navHeight
@@ -3149,7 +3149,7 @@ function updateCursor() {
         mouseY < state.logoArea.y + state.logoArea.height) {
         isOverButton = true;
     }
-    
+
     //navbar links
     if (state.navLinks) {
         for (let link of state.navLinks) {
