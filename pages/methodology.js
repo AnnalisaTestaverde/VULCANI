@@ -323,7 +323,7 @@ function setupLearnMoreButton() {
     });
 }
 
-// GESTIONE SCROLL TESTO
+// GESTIONE SCROLL TESTO - scroll vari
 function handleTextScroll() {
     if (!textScrollArea || isScrolling) return;
     
@@ -331,14 +331,17 @@ function handleTextScroll() {
     scrollTimeout = setTimeout(() => {
         const scrollTop = textScrollArea.scrollTop;
         const scrollHeight = textScrollArea.scrollHeight;
+        const clientHeight = textScrollArea.clientHeight;
         
-        // Calcolo sezione in base allo scroll
-        const sectionHeight = scrollHeight / 3;
+        // (1) Calcolo con OFFSET AUMENTATO!
+        const sectionHeight = (scrollHeight - clientHeight) / 3;
         let newSectionId = currentSectionId;
         
-        if (scrollTop < sectionHeight) {
+        /* OFFSET (correzioni varie + modifica da r.388)
+        - IMPOSTATO +150 per migliore funzionam. */
+        if (scrollTop < sectionHeight + 150) {
             newSectionId = 1;
-        } else if (scrollTop < sectionHeight * 2) {
+        } else if (scrollTop < (sectionHeight * 2) + 150) {
             newSectionId = 2;
         } else {
             newSectionId = 3;
@@ -349,6 +352,7 @@ function handleTextScroll() {
         }
     }, 100);
 }
+
 /* SCROLL - freccia */
 function handleScrollHintClick() {
     if (isScrolling) return;
@@ -374,21 +378,45 @@ function scrollToSection(sectionId) {
         return;
     }
     
-    // Calcolo posizione di scroll
+    // (2) Calcolo con OFFSET AUMENTATO!
     const scrollHeight = textScrollArea.scrollHeight;
-    const sectionHeight = 1950 / 3;
-    const targetScroll = (sectionId - 1) * sectionHeight;
+    const clientHeight = textScrollArea.clientHeight;
+    const maxScroll = scrollHeight - clientHeight;
+    const sectionHeight = maxScroll / 3;
+    
+    let targetScroll;
+    
+    // !! POSIZIONI AGGIORNATE CON OFFSET
+    switch(sectionId) {
+        // (1) - leggera correzione
+        case 1:
+            targetScroll = 0 - 10;
+            break;
+        // (2) - utile per evitare taglio titolo da parte della nav
+        case 2:
+            targetScroll = sectionHeight - 115 ; 
+            break;
+        // (3) - correzione per minore spazio scroll
+        case 3:
+            targetScroll = (sectionHeight * 2) + 120; //
+            break;
+        default:
+            targetScroll = 0;
+    }
+    
+    // ! LIMITA AL MASSIMO SCROLL POSSIBILE
+    targetScroll = Math.min(maxScroll, targetScroll);
     
     // Aggiornamento immediato di sezione
     updateSection(sectionId);
     
-    // Scroll alla posizione
+    // Scroll alla posizione calcolata
     textScrollArea.scrollTo({
         top: targetScroll,
         behavior: 'smooth'
     });
     
-    // Rilascio lock
+    // Rilascio lock dopo lo scroll
     setTimeout(() => {
         isScrolling = false;
     }, 600);

@@ -103,7 +103,7 @@ header {
     z-index: 1000;
     background-color: white;
     transition: all 0.3s ease;
-    height: 90px;
+    height: 67px;
     box-sizing: border-box;
 }
 
@@ -417,7 +417,7 @@ header {
 #html-footer {
     width: 100%;
     border-top: 2px solid #FF2B00;
-    padding: 80px 0px 70px 230px;
+    padding: 80px 5px 70px 265px;
     margin: 0;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
