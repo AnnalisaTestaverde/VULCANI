@@ -30,6 +30,8 @@ per la categoria Demage
 Nel dataset i danni economici sono stati convertiti dagli autori in dollari americani degli anni 90 (anno in cui sono state compilate le prime righe del dataset). 
 Per avere un’idea più consapevole dei danni economici causati dalle eruzioni abbiamo convertito questi valori in dollari americani del 2026. 
 
+0= None;  1= -2.4 mil;  2= 2.4-12 mil;  3= 12-57.6 mil;  4= 60+ mil
+
 Abbiamo inoltre generato un nuovo parametro chiamato "Impact", calcolato come la somma dei valori delle categorie "Description". Questo indice permette di determinare l’impatto complessivo di ogni singola eruzione, utilizzato nella visualizzazione d’insieme per confrontare le eruzioni su una scala da 1 a 16 (impatto massimo causato dall’eruzione del Tambora nel 1815).
 
 A supporto delle pagine d’insieme e di dettaglio abbiamo creato due pagine “Learn more” che spiegano nel dettaglio le visualizzazioni e guidano nella navigazione. 
