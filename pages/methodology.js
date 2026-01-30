@@ -394,7 +394,7 @@ function scrollToSection(sectionId) {
             break;
         // (2) - utile per evitare taglio titolo da parte della nav
         case 2:
-            targetScroll = sectionHeight - 120 ; 
+            targetScroll = sectionHeight - 115 ; 
             break;
         // (3) - correzione per minore spazio scroll
         case 3:
