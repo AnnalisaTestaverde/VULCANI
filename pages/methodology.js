@@ -1,9 +1,4 @@
-/**
- * METHODOLOGY PAGE - UNICO FILE JS
- * Gestisce testo, immagini, bottoni e footer HTML
- */
-
-// ===== CONFIGURAZIONE =====
+// SEZIONI - configurazione per visualizzazione sezioni 
 const sections = [
     {
         id: 1,
@@ -11,8 +6,7 @@ const sections = [
         subtitle: "HOW WE BUILT OUR VISUAL STORY.",
         imageId: "methodology-image-1",
         buttonText: "Explore the dataset",
-        buttonLink: "https://www.ngdc.noaa.gov/hazel/view/hazards/volcano/event-data",
-        threshold: 0
+        buttonLink: "https://www.ngdc.noaa.gov/hazel/view/hazards/volcano/event-data"
     },
     {
         id: 2,
@@ -20,8 +14,7 @@ const sections = [
         subtitle: "HOW WE VISUALIZE ERUPTION DATA.",
         imageId: "methodology-image-2",
         buttonText: "Explore all eruptions",
-        buttonLink: "overview.html",
-        threshold: 500
+        buttonLink: "overview.html"
     },
     {
         id: 3,
@@ -29,165 +22,294 @@ const sections = [
         subtitle: "HOW WE INTERPRET AND PRESENT DATA.",
         imageId: "methodology-image-3",
         buttonText: "Explore the detail graphs",
-        buttonLink: "learn_more_detail.html",
-        threshold: 1400
+        buttonLink: "learn_more_detail.html"
     }
 ];
 
-// ===== VARIABILI GLOBALI =====
+// VARIABILI GLOBALI
 let currentSectionId = 1;
-let isScrolling = false;
-let isAtFooter = false;
 let textScrollArea = null;
-let mainContent = null;
-let footer = null;
 let scrollHint = null;
-let isScrollLocked = false;
+let isScrolling = false;
+let scrollTimeout = null;
+let p5Sketch = null;
 
-// ===== DATI FOOTER HTML =====
-const FOOTER_HTML = `
-<div class="footer-content">
-    <div class="footer-column">
-        <h3>Computer Graphics Studio for Information Design</h3>
-        <p>A.Y. 2025/2026</p>
-        <p>Bachelor's Degree in Communication Design</p>
-        
-        <h3 style="margin-top: 40px;">Project by</h3>
-        <ul>
-            <li>Alice Comini</li>
-            <li>Matilde Curino</li>
-            <li>Greta Franco</li>
-            <li>Carlo Galli</li>
-            <li>Ilaria La Spada</li>
-            <li>Annalisa Testaverde</li>
-        </ul>
-    </div>
-    
-    <div class="footer-column">
-        <p>© CC-BY 4.0 The authors.</p>
-        <p class="footer-license">
-            Except where otherwise noted, all content on this website is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). You are free to share and adapt the material, including for commercial use, provided appropriate credit is given.
-        </p>
-        
-        <p>For questions about attribution or reuse, contact us at:</p>
-        <ul>
-            <li><a href="mailto:alice.comini@mail.polimi.it" class="footer-email">alice.comini@mail.polimi.it</a></li>
-            <li><a href="mailto:matilde.curino@mail.polimi.it" class="footer-email">matilde.curino@mail.polimi.it</a></li>
-            <li><a href="mailto:greta.franco@mail.polimi.it" class="footer-email">greta.franco@mail.polimi.it</a></li>
-            <li><a href="mailto:carlo11.galli@mail.polimi.it" class="footer-email">carlo11.galli@mail.polimi.it</a></li>
-            <li><a href="mailto:ilaria.laspada@mail.polimi.it" class="footer-email">ilaria.laspada@mail.polimi.it</a></li>
-            <li><a href="mailto:annalisa.testaverde@mail.polimi.it" class="footer-email">annalisa.testaverde@mail.polimi.it</a></li>
-        </ul>
-    </div>
-    
-    <div class="footer-column">
-        <h3>Faculty</h3>
-        <ul>
-            <li>Michele Mauri</li>
-            <li>Davide Conficconi</li>
-        </ul>
-        
-        <h3 style="margin-top: 40px;">Teaching Assistants</h3>
-        <ul>
-            <li>Alessandra Facchin</li>
-            <li>Alessandro Nazzari</li>
-        </ul>
-        
-        <div class="footer-logo">
-            DensityDesign Lab<br>
-            NECST
-        </div>
-    </div>
-</div>
-`;
-
-// ===== INIZIALIZZAZIONE =====
+// INIZIALIZZAZIONE - vari elementi
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("=== INIZIALIZZAZIONE PAGINA METHODOLOGY ===");
+    
+    // (!) PAGINA
     initializePage();
+    
+    // (!!) P5.js IN MODALITÀ STATICA
+    setTimeout(initializeStaticP5, 100);
 });
 
+// (!)
 function initializePage() {
-    // Salva riferimenti agli elementi
+    // Salvataggio riferimenti agli elementi
     textScrollArea = document.querySelector('.text-content');
-    mainContent = document.getElementById('main-content');
     scrollHint = document.getElementById('text-scroll-hint');
     
-    // Crea il footer HTML
-    createHTMLFooter();
-    
-    // Imposta i riferimenti dopo la creazione
-    footer = document.getElementById('html-footer');
-    
-    // Configura event listener
+    // Setup event listeners
     setupEventListeners();
     
-    // Calcola soglie scroll
-    calculateScrollThresholds();
+    // Setup bottone
+    setupLearnMoreButton();
     
-    // Configura gestione errori immagine
-    setupImageErrorHandler();
-    
-    // Inizializza la freccia di scroll
-    updateScrollHint();
-    
-    console.log("Pagina inizializzata. Footer creato.");
+    // Inizializzazione sezione corrente
+    updateSection(currentSectionId);
 }
 
-// ===== GESTIONE FOOTER HTML =====
-function createHTMLFooter() {
-    const footerContainer = document.getElementById('footer-container');
-    if (!footerContainer) return;
+// (!!) P5.js - STATO DEFINITIVO
+function initializeStaticP5() {
+    if (typeof p5 === 'undefined') {
+        console.error("P5.js non trovato");
+        return;
+    }
     
-    const footerDiv = document.createElement('div');
-    footerDiv.id = 'html-footer';
-    footerDiv.className = 'footer';
-    footerDiv.innerHTML = FOOTER_HTML;
+    // a. BLOCCO - animazioni esistenti
+    stopAllP5Animations();
     
-    footerContainer.appendChild(footerDiv);
+    // b. CREAZIONE SKETCH STATICO
+    p5Sketch = new p5((p) => {
+        // Variabili con coordinate fisse
+        let staticDots = [];
+        let canvasElement = null;
+        
+        // 1. FUNZIONE SETUP
+        p.setup = function() {
+            
+            // Calcolo dimensioni
+            const header = document.querySelector('header');
+            const footer = document.getElementById('html-footer');
+            
+            if (!header || !footer) {
+                console.error("Elementi DOM mancanti");
+                return;
+            }
+            
+            const headerHeight = header.offsetHeight;
+            const footerTop = footer.offsetTop;
+            const canvasHeight = footerTop - headerHeight;
+            
+            // Creaziine canvas
+            canvasElement = p.createCanvas(window.innerWidth, canvasHeight);
+            
+            // APPLICAZIONE STILI CRITICI
+            canvasElement.position(0, headerHeight);
+            canvasElement.style('position', 'fixed');
+            canvasElement.style('z-index', '-100');
+            canvasElement.style('pointer-events', 'none');
+            
+            // BLOCCO MOVIMENTI
+            canvasElement.style('transform', 'translate3d(0,0,0)');
+            canvasElement.style('will-change', 'auto');
+            canvasElement.style('backface-visibility', 'hidden');
+            
+            /* NAVIGAZIONE 
+            - creazione pallini con coordinate fisse */
+            createStaticDots(p);
+            
+            // Disegna UNA VOLTA
+            drawOnce(p);
+            
+            // FONDAMENTALE! DISABILITAZIONE LOOP
+            p.noLoop();
+            
+            /* SOSTITUZIONE FUNZIONE DRAW 
+            - sovrascrittura del draw */
+            Object.defineProperty(p, 'draw', {
+                value: function() {
+                    // !! NON deve mai essere eseguita
+                    console.error("ATTENZIONE: draw() è stata chiamata!");
+                    return;
+                },
+                writable: false,
+                configurable: false
+            });
+            
+        };
+        
+        // 2. CREAZIONE PALLINI NAV. FISSI
+        function createStaticDots(p) {
+            staticDots = [];
+            const dotCount = 45;
+            
+            for (let i = 0; i < dotCount; i++) {
+                // Coordinate FISSE nella memoria - nessun movimento
+                staticDots.push({
+                    x: p.random(p.width),
+                    y: p.random(p.height),
+                    size: p.random(1.5, 4),
+                    alpha: p.random(20, 35),
+                    // NESSUNA proprietà di movimento!
+                });
+            }
+        }
+        
+        // 3. DISEGNA UNA VOLTA
+        function drawOnce(p) {
+            
+            // pulizia
+            p.clear();
+            
+            // Disegno pallino con coordinate FISSE
+            p.push();
+            p.noStroke();
+            
+            for (let dot of staticDots) {
+                p.fill(255, 43, 0, dot.alpha);
+                p.ellipse(dot.x, dot.y, dot.size, dot.size);
+            }
+            
+            p.pop();
+        }
+        
+        // 4. GESTIONE RESIZE
+        p.windowResized = function() {
+            console.log("📐 Ridimensionamento finestra");
+            
+            if (!canvasElement) return;
+            
+            const header = document.querySelector('header');
+            const footer = document.getElementById('html-footer');
+            
+            if (!header || !footer) return;
+            
+            const headerHeight = header.offsetHeight;
+            const footerTop = footer.offsetTop;
+            const canvasHeight = footerTop - headerHeight;
+            
+            // Ridimensionamento
+            p.resizeCanvas(window.innerWidth, canvasHeight);
+            canvasElement.style('top', headerHeight + 'px');
+            
+            // Ricreazione pallini per le nuove dimensioni
+            createStaticDots(p);
+            
+            // Ridisegno UNA volta
+            drawOnce(p);
+        };
+        
+        // 5. DEBUG: MONITORA LO SCROLL
+        window.addEventListener('scroll', function() {
+            if (canvasElement) {
+                const rect = canvasElement.elt.getBoundingClientRect();
+                
+                // Se il canvas si è mosso, riposizionamento corretto
+                if (rect.top !== parseInt(canvasElement.style('top'))) {
+                    const header = document.querySelector('header');
+                    if (header) {
+                        canvasElement.style('top', header.offsetHeight + 'px');
+                    }
+                }
+            }
+        });
+        
+    });
 }
 
-// ===== EVENT LISTENER =====
+// !! BLOCCO DI TUTTE LE ANIMAZIONI P5.JS
+function stopAllP5Animations() {
+    // (1): Disabilitazione istanze globali
+    if (window.p5 && window.p5.instance) {
+        try {
+            window.p5.instance.noLoop();
+            console.log("✅ Disabilitato loop istanza globale P5.js");
+        } catch (e) {
+            console.log("ℹ️  Nessuna istanza globale da disabilitare");
+        }
+    }
+    
+    // (2): Disabilitazione funzioni requestAnimationFrame
+    const originalRAF = window.requestAnimationFrame;
+    window.requestAnimationFrame = function(callback) {
+        console.warn("requestAnimationFrame BLOCCATA per prevenire animazioni");
+        return 0; // Restituisce ID invalido
+    };
+    
+    // (3): Disabilitazione setInterval per animazioni
+    const intervals = [];
+    const originalSetInterval = window.setInterval;
+    window.setInterval = function(callback, delay) {
+        if (delay < 1000) { // Blocca intervalli rapidi
+            console.warn(`setInterval(${delay}ms) BLOCCATO per prevenire animazioni`);
+            return 0;
+        }
+        return originalSetInterval.apply(this, arguments);
+    };
+}
+
+// AGGIUNTA CSS CHE BLOCCA ANIMAZIONI
+function addAnimationBlockingCSS() {
+    const style = document.createElement('style');
+    style.textContent = `
+        /* BLOCCA TUTTE LE ANIMAZIONI CANVAS */
+        canvas {
+            animation: none;
+            transition: none;
+            transform: none;
+            will-change: auto;
+        }
+        
+        /* ASSICURA CHE IL CANVAS P5 SIA FISSO */
+        .p5Canvas {
+            position: fixed;
+            top: 90px;
+            left: 0;
+            width: 100vw;
+            z-index: -100;
+            pointer-events: none;
+        }
+        
+        /* DISABILITA TRANSFORMAZIONI CSS */
+        * {
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// EVENT LISTENER
 function setupEventListeners() {
-    // Scroll del mouse
-    document.addEventListener('wheel', handleGlobalWheel, { passive: false });
+    // Scroll del mouse sull'area di testo
+    if (textScrollArea) {
+        textScrollArea.addEventListener('scroll', handleTextScroll);
+    }
     
     // Click sulla freccia di scroll
     if (scrollHint) {
         scrollHint.addEventListener('click', handleScrollHintClick);
     }
     
-    // Click sugli indicatori
-    document.querySelectorAll('.screen-dot').forEach(dot => {
-        dot.addEventListener('click', function() {
+    // Click sui pallini FISSI di navigazione
+    document.querySelectorAll('.fixed-dot').forEach(dot => {
+        dot.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
             const sectionId = parseInt(this.getAttribute('data-section'));
-            if (sectionId !== currentSectionId && !isAtFooter) {
+            if (sectionId !== currentSectionId && !isScrolling) {
                 scrollToSection(sectionId);
             }
         });
     });
     
-    // Bottone Learn More
-    setupLearnMoreButton();
-    
-    // Tasti freccia
     document.addEventListener('keydown', handleKeyDown);
     
-    // Resize
-    window.addEventListener('resize', calculateScrollThresholds);
-    
-    // Scroll per controllare footer
-    window.addEventListener('scroll', checkScrollPosition);
+    // CSS anti-animazione
+    addAnimationBlockingCSS();
 }
 
 function setupLearnMoreButton() {
     const button = document.getElementById('learn-more-btn');
     if (!button) return;
     
-    // Rimuovi eventuali listener precedenti
     const newButton = button.cloneNode(true);
     button.parentNode.replaceChild(newButton, button);
     
-    // Aggiungi nuovo listener
     newButton.addEventListener('click', function(e) {
         e.preventDefault();
         const section = sections.find(s => s.id === currentSectionId);
@@ -201,177 +323,89 @@ function setupLearnMoreButton() {
     });
 }
 
-// ===== GESTIONE SCROLL =====
-function handleGlobalWheel(e) {
-    if (isScrollLocked) return;
+// GESTIONE SCROLL TESTO
+function handleTextScroll() {
+    if (!textScrollArea || isScrolling) return;
     
-    e.preventDefault();
-    
-    if (!textScrollArea) return;
-    
-    const delta = e.deltaY;
-    const scrollTop = textScrollArea.scrollTop;
-    const scrollHeight = textScrollArea.scrollHeight - textScrollArea.clientHeight;
-    const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-    
-    // Se siamo nel footer
-    if (isAtFooter) {
-        // Scroll verso l'alto dal footer
-        if (delta < 0 && window.scrollY <= mainContent.offsetTop + mainContent.offsetHeight) {
-            scrollBackFromFooter();
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        const scrollTop = textScrollArea.scrollTop;
+        const scrollHeight = textScrollArea.scrollHeight;
+        
+        // Calcolo sezione in base allo scroll
+        const sectionHeight = scrollHeight / 3;
+        let newSectionId = currentSectionId;
+        
+        if (scrollTop < sectionHeight) {
+            newSectionId = 1;
+        } else if (scrollTop < sectionHeight * 2) {
+            newSectionId = 2;
+        } else {
+            newSectionId = 3;
         }
-        // Scroll verso il basso - permetti scroll normale della pagina
+        
+        if (newSectionId !== currentSectionId) {
+            updateSection(newSectionId);
+        }
+    }, 100);
+}
+/* SCROLL - freccia */
+function handleScrollHintClick() {
+    if (isScrolling) return;
+    
+    if (currentSectionId === sections.length) {
+        // Se ultima sezione, torna alla prima
+        scrollToSection(1);
+    } else {
+        // Altrimenti prossima
+        scrollToSection(currentSectionId + 1);
+    }
+}
+
+/* SCROLL - alle diverse sezioni */
+function scrollToSection(sectionId) {
+    if (!textScrollArea || sectionId < 1 || sectionId > sections.length) return;
+    
+    isScrolling = true;
+    
+    const section = sections.find(s => s.id === sectionId);
+    if (!section) {
+        isScrolling = false;
         return;
     }
     
-    // Se siamo nel testo
-    if (delta > 0) { // SCROLL VERSO IL BASSO
-        if (scrollPercentage >= 98) {
-            // Fine del testo, vai al footer
-            goToFooter();
-        } else {
-            // Scrolla il testo
-            textScrollArea.scrollTop += delta * 0.5;
-            detectCurrentSection(textScrollArea.scrollTop);
-            updateScrollHint();
-        }
-    } else if (delta < 0) { // SCROLL VERSO L'ALTO
-        textScrollArea.scrollTop += delta * 0.5;
-        detectCurrentSection(textScrollArea.scrollTop);
-        updateScrollHint();
-    }
-}
-
-function checkScrollPosition() {
-    if (!textScrollArea || !footer) return;
+    // Calcolo posizione di scroll
+    const scrollHeight = textScrollArea.scrollHeight;
+    const sectionHeight = 1950 / 3;
+    const targetScroll = (sectionId - 1) * sectionHeight;
     
-    const footerRect = footer.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
+    // Aggiornamento immediato di sezione
+    updateSection(sectionId);
     
-    // Se il footer è visibile (nella viewport)
-    if (footerRect.top < windowHeight && footerRect.bottom > 0) {
-        if (!isAtFooter) {
-            isAtFooter = true;
-            footer.classList.add('visible');
-            updateScrollHint();
-        }
-    } else {
-        if (isAtFooter) {
-            isAtFooter = false;
-            footer.classList.remove('visible');
-            updateScrollHint();
-        }
-    }
-}
-
-// ===== FUNZIONI SCROLL =====
-function handleScrollHintClick() {
-    if (isAtFooter) {
-        scrollBackFromFooter();
-    } else {
-        const scrollTop = textScrollArea.scrollTop;
-        const scrollHeight = textScrollArea.scrollHeight - textScrollArea.clientHeight;
-        const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-        
-        if (scrollPercentage >= 95) {
-            goToFooter();
-        } else {
-            scrollTextContent(400);
-        }
-    }
-}
-
-function goToFooter() {
-    if (isScrollLocked || !footer) return;
+    // Scroll alla posizione
+    textScrollArea.scrollTo({
+        top: targetScroll,
+        behavior: 'smooth'
+    });
     
-    isScrollLocked = true;
-    isAtFooter = true;
-    
-    // Mostra il footer
-    footer.classList.add('visible');
-    
-    // Scorri fino al footer
-    footer.scrollIntoView({ behavior: 'smooth' });
-    
-    updateScrollHint();
-    
-    // Sblocca dopo 500ms
+    // Rilascio lock
     setTimeout(() => {
-        isScrollLocked = false;
-    }, 500);
+        isScrolling = false;
+    }, 600);
 }
 
-function scrollBackFromFooter() {
-    if (isScrollLocked || !textScrollArea) return;
-    
-    isScrollLocked = true;
-    isAtFooter = false;
-    
-    // Nascondi il footer
-    footer.classList.remove('visible');
-    
-    // Torna al contenuto principale
-    mainContent.scrollIntoView({ behavior: 'smooth' });
-    
-    // Imposta scroll del testo in fondo
-    setTimeout(() => {
-        textScrollArea.scrollTop = textScrollArea.scrollHeight - textScrollArea.clientHeight;
-        detectCurrentSection(textScrollArea.scrollTop);
-        updateScrollHint();
-        isScrollLocked = false;
-    }, 500);
-}
-
-function scrollTextContent(pixels) {
-    if (!textScrollArea || isAtFooter) return;
-    
-    textScrollArea.scrollTop += pixels;
-    detectCurrentSection(textScrollArea.scrollTop);
-    updateScrollHint();
-}
-
-// ===== GESTIONE SEZIONI =====
-function calculateScrollThresholds() {
-    const textSections = document.querySelectorAll('.text-section');
-    
-    if (textSections.length >= 3) {
-        sections[1].threshold = textSections[0].offsetHeight - 100;
-        sections[2].threshold = textSections[0].offsetHeight + textSections[1].offsetHeight - 100;
-    }
-}
-
-function detectCurrentSection(scrollTop) {
-    let newSectionId = currentSectionId;
-    
-    for (let i = sections.length - 1; i >= 0; i--) {
-        if (scrollTop >= sections[i].threshold) {
-            newSectionId = sections[i].id;
-            break;
-        }
-    }
-    
-    if (newSectionId !== currentSectionId) {
-        updateCurrentSection(newSectionId);
-    }
-}
-
-function updateCurrentSection(sectionId) {
+// FUNZIONI DI AGGIORNAMENTO
+function updateSection(sectionId) {
     currentSectionId = sectionId;
     const section = sections.find(s => s.id === sectionId);
     
     if (!section) return;
     
-    // Aggiorna titolo
     updateTitle(section.title, section.subtitle);
-    
-    // Aggiorna immagine
     updateImage(section.imageId);
-    
-    // Aggiorna bottone
     updateButton(section.buttonText, section.buttonLink);
-    
-    // Aggiorna indicatori
-    updateIndicators(sectionId);
+    updateFixedDots(sectionId);
+    updateScrollHint();
 }
 
 function updateTitle(title, subtitle) {
@@ -409,7 +443,6 @@ function updateButton(buttonText, buttonLink) {
     
     button.textContent = buttonText;
     
-    // Ricrea il listener con il nuovo link
     const newButton = button.cloneNode(true);
     button.parentNode.replaceChild(newButton, button);
     
@@ -423,145 +456,124 @@ function updateButton(buttonText, buttonLink) {
     });
 }
 
-function updateIndicators(sectionId) {
-    document.querySelectorAll('.screen-dot').forEach(dot => {
-        dot.classList.remove('active');
+function updateFixedDots(sectionId) {
+    document.querySelectorAll('.fixed-dot').forEach(dot => {
+        const dotSectionId = parseInt(dot.getAttribute('data-section'));
+        if (dotSectionId === sectionId) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
     });
-    
-    const currentDot = document.querySelector(`.screen-dot[data-section="${sectionId}"]`);
-    if (currentDot) {
-        currentDot.classList.add('active');
-    }
 }
 
 function updateScrollHint() {
     if (!scrollHint) return;
     
-    if (isAtFooter) {
-        scrollHint.textContent = "V";
-        scrollHint.classList.add('up-arrow');
-        scrollHint.classList.remove('hidden');
+    if (currentSectionId === sections.length) {
+        // Ultima sezione: freccia ruotata (v specchiata)
+        scrollHint.classList.add('flipped');
+        scrollHint.title = "Torna all'inizio";
     } else {
-        if (!textScrollArea) return;
-        
-        const scrollTop = textScrollArea.scrollTop;
-        const scrollHeight = textScrollArea.scrollHeight - textScrollArea.clientHeight;
-        const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-        
-        scrollHint.textContent = "V";
-        scrollHint.classList.remove('up-arrow');
-        scrollHint.classList.remove('hidden');
-        scrollHint.style.opacity = scrollPercentage >= 95 ? "0.7" : "1";
+        // Altre sezioni: freccia normale
+        scrollHint.classList.remove('flipped');
+        scrollHint.title = "Vai alla prossima sezione";
     }
 }
 
-// ===== FUNZIONI UTILITY =====
-function scrollToSection(sectionId) {
-    if (!textScrollArea || isAtFooter) return;
-    
-    const section = sections.find(s => s.id === sectionId);
-    if (!section) return;
-    
-    smoothScrollTo(textScrollArea, section.threshold, 600);
-    updateCurrentSection(sectionId);
-}
-
-function smoothScrollTo(element, to, duration) {
-    if (duration <= 0) return;
-    
-    const start = element.scrollTop;
-    const change = to - start;
-    const increment = 20;
-    let currentTime = 0;
-    
-    const animateScroll = function() {
-        currentTime += increment;
-        const val = easeInOutQuad(currentTime, start, change, duration);
-        element.scrollTop = val;
-        
-        if (currentTime < duration) {
-            setTimeout(animateScroll, increment);
-        }
-    };
-    
-    animateScroll();
-}
-
-function easeInOutQuad(t, b, c, d) {
-    t /= d / 2;
-    if (t < 1) return c / 2 * t * t + b;
-    t--;
-    return -c / 2 * (t * (t - 2) - 1) + b;
-}
-
+// GESTIONE TASTI
 function handleKeyDown(e) {
     switch(e.key) {
         case 'ArrowDown':
         case 'PageDown':
             e.preventDefault();
-            if (!isAtFooter) scrollTextContent(100);
+            if (currentSectionId < sections.length) {
+                scrollToSection(currentSectionId + 1);
+            } else {
+                scrollToSection(1);
+            }
             break;
             
         case 'ArrowUp':
         case 'PageUp':
             e.preventDefault();
-            if (isAtFooter) scrollBackFromFooter();
-            else scrollTextContent(-100);
+            if (currentSectionId > 1) {
+                scrollToSection(currentSectionId - 1);
+            } else {
+                scrollToSection(sections.length);
+            }
             break;
             
         case 'ArrowRight':
             e.preventDefault();
-            if (!isAtFooter && currentSectionId < 3) scrollToSection(currentSectionId + 1);
+            if (currentSectionId < sections.length) {
+                scrollToSection(currentSectionId + 1);
+            }
             break;
             
         case 'ArrowLeft':
             e.preventDefault();
-            if (!isAtFooter && currentSectionId > 1) scrollToSection(currentSectionId - 1);
-            break;
-            
-        case '1':
-        case '2':
-        case '3':
-            e.preventDefault();
-            if (!isAtFooter) {
-                const sectionId = parseInt(e.key);
-                if (sectionId >= 1 && sectionId <= 3 && sectionId !== currentSectionId) {
-                    scrollToSection(sectionId);
-                }
+            if (currentSectionId > 1) {
+                scrollToSection(currentSectionId - 1);
             }
             break;
             
-        case 'End':
+        case ' ':
+        case 'Enter':
             e.preventDefault();
-            if (!isAtFooter) goToFooter();
+            if (currentSectionId < sections.length) {
+                scrollToSection(currentSectionId + 1);
+            } else {
+                scrollToSection(1);
+            }
             break;
             
-        case 'Home':
+        case '1':
             e.preventDefault();
-            if (isAtFooter) scrollBackFromFooter();
-            else scrollToSection(1);
+            if (currentSectionId !== 1) {
+                scrollToSection(1);
+            }
+            break;
+            
+        case '2':
+            e.preventDefault();
+            if (currentSectionId !== 2) {
+                scrollToSection(2);
+            }
+            break;
+            
+        case '3':
+            e.preventDefault();
+            if (currentSectionId !== 3) {
+                scrollToSection(3);
+            }
             break;
     }
 }
 
-function setupImageErrorHandler() {
-    const images = document.querySelectorAll('.methodology-image');
-    images.forEach(image => {
-        image.onerror = function() {
-            const placeholders = ['Methodology Overview', 'Overview Visualization', 'Data Interpretation'];
-            const index = parseInt(this.id.split('-')[3]) - 1;
-            const text = placeholders[index] || 'Methodology Image';
-            
-            this.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23f8f8f8"/><text x="200" y="160" text-anchor="middle" fill="%23FF2B00" font-family="Arial" font-size="16" font-weight="bold">${text}</text><text x="200" y="190" text-anchor="middle" fill="%23999" font-family="Arial" font-size="12">Visualization preview</text></svg>`;
-            this.alt = `Placeholder for ${text}`;
-        };
-    });
-}
+// UTILITY DEBUG
+window.debugP5 = function() {
+    console.log("=== DEBUG P5.js ===");
+    console.log("Sketch attivo:", p5Sketch ? "Sì" : "No");
+    
+    if (p5Sketch) {
+        const canvas = document.querySelector('.p5Canvas');
+        if (canvas) {
+            const rect = canvas.getBoundingClientRect();
+            console.log("Canvas position:", canvas.style.position);
+            console.log("Canvas top:", canvas.style.top);
+            console.log("Bounding rect top:", rect.top);
+            console.log("Canvas si muove?", rect.top !== parseInt(canvas.style.top || 0));
+        }
+    }
+};
 
-// ===== ESPORTA FUNZIONI =====
+// ESPORTO FUNZIONI
 window.methodology = {
+    // chiamata scroll to section
     scrollToSection,
+    // ritorno valore
     currentSection: () => currentSectionId,
-    goToFooter,
-    scrollBackFromFooter
+    // marcata disponibilità methodology
+    debugP5: window.debugP5
 };
