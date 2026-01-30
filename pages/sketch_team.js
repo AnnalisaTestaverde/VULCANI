@@ -55,12 +55,12 @@ function setup() {
 function setupImageConfigs() {
   // IMMAGINI - aggiustamento dimensioni
   displayConfigs = [
-    { scale: 1.15, offsetY: -10, offsetX: 0 },   // Alice
-    { scale: 1.0, offsetY: 0, offsetX: 0 },   // Matilde
-    { scale: 1.15, offsetY: 0, offsetX: 0 },   // Greta
-    { scale: 0.90, offsetY: 0, offsetX: 0 },   // Carlo
-    { scale: 1.40, offsetY: 0, offsetX: 0 },   // Ilaria
-    { scale: 1.15, offsetY: 0, offsetX: 0 }    // Annalisa
+    { scale: 1.15, offsetY: -15, offsetX: 0 },   // alice
+    { scale: 1.00, offsetY: 0, offsetX: 0 },   // matilde
+    { scale: 1.15, offsetY: 0, offsetX: 0 },   // greta
+    { scale: 0.90, offsetY: 0, offsetX: 0 },   // carlo
+    { scale: 1.40, offsetY: 0, offsetX: 0 },   // ilaria
+    { scale: 1.15, offsetY: 0, offsetX: 0 }    // annalisa
   ];
 }
 
