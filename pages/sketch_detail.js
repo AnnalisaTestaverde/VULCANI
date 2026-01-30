@@ -52,11 +52,11 @@ function updateResponsiveDimensions() {
     let centerY;
     
     if (windowHeight > 1200) {
-        centerY = windowHeight * 0.46;
+        centerY = windowHeight * 0.46 + 25;
     } else if (windowHeight < 800) {
-        centerY = windowHeight * 0.50;
+        centerY = windowHeight * 0.50 + 25;
     } else {
-        centerY = windowHeight * centerYPercentage;
+        centerY = windowHeight * centerYPercentage + 25;
     }
     
     //posizione grafico 
@@ -98,6 +98,7 @@ let mainTextSize = 17;
 let chartLabelSize = 14;
 let chartTooltipTextSize = 17;
 const INFLATION_FACTOR = 2.4;
+
 
 let data;
 let eruptions = [];

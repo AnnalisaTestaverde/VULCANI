@@ -2569,11 +2569,11 @@ function updateLayout() {
     const centerYPercentage = 0.48;
     
     if (height > 1200) {
-        state.centerY = height * 0.46; 
+        state.centerY = height * 0.46 + 25; 
     } else if (height < 800) {
-        state.centerY = height * 0.50; 
+        state.centerY = height * 0.50 + 25; 
     } else {
-        state.centerY = height * centerYPercentage; 
+        state.centerY = height * centerYPercentage + 25; 
     }
     
 }
