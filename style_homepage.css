@@ -45,6 +45,11 @@ header {
     z-index: 1001;
 }
 
+.logo a {
+    text-decoration: none;
+    color: #000000;
+}
+
 /*nav*/
 .nav-desktop {
     display: flex;
@@ -59,10 +64,13 @@ header {
     position: relative;
 }
 
-/*explore*/
 .nav-desktop a.explore {
     color: #FF2B00;
     font-weight: bold;
+}
+
+.nav-desktop a:hover {
+    color: #FF2B00;
 }
 
 .page-content {

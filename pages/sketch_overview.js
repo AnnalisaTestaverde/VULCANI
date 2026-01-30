@@ -1254,6 +1254,10 @@ function drawNavBar() {
         currentX += link.width + linkSpacing;
     }
     state.navLinks = navLinks;
+
+    stroke(245, 40, 0); // Stesso colore del bottone Learn More
+    strokeWeight(1); // Stesso spessore del bordo del bottone Learn More
+    line(0, navHeight-5, width, navHeight-5);
     
     pop();
 }
@@ -2243,8 +2247,9 @@ function drawSingleArrowWithBox(x, y, w, h, arrow, isHovered) {
 function drawInfobox() {
     if (state.hoveredVolcano) {
         const volcano = state.hoveredVolcano;
-        const boxWidth = CONFIG.layout.infoBoxWidth;
-        const boxHeight = CONFIG.layout.infoBoxHeight;
+        
+        const boxWidth = 220; 
+        const boxHeight = 90;  
 
         let x = mouseX + 25;
         let y = mouseY - boxHeight / 2;
@@ -2253,7 +2258,6 @@ function drawInfobox() {
         if (y < 0) y = 0;
         if (y + boxHeight > height) y = height - boxHeight;
 
-        //box
         fill(CONFIG.colors.infoBox);
         stroke(CONFIG.colors.infoBoxStroke);
         strokeWeight(1);
@@ -2262,18 +2266,14 @@ function drawInfobox() {
         fill(CONFIG.colors.infoBoxText);
         noStroke();
         
-        //testo dimensione
-        const textSizeBase = 14;
-        const textSizeSmall = 10; 
-        
         //nome vulcano
-        textSize(textSizeBase);
+        textSize(16);  
         textStyle(BOLD);
         textAlign(LEFT, TOP);
         
-        //taglia il nome lungo
+        //troncamento nome se troppo lungo
         let volcanoName = volcano.name;
-        const maxNameWidth = boxWidth - 20;
+        const maxNameWidth = boxWidth - 20;  //margini 
         
         while (textWidth(volcanoName) > maxNameWidth && volcanoName.length > 10) {
             volcanoName = volcanoName.substring(0, volcanoName.length - 4) + '...';
@@ -2281,13 +2281,13 @@ function drawInfobox() {
         
         text(volcanoName, x + 10, y + 10);
         
-        //anno
-        textSize(textSizeSmall);
+        //year
+        textSize(16); 
         textStyle(NORMAL);
-        text('Year: ' + formatYear(volcano.year), x + 10, y + 35);
+        text('Year: ' + formatYear(volcano.year), x + 10, y + 40);  
         
-        //impatto
-        text('Impact: ' + volcano.impact, x + 10, y + 55);
+        //impact
+        text('Impact: ' + volcano.impact, x + 10, y + 60); 
     }
 }
 

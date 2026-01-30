@@ -6,14 +6,14 @@ let typedCaption = 0;
 let typingSpeed = 1.5;
 let frameCounter = 0;
 
-// Bounds per frecce
-let upBounds = { x: 0, y: 0, w: 0, h: 0 };    // freccia su
-let downBounds = { x: 0, y: 0, w: 0, h: 0 };  // freccia giù
+//animazione frecce
+let upBounds = { x: 0, y: 0, w: 0, h: 0 };    //freccia su
+let downBounds = { x: 0, y: 0, w: 0, h: 0 };  //freccia giù
 
-// Stato hover
+//hover
 let isHovering = false;
 
-// Array di slide con le parole da evidenziare in BIANCO
+//array per parole bianche
 let slides = [
   {
     lines: ["Volcanic eruptions in our dataset are", "described through an impact score."],
@@ -37,9 +37,8 @@ let slides = [
   }
 ];
 
-// Aggiungi HTML per gli indicatori e le frecce di scroll
 function addHTMLStructure() {
-  // Aggiungi gli indicatori delle schermate (pallini)
+  //indicatori schermata pallini
   const indicatorContainer = document.createElement('div');
   indicatorContainer.className = 'screen-indicator';
   indicatorContainer.innerHTML = `
@@ -49,7 +48,7 @@ function addHTMLStructure() {
   `;
   document.body.appendChild(indicatorContainer);
   
-  // Contenitore per le frecce (solo visualizzazione)
+  //contenitore frecce
   const arrowsContainer = document.createElement('div');
   arrowsContainer.className = 'arrows-container';
   document.body.appendChild(arrowsContainer);
@@ -58,21 +57,19 @@ function addHTMLStructure() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   
-  // PRIMA inizializza le frecce
+  //prima inizializza le frecce
   updateArrowsVisibility();
   
-  // POI inizia la digitazione
+  //poi inizia la digitazione
   startTyping();
   
-  // Aggiungi struttura HTML
   addHTMLStructure();
   
-  // Setup event listeners
   setupEventListeners();
 }
 
 function draw() {
-  background(255, 43, 0); // #FF2B00 - Sfondo rosso
+  background(255, 43, 0); 
 
   let current = slides[currentSlide];
   let fullMain = current.lines.join('\n');
@@ -88,7 +85,7 @@ function draw() {
             typedCaption = 0;
           } else {
             isTyping = false;
-            // Quando finisce la digitazione, aggiorna le frecce
+            //quando finisce la digitazione, aggiorna le frecce
             updateArrowsVisibility();
           }
         }
@@ -96,7 +93,7 @@ function draw() {
         typedCaption++;
         if (typedCaption >= fullCaption.length) {
           isTyping = false;
-          // Quando finisce la digitazione, aggiorna le frecce
+          //quando finisce la digitazione, aggiorna le frecce
           updateArrowsVisibility();
         }
       }
@@ -108,7 +105,7 @@ function draw() {
   let displayCaption = fullCaption.substring(0, typedCaption);
   drawMultilineText(displayMain, displayCaption, width / 2);
 
-  // Bottone finale "Explore all eruptions"
+  //bottone alla fine "Explore all eruptions"
   if (currentSlide === slides.length - 1 && !isTyping) {
     drawExploreButton();
   }
@@ -129,7 +126,7 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
   textSize(mainSize);
   textStyle(BOLD);
   
-  // Trova la larghezza massima del testo
+  //larghezza max del testo
   let maxWidthMain = 0;
   for (let line of fullLines) {
     let w = textWidth(line);
@@ -155,7 +152,7 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
   textSize(mainSize);
   textStyle(BOLD);
   
-  // Disegna ogni linea di testo
+  //digita ogni riga 
   for (let i = 0; i < fullLines.length; i++) {
     let lineToShow = i < displayedMainLines.length ? displayedMainLines[i] : "";
     let lineText = fullLines[i];
@@ -165,21 +162,18 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
     // Controlla quali parole sono già state digitate in questa linea
     let typedInThisLine = displayedMainLines[i] || "";
     
-    // Processa il testo carattere per carattere
+    //testo processato carattere x carattere
     for (let charIndex = 0; charIndex < lineText.length; charIndex++) {
       let char = lineText[charIndex];
       let typedChar = charIndex < typedInThisLine.length ? typedInThisLine[charIndex] : "";
       
-      if (typedChar === "") break; // Non disegnare caratteri non ancora digitati
+      if (typedChar === "") break; //non disegnare caratteri non digitati
       
-      // Controlla se questo carattere è parte di una parola evidenziata
+      //controllo se il carattere va evidenziato
       let shouldHighlight = false;
       
-      // Gestione speciale per "destroyed houses" nella seconda slide
       if (currentSlide === 1 && (i === 1 || i === 2)) {
-        // Seconda slide, linee 2 e 3 (indici 1 e 2)
         if (i === 1 && lineText.includes("destroyed")) {
-          // Se siamo nella linea con "destroyed"
           let destroyedPos = lineText.indexOf("destroyed");
           if (charIndex >= destroyedPos && charIndex < destroyedPos + "destroyed".length) {
             if (typedInThisLine.length > destroyedPos) {
@@ -187,7 +181,6 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
             }
           }
         } else if (i === 2 && lineText.includes("houses")) {
-          // Se siamo nella linea con "houses"
           let housesPos = lineText.indexOf("houses");
           if (charIndex >= housesPos && charIndex < housesPos + "houses".length) {
             if (typedInThisLine.length > housesPos) {
@@ -197,25 +190,23 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
         }
       }
       
-      // Controlla altre parole evidenziate se non abbiamo ancora trovato una corrispondenza
       if (!shouldHighlight) {
-        // Cerca tutte le parole evidenziate per vedere se questo carattere ne fa parte
+        //cerca tutte le parole evidenziate per vedere se il carattere ne fa parte
         for (let hw of highlightedWords) {
-          // Salta "destroyed houses" che abbiamo già gestito
           if (hw === "houses destroyed" && currentSlide === 1) continue;
           
           let hwLower = hw.toLowerCase();
           let lineLower = lineText.toLowerCase();
           
-          // Trova tutte le occorrenze di questa parola nella linea
+          //trova tutte le occorrenze di questa parola nella linea
           let startIndex = 0;
           while (true) {
             let pos = lineLower.indexOf(hwLower, startIndex);
             if (pos === -1) break;
             
-            // Se il carattere corrente è dentro questa occorrenza
+            //se il carattere corrente è dentro questa occorrenza
             if (charIndex >= pos && charIndex < pos + hw.length) {
-              // Controlla se abbiamo digitato abbastanza caratteri
+              //controlla se abbiamo digitato abbastanza caratteri
               if (typedInThisLine.length > pos) {
                 shouldHighlight = true;
                 break;
@@ -228,12 +219,12 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
       }
       
       if (shouldHighlight) {
-        fill(255); // Testo BIANCO per le parole evidenziate
+        fill(255); //testo bianco parole evidenziate
       } else {
-        fill(0); // Testo NERO per il resto
+        fill(0); //testo nero parole normali
       }
       
-      // Disegna il carattere
+      //disegna il carattere
       text(typedChar, currentX, lineY);
       currentX += textWidth(typedChar);
     }
@@ -243,19 +234,19 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
     let captionY = startY + totalMainHeight + captionSpacing;
     textSize(captionSize);
     textStyle(BOLD);
-    fill(0); // Caption nero
+    fill(0);
     text(displayCaption, xStart, captionY);
   }
 }
 
-// Bottone "Explore all eruptions"
+//bottone "Explore all eruptions"
 function drawExploreButton() {
   const buttonWidth = 220;
   const buttonHeight = 40;
   const buttonX = width / 2 - buttonWidth / 2;
   const buttonY = height - 100;
   
-  // Calcola scala hover
+  //scala hover
   const scale = isHovering ? 1.05 : 1.0;
   const scaledW = buttonWidth * scale;
   const scaledH = buttonHeight * scale;
@@ -263,28 +254,28 @@ function drawExploreButton() {
   const scaledY = buttonY - (scaledH - buttonHeight) / 2;
   
   if (isHovering) {
-    // STATO HOVER: sfondo bianco, testo e contorno rosso
-    fill(255); // Sfondo BIANCO
-    stroke(255, 43, 0); // Stroke ROSSO (#FF2B00)
+    //stato hover: sfondo bianco, testo e contorno rosso
+    fill(255); //sfondo bIANCO
+    stroke(255, 43, 0); //stroke rosso 
     strokeWeight(1);
-    rect(scaledX, scaledY, scaledW, scaledH, 5); // Angoli arrotondati con raggio 5
+    rect(scaledX, scaledY, scaledW, scaledH, 5);
 
-    // Testo "Explore all eruptions" in ROSSO, CENTRATO
-    fill(255, 43, 0); // #FF2B00 - Testo ROSSO
+    //testo "Explore all eruptions" 
+    fill(255, 43, 0);
     noStroke();
     textSize(18);
     textStyle(BOLD);
     textAlign(CENTER, CENTER);
     text("Explore all eruptions", scaledX + scaledW/2, scaledY + scaledH/2);
   } else {
-    // STATO NORMALE: contorno bianco, sfondo trasparente, testo bianco
+    //stato normale: contorno bianco, sfondo trasparente, testo bianco
     noFill();
-    stroke(255); // Stroke BIANCO
+    stroke(255);
     strokeWeight(1);
-    rect(scaledX, scaledY, scaledW, scaledH, 5); // Angoli arrotondati con raggio 5
+    rect(scaledX, scaledY, scaledW, scaledH, 5);
 
-    // Testo "Explore all eruptions" in BIANCO, CENTRATO
-    fill(255); // Testo BIANCO
+    //testo "Explore all eruptions" in bianco
+    fill(255);
     noStroke();
     textSize(18);
     textStyle(BOLD);
@@ -292,22 +283,22 @@ function drawExploreButton() {
     text("Explore all eruptions", scaledX + scaledW/2, scaledY + scaledH/2);
   }
 
-  // Aggiorna bounds per il click
+  //aggiorna animazione freccia con il click
   downBounds.x = buttonX;
   downBounds.y = buttonY;
   downBounds.w = buttonWidth;
   downBounds.h = buttonHeight;
 }
 
-// Configura tutti gli event listener
+//event listener
 function setupEventListeners() {
   // Scroll del mouse
   window.addEventListener('wheel', handleScroll, { passive: false });
   
-  // Tasti freccia
+  //tasti frecce
   document.addEventListener('keydown', handleKeyDown);
   
-  // Click sugli indicatori delle schermate
+  //click 
   document.querySelectorAll('.screen-dot').forEach(dot => {
     dot.addEventListener('click', function() {
       const slideIndex = parseInt(this.getAttribute('data-screen'));
@@ -318,7 +309,7 @@ function setupEventListeners() {
   });
 }
 
-// Completa la digitazione del testo corrente
+//digitazione testo corrente
 function completeTyping() {
   if (isTyping) {
     let current = slides[currentSlide];
@@ -326,12 +317,12 @@ function completeTyping() {
     typedCaption = (current.caption || "").length;
     isTyping = false;
     frameCounter = 0;
-    // Aggiorna le frecce quando si completa la digitazione
+    //aggiorna frecce 
     updateArrowsVisibility();
   }
 }
 
-// Gestione tasti freccia - MODIFICATA per completare l'animazione
+//tasti freccia gestione
 function handleKeyDown(e) {
   switch(e.key) {
     case 'ArrowDown':
@@ -397,20 +388,17 @@ function handleKeyDown(e) {
   }
 }
 
-// Vai a una slide specifica
+//andare alla slide specifica
 function goToSlide(slideIndex) {
   if (slideIndex < 0 || slideIndex >= slides.length || slideIndex === currentSlide) return;
   
   currentSlide = slideIndex;
   startTyping();
   updateScreenIndicator();
-  // Le frecce vengono aggiornate in startTyping() e quando finisce la digitazione
-  
-  // Forza il redraw per mostrare immediatamente il cambiamento
   redraw();
 }
 
-// Gestione scroll del mouse
+//scrolling del mouse
 function handleScroll(e) {
   e.preventDefault();
   
@@ -429,13 +417,12 @@ function handleScroll(e) {
 
 function mousePressed() {
   if (isTyping) {
-    // Completa la digitazione
+    //digitazione
     completeTyping();
     return;
   }
   
-  // NON gestire più i click sulle frecce qui - le frecce HTML hanno i loro event listener
-  // Click sul bottone finale
+  //click bottone finale
   if (currentSlide === slides.length - 1) {
     if (
       mouseX >= downBounds.x &&
@@ -443,15 +430,14 @@ function mousePressed() {
       mouseY >= downBounds.y &&
       mouseY <= downBounds.y + downBounds.h
     ) {
-      // VAI ALLA MAPPA
+      //mappa visione d'insieme
       window.location.href = "overview.html";
     }
   }
 }
 
-// Rileva hover sul bottone
+//hover sul bottone
 function mouseMoved() {
-  // Hover sul bottone finale
   if (currentSlide === slides.length - 1 && !isTyping) {
     if (
       mouseX >= downBounds.x &&
@@ -462,25 +448,24 @@ function mouseMoved() {
       if (!isHovering) {
         isHovering = true;
         document.body.style.cursor = 'pointer';
-        redraw(); // Forza il redraw per mostrare il cambio di stato
+        redraw();
       }
       return;
     } else {
       if (isHovering) {
         isHovering = false;
         document.body.style.cursor = 'default';
-        redraw(); // Forza il redraw per mostrare il cambio di stato
+        redraw();
       }
     }
   }
-  
-  // NON gestire più hover sulle aree delle frecce qui - le frecce HTML hanno i loro stili CSS
+
   if (!isHovering) {
     document.body.style.cursor = 'default';
   }
 }
 
-// Aggiorna gli indicatori delle schermate
+//aggiorna i pallini per in numero di pagina corrente
 function updateScreenIndicator() {
   const dots = document.querySelectorAll('.screen-dot');
   dots.forEach((dot, index) => {
@@ -492,20 +477,19 @@ function updateScreenIndicator() {
   });
 }
 
-// Aggiorna visibilità delle frecce - MODIFICATA per mostrare sempre se non si sta digitando
 function updateArrowsVisibility() {
   const arrows = document.querySelector('.arrows-container');
   if (arrows) {
     arrows.innerHTML = '';
     
-    // Mostra frecce solo se non si sta digitando o siamo all'ultima slide (per il bottone)
+    //si vedono le frecce sono le non si sta digitando il testo o se siamo all'ultima slide
     if (!isTyping || currentSlide === slides.length - 1) {
-      // Freccia SU (solo se non siamo alla prima slide)
+      //freccia su solo se non siamo nella prima slide
       if (currentSlide > 0) {
         const upArrow = document.createElement('div');
         upArrow.className = 'scroll-hint up-arrow';
         upArrow.innerHTML = 'V';
-        // Aggiungi event listener per il click
+        //event listener al click
         upArrow.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
@@ -519,12 +503,12 @@ function updateArrowsVisibility() {
         arrows.appendChild(upArrow);
       }
       
-      // Freccia GIÙ (solo se non siamo all'ultima slide)
+      //freccia giù solo se non siamo nell'ultima slide
       if (currentSlide < slides.length - 1) {
         const downArrow = document.createElement('div');
         downArrow.className = 'scroll-hint down-arrow';
         downArrow.innerHTML = 'V';
-        // Aggiungi event listener per il click
+        //event listener al click
         downArrow.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
@@ -547,7 +531,6 @@ function startTyping() {
   typedMain = 0;
   typedCaption = 0;
   frameCounter = 0;
-  // Aggiorna le frecce (che ora gestiscono la visibilità in base a isTyping)
   updateArrowsVisibility();
 }
 
@@ -556,11 +539,9 @@ function windowResized() {
   redraw();
 }
 
-// Aggiungi CSS inline per gli elementi HTML
 function addInlineStyles() {
   const style = document.createElement('style');
   style.textContent = `
-    /* Indicatore schermate a sinistra */
     .screen-indicator {
       position: fixed;
       left: 20px;
@@ -594,7 +575,7 @@ function addInlineStyles() {
       transform: scale(1.3);
     }
     
-    /* Contenitore frecce */
+    /*contenitore frecce*/
     .arrows-container {
       position: fixed;
       top: 0;
@@ -605,7 +586,7 @@ function addInlineStyles() {
       z-index: 1000;
     }
     
-    /* Stile frecce - NERO SOLIDO PER ENTRAMBE */
+    /*frecce*/
     .scroll-hint {
       position: fixed;
       left: 50%;
@@ -627,20 +608,20 @@ function addInlineStyles() {
       font-family: 'Helvetica', Arial, sans-serif !important;
     }
     
-    /* Freccia SU - posizionata in alto, ruotata di 180 gradi */
+    /*freccia su*/
     .up-arrow {
       top: 40px;
       left: 50%;
       transform: translateX(-50%) rotate(180deg);
     }
     
-    /* Freccia GIÙ - posizionata in basso */
+    /*freccia giù*/
     .down-arrow {
       bottom: 40px;
       left: 50%;
     }
     
-    /* Animazione bounce ESATTAMENTE COME NEL CODICE DI RIFERIMENTO */
+    /*animazione frecce bounce*/
     @keyframes bounce {
       0%, 20%, 50%, 80%, 100% {
         transform: translateX(-50%) translateY(0);
@@ -653,7 +634,7 @@ function addInlineStyles() {
       }
     }
     
-    /* Animazione per freccia su (ruotata) */
+    /*animazione freccia su*/
     .up-arrow {
       animation: bounceUp 2s infinite;
     }
@@ -670,7 +651,6 @@ function addInlineStyles() {
       }
     }
     
-    /* Reset canvas position */
     canvas {
       position: absolute;
       top: 0;
@@ -679,7 +659,6 @@ function addInlineStyles() {
       pointer-events: none; /* IMPORTANTE: il canvas non deve intercettare i click */
     }
     
-    /* Body e HTML per coprire tutto */
     body, html {
       margin: 0;
       padding: 0;
@@ -690,7 +669,7 @@ function addInlineStyles() {
       font-family: 'Helvetica', Arial, sans-serif;
     }
     
-    /* Aggiungi effetto hover per le frecce */
+    /*hover frecce*/
     .scroll-hint:hover {
       opacity: 0.8 !important;
       transform: translateX(-50%) scale(1.1);
@@ -703,8 +682,8 @@ function addInlineStyles() {
   document.head.appendChild(style);
 }
 
-// Esegui il setup degli stili all'avvio
+//stile all'inizio
 addInlineStyles();
 
-// Inizializza le frecce SUBITO
+//inizializza frecce
 updateArrowsVisibility();
