@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
     <script src="sketch_team.js"></script>
     <style>
-        /* STILI - impostazione direttamente in HTML */
         * {
             margin: 0;
             padding: 0;
@@ -26,12 +25,10 @@
             min-height: 100vh;
         }
 
-        /* in modo da avere scorrimento fluido */
         html {
             scroll-behavior: smooth;
         }
 
-        /* HEADER */
         header {
             width: 100%;
             padding: 25px 40px;
@@ -52,7 +49,11 @@
             z-index: 1001;
         }
 
-        /* NAVIGATION */
+        .logo a {
+            text-decoration: none;
+            color: #000000;
+        }
+
         .nav-desktop {
             display: flex;
             gap: 40px;
@@ -66,7 +67,6 @@
             position: relative;
         }
 
-        /* aggiunta specifica per "explore" */
         .nav-desktop a.explore {
             color: #FF2B00;
             font-weight: bold;
@@ -76,7 +76,6 @@
             color: #FF2B00;
         }
 
-        /* CONTENUTO PAGE PRINCIPALE */
         .page-content {
             padding-top: 90px;
             position: relative;
@@ -84,7 +83,6 @@
             min-height: calc(100vh - 320px);
         }
 
-        /* CANVAS P5.JS - per team */
         canvas {
             display: block;
             position: relative;
@@ -99,7 +97,7 @@
             overflow: hidden;
         }
 
-                footer {
+        footer {
             width: 100%;
             border-top: 2px solid #FF2B00;
             padding: 80px max(5%, 20px) 80px max(5%, 20px); 
@@ -124,7 +122,7 @@
             flex-direction: column;
             min-height: 250px;
         }
-        /* COLONNA 1: Corso, Anno e Collegamento DDC */
+
         .studio-header {
             margin-bottom: 20px;
         }
@@ -158,7 +156,6 @@
             color: #FF2B00;
         }
 
-        /* Logo POLIMI */
         .polimi-logo-container {
             margin-top: 2px;
             display: flex;
@@ -180,7 +177,6 @@
             opacity: 1;
         }
 
-        /* Membri */
         .project-team {
             margin-top: 15px;
         }
@@ -205,7 +201,6 @@
             color: #444;
         }
 
-        /* COLONNA 2: Licenza CC */
         .license-section {
             height: 100%;
             display: flex;
@@ -261,7 +256,6 @@
             font-size: 13px;
         }
 
-        /* Contatti per CC */
         .contact-email {
             color: #FF2B00;
             font-weight: 500;
@@ -273,7 +267,6 @@
             height: 20px;
         }
 
-        /* COLONNA 3: Professori ed assitenti */
         .faculty-section {
             margin-bottom: 20px;
         }
@@ -320,7 +313,6 @@
             color: #444;
         }
 
-        /* Loghi DensityDesign e NECST */
         .logos-container {
             display: flex;
             flex-direction: column;
@@ -364,11 +356,11 @@
 </head>
 
 <body>
-    <!--HEADER-->
+    <!--header-->
     <header>
-        <div class="logo">Significant Volcanic Eruptions</div>
+        <div class="logo"><a href="../index.html">Significant Volcanic Eruptions</a></div>
         
-        <!--NAVIGAZIONE--> 
+        <!--nav--> 
         <nav class="nav-desktop">
             <a href="../index.html">Homepage</a>
             <a href="team.html">Team</a>
@@ -377,14 +369,14 @@
         </nav>
     </header>
 
-    <!-- CONTENUTO PRINCIPALE -->
+    <!--main content-->
     <div class="page-content">
         <div id="sketch-container"></div>
     </div>
 
-    <!-- FOOTER -->
+    <!--footer-->
     <footer>
-        <!-- COLONNA 1 (info corso + membri)-->
+        <!--col 1-->
         <div class="footer-col">
             <div class="studio-header">
                 <div class="studio-title">Computer Graphics Studio for Information Design</div>
@@ -393,7 +385,7 @@
                     Bachelor's Degree in Communication Design
                 </a>
                 
-                <!-- Logo POLIMI -->
+                <!--polimi logo-->
                 <div class="polimi-logo-container">
                     <img src="../assets/logo_polimi.svg" alt="Politecnico di Milano" class="polimi-logo">
                 </div>
@@ -412,7 +404,7 @@
             </div>
         </div>
         
-        <!-- COLONNA 2 (copywrite + contatti) -->
+        <!--col 2-->
         <div class="footer-col">
             <div class="license-section">
                 <div class="license-content">
@@ -446,7 +438,7 @@
             </div>
         </div>
         
-        <!-- COLONNA 3 (info docenza) -->
+        <!--col 3-->
         <div class="footer-col">
             <div class="faculty-section">
                 <div class="faculty-title">Faculty</div>
@@ -462,7 +454,7 @@
                 </div>
             </div>
             
-            <!-- Loghi DensityDesign e NECST -->
+            <!--DensityDesign e NECST-->
             <div class="logos-container">
                 <div class="logo-item">
                     <img src="../assets/densitydesign.svg" 
