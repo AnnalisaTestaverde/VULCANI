@@ -390,15 +390,16 @@ function drawFullContentOptimized() {
 function drawNavBar() {
   push();
   
-  let navHeight = 70;
+  let navHeight = 60;  // Cambiato da 70 a 60 per allineare con overview
   let navY = 0;
   
   fill(255);
   noStroke();
   rect(0, navY, width, navHeight);
   
+  // Testo Back
   fill(0);
-  textSize(15);
+  textSize(15);  // Diminuisce la dimensione del testo per allineare meglio
   textFont("Helvetica");
   textStyle(BOLD);
   textAlign(LEFT, CENTER);
@@ -460,6 +461,10 @@ function drawNavBar() {
   }
   
   state.navLinks = navLinks;
+
+  stroke(245, 40, 0); // Stesso colore del bottone Learn More
+  strokeWeight(1); // Stesso spessore del bordo del bottone Learn More
+  line(0, navHeight-5, width, navHeight-5);
   
   pop();
 }

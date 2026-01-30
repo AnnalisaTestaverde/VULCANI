@@ -1254,6 +1254,10 @@ function drawNavBar() {
         currentX += link.width + linkSpacing;
     }
     state.navLinks = navLinks;
+
+    stroke(245, 40, 0); // Stesso colore del bottone Learn More
+    strokeWeight(1); // Stesso spessore del bordo del bottone Learn More
+    line(0, navHeight-5, width, navHeight-5);
     
     pop();
 }
