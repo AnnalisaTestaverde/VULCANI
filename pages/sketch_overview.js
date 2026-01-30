@@ -173,6 +173,7 @@ let state = {
     hoveredYearLeft: false,
     hoveredYearRight: false,
     searchTargetHeight: 0,
+    logoArea: null,
     navLinks: null
 };
 
@@ -1195,6 +1196,16 @@ function drawNavBar() {
     textStyle(BOLD);
     textAlign(LEFT, CENTER);
     text("Significant Volcanic Eruptions", 40, navHeight/2);
+    
+    //area logo per click
+    let logoText = "Significant Volcanic Eruptions";
+    let logoWidth = textWidth(logoText);
+    state.logoArea = {
+        x: 40 - 11, 
+        y: navY,
+        width: logoWidth + 20,
+        height: navHeight
+        };
     
     //link
     let navLinks = [
@@ -2569,16 +2580,27 @@ function updateLayout() {
     const centerYPercentage = 0.48;
     
     if (height > 1200) {
-        state.centerY = height * 0.46; 
+        state.centerY = height * 0.46 + 25; 
     } else if (height < 800) {
-        state.centerY = height * 0.50; 
+        state.centerY = height * 0.50 + 25; 
     } else {
-        state.centerY = height * centerYPercentage; 
+        state.centerY = height * centerYPercentage + 25; 
     }
     
 }
 
 function mousePressed() {
+    //click sul logo home
+     if (state.logoArea &&
+        mouseX > state.logoArea.x &&
+        mouseX < state.logoArea.x + state.logoArea.width &&
+        mouseY > state.logoArea.y &&
+        mouseY < state.logoArea.y + state.logoArea.height) {
+        
+        window.location.href = "../index.html";
+        return;
+    }
+
     //click sui link della navbar
     if (state.navLinks) {
         for (let link of state.navLinks) {
@@ -3118,6 +3140,15 @@ function setup() {
 
 function updateCursor() {
     let isOverButton = false;
+
+    //torna alla home logo
+    if (state.logoArea &&
+        mouseX > state.logoArea.x &&
+        mouseX < state.logoArea.x + state.logoArea.width &&
+        mouseY > state.logoArea.y &&
+        mouseY < state.logoArea.y + state.logoArea.height) {
+        isOverButton = true;
+    }
 
     //navbar links
     if (state.navLinks) {

@@ -1,4 +1,3 @@
-/* STILI - impostazione direttamente in HTML */
 * {
     margin: 0;
     padding: 0;
@@ -17,19 +16,18 @@ body, html {
     position: relative;
 }
 
-/* in modo da avere scorrimento fluido */
+/*scorrimento*/
 html {
     scroll-behavior: smooth;
 }
 
-/* HEADER */
+/*header*/
 header {
     width: 100%;
     padding: 25px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* in modo che rimanga visibile durante lo scroll */
     position: sticky; 
     top: 0; 
     z-index: 1000;
@@ -45,7 +43,12 @@ header {
     z-index: 1001;
 }
 
-/* NAVIGAZIONE */
+.logo a {
+    text-decoration: none;
+    color: #000000;
+}
+
+/*navigazione*/
 .nav-desktop {
     display: flex;
     gap: 40px;
@@ -59,7 +62,7 @@ header {
     position: relative;
 }
 
-/* SEZIONE - personalizzazione per esplora */
+/*sezione*/
 .nav-desktop a.explore {
     color: #FF2B00;
     font-weight: bold;
@@ -69,7 +72,7 @@ header {
     color: #FF2B00;
 }
 
-/* CONTENUTO PRINCIPALE - NESSUN MARGINE (per sticky) */
+/*main content*/
 #main-content {
     padding: 40px 80px;
     position: relative;
@@ -79,7 +82,7 @@ header {
     box-sizing: border-box;
 }
 
-/* CANVAS P5.JS - per pallini navigazione */
+/* contenitore pallini*/
 #p5-container {
     position: fixed;
     top: 0;
@@ -102,7 +105,7 @@ canvas {
     transform: translateZ(0);
 }
 
-/* NAVIGAZIONE - pallini fissi */
+/*pallini fissi*/
 #fixed-dots {
     position: fixed;
     left: 20px;
@@ -118,7 +121,7 @@ canvas {
     background: transparent;
 }
 
-/* impostazione singolo pallino - NON SELEZIONATO */
+/*singolo pallino non selezionato*/
 .fixed-dot {
     width: 12px;
     height: 12px;
@@ -129,14 +132,14 @@ canvas {
     background-color: rgba(255, 43, 0, 0.3);
 }
 
-/* impostazione singolo pallino - SELEZIONATO */
+/*singolo pallino selezionato*/
 .fixed-dot.active {
     background-color: #FF2B00;
     transform: scale(1.2);
     border-color: #FF2B00;
 }
 
-/* HOVER - pallino selezionato */
+/*hover pallino selezionato*/
 .fixed-dot:hover {
     background-color: rgba(255, 43, 0, 0.7);
     border-color: #FF2B00;
@@ -177,7 +180,7 @@ canvas {
     min-height: 600px;
 }
 
-/* TESTO - fascia con scroll */
+/*testo*/
 .text-scroll-container {
     flex: 1;
     position: relative;
@@ -200,12 +203,12 @@ canvas {
     -ms-overflow-style: none;
 }
 
-/* SCROLLBAR NASCOSTA (2) - nascosta in webkit */
+/*scrollbar non visibile*/
 .text-content::-webkit-scrollbar {
     display: none;
 }
 
-/* TESTO - sezioni e titoli vari */
+/*testo*/
 .text-section {
     margin-bottom: 60px;
     opacity: 1;
@@ -218,7 +221,7 @@ canvas {
     font-weight: bold;
 }
 
-/* TITOLO (!) - se primo della pagina */
+/*titolo*/
 .section-title:first-child {
     margin-top: 0;
 }
@@ -235,21 +238,19 @@ canvas {
     color: #000000;
 }
 
-/* LISTA */
 .impact-list {
     margin: 25px 0;
     padding-left: 20px;
     color: #333333;
 }
 
-/* LISTA (P) - singolo punto */
 .impact-list li {
     margin-bottom: 15px;
     line-height: 1.6;
     list-style-type: disc;
 }
 
-/* TABELLA */
+/*tabella*/
 .impact-table {
     width: 100%;
     border-collapse: collapse;
@@ -258,7 +259,7 @@ canvas {
     border: 2px solid #FF2B00;
 }
 
-/* TABELLA (I) - intestazioni */
+/*intestazioni tabella*/
 .impact-table th {
     background-color: #FF2B00;
     color: white;
@@ -267,7 +268,7 @@ canvas {
     font-weight: bold;
 }
 
-/* TABELLA (C) - singola cella */
+/*cella tabella*/
 .impact-table td {
     padding: 10px;
     border-bottom: 1px solid #e0e0e0;
@@ -275,24 +276,24 @@ canvas {
     text-align: center;
 }
 
-/* TABELLA (R/P) - riga pari */
+/*riga pari*/
 .impact-table tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-/* TABELLA (R/D) - riga dispari */
+/*riga dispari*/
 .impact-table tr:nth-child(odd) {
     background-color: white;
 }
 
-/* TABELLA (!) - prima colonna */
+/*prima colonna*/
 .impact-table td:first-child {
     font-weight: bold;
     text-align: left;
     padding-left: 20px;
 }
 
-/* TABELLA (N) - note */
+/*note*/
 .table-note {
     font-size: 12px;
     color: #666;
@@ -300,12 +301,12 @@ canvas {
     line-height: 1.4;
 }
 
-/* FOOTER - impostazione h */
+/*footer*/
 .footer-space {
     height: 200px;
 }
 
-/* SCROLL HINT - testo e animazioni */
+/*testo e animazioni*/
 .text-scroll-hint {
     position: absolute;
     bottom: -50px;
@@ -329,7 +330,7 @@ canvas {
     line-height: 1;
 }
 
-/* freccia per risalire i contenuti + hover / hidden */
+/*fraccia per salire*/
 .text-scroll-hint.flipped {
     transform: translateX(-50%) rotate(180deg);
     animation: bounce-flipped 2s infinite;
@@ -344,7 +345,7 @@ canvas {
     pointer-events: none;
 }
 
-/* IMMAGINI - container e varie */
+/*img*/
 .image-container {
     position: relative;
     width: calc(50% - 120px);
@@ -372,7 +373,7 @@ canvas {
     transform: translateX(0) scale(1);
 }
 
-/* BOTTONI - link / approfondimenti */
+/*learn more bottone*/
 .learn-more-btn {
     background-color: transparent;
     color: #000000;
@@ -394,7 +395,7 @@ canvas {
     color: white;
 }
 
-/* FOOTER */
+/*footer*/
 #html-footer {
     width: 100%;
     border-top: 2px solid #FF2B00;
@@ -421,7 +422,7 @@ canvas {
     min-height: 250px;
 }
 
-/* COLONNA 1 - corso, anno e collegamento DDC */
+/*col1*/
 .studio-header {
     margin-bottom: 20px;
 }
@@ -455,7 +456,7 @@ canvas {
     color: #FF2B00;
 }
 
-/* logo POLIMI */
+/*polimi logo*/
 .polimi-logo-container {
     margin-top: 2px;
     display: flex;
@@ -477,7 +478,7 @@ canvas {
     opacity: 1;
 }
 
-/* membri */
+/*autori*/
 .project-team {
     margin-top: 15px;
 }
@@ -502,7 +503,6 @@ canvas {
     color: #444;
 }
 
-/* COLONNA 2 - licenza CC */
 .license-section {
     height: 100%;
     display: flex;
@@ -558,7 +558,6 @@ canvas {
     font-size: 13px;
 }
 
-/* contatti per CC */
 .contact-email {
     color: #FF2B00;
     font-weight: 500;
@@ -570,7 +569,7 @@ canvas {
     height: 20px;
 }
 
-/* COLONNA 3 - professori ed assistenti */
+/*col3*/
 .faculty-section {
     margin-bottom: 20px;
 }
@@ -617,7 +616,7 @@ canvas {
     color: #444;
 }
 
-/* loghi DensityDesign e NECST */
+/*DensityDesign e NECST*/
 .logos-container {
     display: flex;
     flex-direction: column;
@@ -658,7 +657,7 @@ canvas {
     opacity: 1;
 }
 
-/* ANIMAZIONI - (frecce e testi) */
+/*animazioni*/
 @keyframes bounce {
     0%, 20%, 50%, 80%, 100% {
         transform: translateX(-50%) translateY(0);
@@ -698,7 +697,6 @@ canvas {
     animation: fadeInUp 0.4s ease-out;
 }
 
-/* MEDIA QUERIES */
 @media (max-width: 1439px) and (min-width: 1280px) {
     #main-content {
         padding: 35px 60px;
