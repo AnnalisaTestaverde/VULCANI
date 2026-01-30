@@ -1,4 +1,3 @@
-// ===== P5.JS CON SCROLL FLUIDO =====
 let lines = [];
 const numLines = 100;
 const noiseScale = 0.008;
@@ -10,18 +9,16 @@ let isScrolling = false;
 let scrollTimeout;
 
 function setup() {
-    // Crea canvas
     canvas = createCanvas(windowWidth, windowHeight);
     canvas.id("p5-background-canvas");
     canvas.position(0, 0);
     canvas.style('z-index', '-1');
     canvas.style('pointer-events', 'none');
     
-    // Ottimizzazioni rendering
     canvas.elt.style.imageRendering = 'optimizeSpeed';
     drawingContext.imageSmoothingEnabled = false;
     
-    // Genera linee (100 linee, punti ogni 8px)
+    //100 linee ogni 8 px
     for (let i = 0; i < numLines; i++) {
         lines[i] = [];
         for (let x = 0; x < width; x += 8) {
@@ -29,27 +26,23 @@ function setup() {
         }
     }
     
-    // Ferma il loop automatico
     noLoop();
     
-    // Avvia animazione a 30fps
     animationInterval = setInterval(drawFrame, 33);
     
-    // Rileva scroll per ottimizzare
     window.addEventListener('scroll', handleScroll, { passive: true });
 }
 
 function handleScroll() {
-    // Segnala che stiamo scrollando
+    //scrolling
     isScrolling = true;
     
-    // Ferma temporaneamente l'animazione durante scroll veloce
     if (animationInterval) {
         clearInterval(animationInterval);
         animationInterval = null;
     }
     
-    // Ripristina animazione dopo lo scroll
+    //animazione dopo lo scrolling
     clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => {
         isScrolling = false;
@@ -60,27 +53,23 @@ function handleScroll() {
 }
 
 function drawFrame() {
-    // Disegna solo se non stiamo scrollando velocemente
     if (!isScrolling) {
         draw();
     }
 }
 
 function draw() {
-    // Sfondo con effetto ghosting 
-    background(255, 255, 255, 15);
+    background(255, 255, 255);
     
-    // Incrementa tempo 
     timeOffset += noiseSpeed;
 
-    // DISEGNA TUTTE LE LINEE
+    //disegna linee
     for (let i = 0; i < lines.length; i++) {
         stroke('#ff2a00ff');
         strokeWeight(2); // 
         noFill();
 
         beginShape();
-        // USA TUTTI I PUNTI ORIGINALI
         for (let j = 0; j < lines[i].length; j++) {
             const x = lines[i][j];
             const yBase = map(i, 0, lines.length - 1, height * 0.1, height * 0.9);
@@ -103,7 +92,7 @@ function draw() {
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
     
-    // Rigenera linee
+    //rigenera linee
     for (let i = 0; i < numLines; i++) {
         lines[i] = [];
         for (let x = 0; x < width; x += 8) {
@@ -112,7 +101,6 @@ function windowResized() {
     }
 }
 
-// Pulizia per evitare sovraccarico
 window.addEventListener('beforeunload', function() {
     if (animationInterval) {
         clearInterval(animationInterval);
