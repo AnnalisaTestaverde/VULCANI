@@ -9,71 +9,13 @@
     <!-- Libreria p5.js per le animazioni -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     
-    <!-- Stile CSS aggiuntivo per i bottoni e scroll -->
+    <!-- Stile CSS aggiuntivo per i bottoni e scroll - IDENTICI AL CODICE 1 -->
     <style>
-        /* Stile per i bottoni in basso - MODIFICATO: MESSI PIÙ IN ALTO */
-        #buttons-container {
-            display: none; /* NASCOSTO INIZIALMENTE */
-            position: fixed;
-            bottom: 100px; /* PIÙ IN ALTO */
-            left: 0;
-            right: 0;
-            justify-content: center;
-            z-index: 1000;
-            padding: 0 40px;
-            opacity: 1;
-            transition: opacity 0.3s ease;
-        }
-        
-        .buttons-row {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .bottom-button {
-            background-color: transparent;
-            color: #FFFFFF; /* Testo bianco */
-            border: 2px solid #FFFFFF; /* Stroke bianco */
-            border-radius: 5px; /* Squadrato como la methodology */
-            padding: 14px 40px;
-            font-size: 16px;
-            font-weight: bold;
-            font-family: 'Helvetica', Arial, sans-serif;
-            cursor: default; /* Default cursor, cambia in pointer su hover */
-            text-align: center;
-            flex: 1;
-            transition: all 0.3s ease;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: 0.5px;
-        }
-        
-        .bottom-button:hover {
-            background-color: #FFFFFF !important; /* Bianco su hover */
-            color: #FF2B00 !important; /* Testo rosso su hover */
-            cursor: pointer !important; /* Manina su hover */
-        }
-        
-        .button-spacer {
-            width: 30px;
-        }
-        
-        /* Rimuovi lo stile predefinito dei bottoni */
-        .bottom-button:focus {
-            outline: none;
-        }
-        
-        /* Stile per la freccia di scroll - COME ORIGINALE */
+        /* Stile per la freccia di scroll - IDENTICA AL CODICE 1 */
         #scroll-hint {
             position: absolute;
             bottom: -70px;
-            left: 50%;
+            left: 47%; /* MODIFICATO: 47% come nel codice 1 */
             transform: translateX(-50%);
             color: #000000 !important;
             font-size: 40px !important;
@@ -126,51 +68,6 @@
         
         .scroll-enabled::-webkit-scrollbar {
             display: none; /* Chrome, Safari, Opera */
-        }
-        
-        /* Bottone About the methodology centrato nel box del testo */
-        #about-methodology-btn-container {
-            position: absolute;
-            bottom: 40px; /* Posizione dal basso del text container */
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 40px); /* Stessa larghezza del text container con margini */
-            max-width: 800px;
-            display: none; /* Nascondi inizialmente */
-            justify-content: center;
-            z-index: 10;
-        }
-        
-        #about-methodology-btn {
-            background-color: transparent;
-            color: #FFFFFF; /* Testo bianco */
-            border: 2px solid #FFFFFF; /* Stroke bianco */
-            border-radius: 5px; /* Squadrato como la methodology */
-            padding: 14px 40px;
-            font-size: 16px;
-            font-weight: bold;
-            font-family: 'Helvetica', Arial, sans-serif;
-            cursor: default; /* Default cursor, cambia in pointer su hover */
-            text-align: center;
-            transition: all 0.3s ease;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: 0.5px;
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
-        }
-        
-        #about-methodology-btn:hover {
-            background-color: #FFFFFF !important; /* Bianco su hover */
-            color: #FF2B00 !important; /* Testo rosso su hover */
-            cursor: pointer !important; /* Manina su hover */
-        }
-        
-        #about-methodology-btn:focus {
-            outline: none;
         }
         
         /* Nuove classi per gli elenchi puntati */
@@ -277,27 +174,13 @@
                     Finally, a <span class="bold-white">geographic map</span> locates the volcano on a global scale, allowing its position on the planet and the geographical context in which the eruption occurred to be clearly understood.
                 </div>
                 
-                <!-- Bottone About the methodology centrato nel box del testo -->
-                <div id="about-methodology-btn-container">
-                    <button id="about-methodology-btn">About the methodology</button>
-                </div>
-                
                 <!-- Spazio finale ridotto (per accorciare il box) -->
                 <div style="height: 150px;"></div>
             </div>
         </div>
         
-        <!-- Freccia al centro in basso per indicare lo scroll - STILE ORIGINALE -->
+        <!-- Freccia al centro in basso per indicare lo scroll - IDENTICA AL CODICE 1 -->
         <div id="scroll-hint" class="text-scroll-hint">V</div>
-    </div>
-    
-    <!-- Bottoni finali - SEMPRE VISIBILI E PIÙ IN ALTO -->
-    <div id="buttons-container">
-        <div class="buttons-row">
-            <button class="bottom-button" id="back-to-map-btn">Back to Eruptions</button>
-            <div class="button-spacer"></div>
-            <button class="bottom-button" id="about-dataset-btn">About the methodology</button>
-        </div>
     </div>
     
     <!-- Codice JavaScript p5.js principale - GRAFICO ORIGINALE MERAPI 1961 -->
@@ -342,13 +225,18 @@
             animationStartTime: 0,
             isAnimating: false,
             
-            // Per il back button
+            // Per il back button - MODIFICATO PER INCLUIRE HOVER
             backButtonArea: null,
+            isBackButtonHovered: false,
+            
+            // Per il methodology button nel canvas (COME NEL CODICE 1)
+            methodologyButtonArea: null,
+            isMethodologyButtonHovered: false,
+            showMethodologyButton: false, // Inizialmente nascosto (COME NEL CODICE 1)
             
             // Per lo scroll
             scrollArea: null,
             scrollHint: null,
-            buttonsContainer: null,
             isAtBottom: false,
             
             // Flag per controllare se l'inizializzazione è già avvenuta
@@ -426,7 +314,7 @@
             // Inizializza i dati immediatamente
             initializeData();
             
-            // Setup degli event listener per lo scroll e i bottoni
+            // Setup degli event listener per lo scroll
             setupScrollListeners();
             
             // Forza un ridisegno iniziale
@@ -445,6 +333,11 @@
             background(CONFIG.colors.background);
             drawTitle();
             drawBackButton();
+            
+            // Disegna il bottone methodology solo se è visibile (COME NEL CODICE 1)
+            if (state.showMethodologyButton) {
+                drawMethodologyButton();
+            }
             
             if (state.chartData) {
                 drawImpactChart(state.chartData);
@@ -472,7 +365,7 @@
             textStyle(NORMAL);
         }
 
-        // 6 - Back Button
+        // 6 - Back Button - MODIFICATO PER ESSERE IDENTICO AL CODICE 1
         function drawBackButton() {
             const buttonWidth = 160;
             const buttonHeight = 40;
@@ -480,28 +373,39 @@
             const buttonX = width - buttonWidth - 50;
             const buttonY = CONFIG.layout.startButtonY;
             
-            stroke(CONFIG.colors.text);
+            // NO FILL di default - solo su hover (come nel codice 1)
+            if (state.isBackButtonHovered) {
+                // FILL BIANCO solo su hover
+                fill(CONFIG.colors.accent); // Bianco
+            } else {
+                noFill(); // Nessun fill di default
+            }
+            
+            // Bordo - Bianco su hover, Nero di default (come nel codice 1)
+            stroke(state.isBackButtonHovered ? CONFIG.colors.accent : CONFIG.colors.infoBox);
             strokeWeight(1);
-            noFill();
             rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
 
+            // Icona con "×" - SENZA CERCHIO ATTORNO (come nel codice 1)
             push();
             translate(buttonX + 25, buttonY + buttonHeight/2);
-            fill(CONFIG.colors.text);
-            noStroke();
-            textSize(20);
+            fill(state.isBackButtonHovered ? CONFIG.colors.background : CONFIG.colors.infoBox); // Nero di default, Rosso su hover
+            noStroke(); // NESSUNO STROKE
+            textSize(20); // Leggermente più grande
             textStyle(BOLD);
             textAlign(CENTER, CENTER);
             text("×", 0, 0);
             pop();
 
-            fill(CONFIG.colors.text);
+            // Testo "Back" - Nero di default, Rosso su hover (come nel codice 1)
+            fill(state.isBackButtonHovered ? CONFIG.colors.background : CONFIG.colors.infoBox);
             noStroke();
             textSize(CONFIG.layout.labelFontSize);
             textStyle(BOLD);
             textAlign(LEFT, CENTER);
             text("Back", buttonX + 50, buttonY + buttonHeight/2);
 
+            // Memorizza l'area per l'interazione
             state.backButtonArea = {
                 x: buttonX,
                 y: buttonY,
@@ -510,7 +414,46 @@
             };
         }
 
-        // 7 - Disegna il grafico d'impatto
+        // 7 - Methodology Button - ESATTAMENTE COME NEL CODICE 1
+        function drawMethodologyButton() {
+            const buttonWidth = 200; // Leggermente più largo per il testo più lungo
+            const buttonHeight = 40;
+            
+            // POSIZIONE: a sinistra, stessa altezza del back button (COME NEL CODICE 1)
+            const buttonX = 50; // Margine sinistro
+            const buttonY = CONFIG.layout.startButtonY; // Stessa altezza del back button
+            
+            // NO FILL di default - solo su hover (COME NEL CODICE 1)
+            if (state.isMethodologyButtonHovered) {
+                // FILL BIANCO solo su hover
+                fill(CONFIG.colors.accent); // Bianco
+            } else {
+                noFill(); // Nessun fill di default
+            }
+            
+            // Bordo - Bianco su hover, Nero di default (COME NEL CODICE 1)
+            stroke(state.isMethodologyButtonHovered ? CONFIG.colors.accent : CONFIG.colors.infoBox);
+            strokeWeight(1);
+            rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
+
+            // Testo "About the Methodology" - Nero di default, Rosso su hover (COME NEL CODICE 1)
+            fill(state.isMethodologyButtonHovered ? CONFIG.colors.background : CONFIG.colors.infoBox);
+            noStroke();
+            textSize(CONFIG.layout.labelFontSize);
+            textStyle(BOLD);
+            textAlign(LEFT, CENTER);
+            text("About the Methodology", buttonX + 12, buttonY + buttonHeight/2);
+
+            // Memorizza l'area per l'interazione (COME NEL CODICE 1)
+            state.methodologyButtonArea = {
+                x: buttonX,
+                y: buttonY,
+                width: buttonWidth,
+                height: buttonHeight
+            };
+        }
+
+        // 8 - Disegna il grafico d'impatto
         function drawImpactChart(d) {
             push();
 
@@ -774,7 +717,7 @@
             }
         }
 
-        // 8 - Funzione di utilità per disegnare segmento ad arco
+        // 9 - Funzione di utilità per disegnare segmento ad arco
         function drawArcSegment(r1, r2, start, end) {
             beginShape();
             for (let a = start; a <= end; a += 0.01) {
@@ -786,7 +729,7 @@
             endShape(CLOSE);
         }
 
-        // 9 - Disegna tooltip
+        // 10 - Disegna tooltip
         function drawTooltip(txt) {
             push();
             textSize(CONFIG.chartTooltipTextSize);
@@ -804,7 +747,7 @@
             pop();
         }
 
-        // 10 - Gestione animazioni
+        // 11 - Gestione animazioni
         function startAnimation() {
             state.isAnimating = true;
             state.animationStartTime = millis();
@@ -827,16 +770,32 @@
             return progress;
         }
 
-        // 11 - Aggiorna il cursore
+        // 12 - Aggiorna il cursore - MODIFICATO PER INCLUIRE HOVER SUI BOTTONI COME NEL CODICE 1
         function updateCursor() {
             let isOverButton = false;
 
+            // Controlla hover sul back button (come nel codice 1)
+            state.isBackButtonHovered = false;
+            
             if (state.backButtonArea &&
                 mouseX > state.backButtonArea.x &&
                 mouseX < state.backButtonArea.x + state.backButtonArea.width &&
                 mouseY > state.backButtonArea.y &&
                 mouseY < state.backButtonArea.y + state.backButtonArea.height) {
                 isOverButton = true;
+                state.isBackButtonHovered = true;
+            }
+            
+            // Controlla hover sul methodology button (COME NEL CODICE 1)
+            state.isMethodologyButtonHovered = false;
+            
+            if (state.showMethodologyButton && state.methodologyButtonArea &&
+                mouseX > state.methodologyButtonArea.x &&
+                mouseX < state.methodologyButtonArea.x + state.methodologyButtonArea.width &&
+                mouseY > state.methodologyButtonArea.y &&
+                mouseY < state.methodologyButtonArea.y + state.methodologyButtonArea.height) {
+                isOverButton = true;
+                state.isMethodologyButtonHovered = true;
             }
 
             let cx = width * CONFIG.chartXPercent;
@@ -856,8 +815,9 @@
             }
         }
 
-        // 12 - Gestione click del mouse
+        // 13 - Gestione click del mouse - AGGIORNATO PER IL BOTTONE METHODOLOGY COME NEL CODICE 1
         function mousePressed() {
+            // Controllo per il back button
             if (state.backButtonArea &&
                 mouseX > state.backButtonArea.x &&
                 mouseX < state.backButtonArea.x + state.backButtonArea.width &&
@@ -865,6 +825,18 @@
                 mouseY < state.backButtonArea.y + state.backButtonArea.height) {
                 
                 goBackToPreviousPage();
+                return;
+            }
+            
+            // Controllo per il methodology button (COME NEL CODICE 1)
+            if (state.showMethodologyButton && state.methodologyButtonArea &&
+                mouseX > state.methodologyButtonArea.x &&
+                mouseX < state.methodologyButtonArea.x + state.methodologyButtonArea.width &&
+                mouseY > state.methodologyButtonArea.y &&
+                mouseY < state.methodologyButtonArea.y + state.methodologyButtonArea.height) {
+                
+                // Vai alla pagina methodology.html (COME NEL CODICE 1)
+                window.location.href = "methodology.html";
                 return;
             }
         }
@@ -915,7 +887,7 @@
             }
         }
 
-        // 13 - Ridimensionamento finestra
+        // 14 - Ridimensionamento finestra
         function windowResized() {
             resizeCanvas(windowWidth, windowHeight);
             // Forza un ridisegno dopo il ridimensionamento
@@ -924,13 +896,10 @@
             }
         }
 
-        // 14 - Setup degli event listener per lo scroll e i bottoni
+        // 15 - Setup degli event listener per lo scroll
         function setupScrollListeners() {
             state.scrollArea = document.getElementById('text-scroll-area');
             state.scrollHint = document.getElementById('scroll-hint');
-            state.buttonsContainer = document.getElementById('buttons-container');
-            const aboutMethodologyBtnContainer = document.getElementById('about-methodology-btn-container');
-            const aboutMethodologyBtn = document.getElementById('about-methodology-btn');
             
             if (state.scrollArea) {
                 state.scrollArea.addEventListener('scroll', handleTextScroll);
@@ -945,57 +914,9 @@
                 // Inizializza lo stato dello scroll
                 setTimeout(checkScrollEnd, 100);
             }
-            
-            const backToMapBtn = document.getElementById('back-to-map-btn');
-            const aboutDatasetBtn = document.getElementById('about-dataset-btn');
-            
-            if (backToMapBtn) {
-                backToMapBtn.addEventListener('click', function() {
-                    // Naviga alla pagina precedente invece che sempre a overview.html
-                    goBackToPreviousPage();
-                });
-                
-                backToMapBtn.addEventListener('mouseenter', function() {
-                    backToMapBtn.style.cursor = 'pointer';
-                });
-                
-                backToMapBtn.addEventListener('mouseleave', function() {
-                    backToMapBtn.style.cursor = 'default';
-                });
-            }
-            
-            if (aboutDatasetBtn) {
-                aboutDatasetBtn.addEventListener('click', function() {
-                    // Modificato: NON si apre in nuova scheda
-                    window.location.href = "methodology.html";
-                });
-                
-                aboutDatasetBtn.addEventListener('mouseenter', function() {
-                    aboutDatasetBtn.style.cursor = 'pointer';
-                });
-                
-                aboutDatasetBtn.addEventListener('mouseleave', function() {
-                    aboutDatasetBtn.style.cursor = 'default';
-                });
-            }
-            
-            if (aboutMethodologyBtn) {
-                aboutMethodologyBtn.addEventListener('click', function() {
-                    // Modificato: NON si apre in nuova scheda
-                    window.location.href = "methodology.html";
-                });
-                
-                aboutMethodologyBtn.addEventListener('mouseenter', function() {
-                    aboutMethodologyBtn.style.cursor = 'pointer';
-                });
-                
-                aboutMethodologyBtn.addEventListener('mouseleave', function() {
-                    aboutMethodologyBtn.style.cursor = 'default';
-                });
-            }
         }
 
-        // 15 - Gestione scroll globale
+        // 16 - Gestione scroll globale
         function handleGlobalWheel(e) {
             if (state.scrollArea) {
                 state.scrollArea.scrollTop += e.deltaY;
@@ -1004,12 +925,12 @@
             }
         }
 
-        // 16 - Gestione scroll del testo
+        // 17 - Gestione scroll del testo
         function handleTextScroll() {
             checkScrollEnd();
         }
 
-        // 17 - Controlla se siamo alla fine dello scroll
+        // 18 - Controlla se siamo alla fine dello scroll - MODIFICATO PER MOSTRARE/NASCONDERE BOTTONE METHODOLOGY COME NEL CODICE 1
         function checkScrollEnd() {
             if (!state.scrollArea || !state.scrollHint) return;
             
@@ -1017,36 +938,19 @@
             const scrollHeight = state.scrollArea.scrollHeight - state.scrollArea.clientHeight;
             const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
             
-            const aboutMethodologyBtnContainer = document.getElementById('about-methodology-btn-container');
-            const aboutMethodologyBtn = document.getElementById('about-methodology-btn');
-            const buttonsContainer = document.getElementById('buttons-container');
-            
+            // Nasconde la freccia e mostra il bottone methodology quando si è vicini alla fine (90%) - COME NEL CODICE 1
             if (scrollPercentage > 90) {
                 state.scrollHint.style.display = "none";
                 state.isAtBottom = true;
-                
-                if (aboutMethodologyBtnContainer) {
-                    aboutMethodologyBtnContainer.style.display = "flex";
-                }
-                
-                if (buttonsContainer) {
-                    buttonsContainer.style.display = "flex";
-                }
+                state.showMethodologyButton = true; // Mostra il bottone (COME NEL CODICE 1)
             } else {
                 state.scrollHint.style.display = "block";
                 state.isAtBottom = false;
-                
-                if (aboutMethodologyBtnContainer) {
-                    aboutMethodologyBtnContainer.style.display = "none";
-                }
-                
-                if (buttonsContainer) {
-                    buttonsContainer.style.display = "none";
-                }
+                state.showMethodologyButton = false; // Nascondi il bottone (COME NEL CODICE 1)
             }
         }
 
-        // 18 - Scroll del contenuto testo
+        // 19 - Scroll del contenuto testo
         function scrollTextContent(pixels) {
             if (!state.scrollArea) return;
             
@@ -1054,7 +958,7 @@
             checkScrollEnd();
         }
 
-        // 19 - Inizializzazione al caricamento della pagina
+        // 20 - Inizializzazione al caricamento della pagina
         document.addEventListener('DOMContentLoaded', function() {
             // Assicura che p5.js sia pronto
             setTimeout(function() {

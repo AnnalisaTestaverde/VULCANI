@@ -1,20 +1,10 @@
-// ============ CONFIGURAZIONE RESPONSIVE ============
 const CONFIG = {
     layout: {
-        marginX: 40,                // Margine sinistro fisso
-        navbarHeight: 70,           // Altezza navbar
-        titleStartY: 75,            // Titolo in alto
-        yearNavigatorY: 230,        // Navigatore anno
-        descriptionStartY: 340,     // Descrizione vulcano
-        mapBottomMargin: 60,        // Mappa dal fondo
-        chartBottomMargin: 100,     // Grafico dal fondo
-        maxChartSize: 500,          // Dimensione massima grafico
-        minChartSize: 300,          // Dimensione minima grafico
-        centerXRatio: 0.695,        // Stessa posizione orizzontale di overview
-        maxRadius: 300,             // Max radius come in overview
-        minRadius: 29,              // Min radius come in overview
-        centerYOffset: -10,         // Offset verticale
-        topOffset: -20              // Offset superiore
+        marginX: 40,                
+        navbarHeight: 70,                                       
+        maxChartSize: 500,          
+        minChartSize: 300,         
+        centerXRatio: 0.695            
     },
     responsive: {
         referenceWidth: 1920,
@@ -22,10 +12,9 @@ const CONFIG = {
     }
 };
 
-// Variabile globale per scaling
 let scaleFactor = 1.0;
 
-// Funzioni per scaling responsive
+//scaling
 function calculateScaleFactor() {
     const referenceWidth = CONFIG.responsive.referenceWidth;
     const referenceHeight = CONFIG.responsive.referenceHeight;
@@ -37,21 +26,19 @@ function calculateScaleFactor() {
 }
 
 function applyResponsiveScaling() {
-    // Calcola scaling basato sull'altezza
+    //scaling basato sull'altezza
     const availableHeight = windowHeight - CONFIG.layout.navbarHeight;
     const referenceAvailableHeight = CONFIG.responsive.referenceHeight - CONFIG.layout.navbarHeight;
     
     scaleFactor = availableHeight / referenceAvailableHeight;
-    scaleFactor = constrain(scaleFactor, 0.7, 1.2); // Limita lo scaling
-    
-    // Aggiorna dimensioni in base al fattore di scala
+    scaleFactor = constrain(scaleFactor, 0.7, 1.2);
+   
     updateResponsiveDimensions();
 }
 
 function updateResponsiveDimensions() {
     
-        // ---------- POSIZIONE E DIMENSIONE GRAFICO ----------
-    // Calcolo del centro X come in overview
+    //posizione grafico 
     let centerXRatio = CONFIG.layout.centerXRatio;
     
     if (windowWidth > 1920) {
@@ -60,7 +47,7 @@ function updateResponsiveDimensions() {
         centerXRatio = 0.65;
     }
     
-    // Calcolo del centro Y - usando la stessa logica di overview
+    //centro y grafico 
     const centerYPercentage = 0.48;
     let centerY;
     
@@ -72,55 +59,38 @@ function updateResponsiveDimensions() {
         centerY = windowHeight * centerYPercentage;
     }
     
-    // Imposta le percentuali per il posizionamento del grafico
-    chartXPercent = centerXRatio;  // Posizione orizzontale
-    chartYPercent = centerY / windowHeight;  // Posizione verticale
+    //posizione grafico 
+    chartXPercent = centerXRatio; 
+    chartYPercent = centerY / windowHeight; 
     
-    // ---------- DIMENSIONE GRAFICO ----------
-    // Calcola dimensione ottimale per il grafico
-    // Usa la stessa logica di scaling del grafico overview
     const graphScale = min(scaleFactor * 1.3, 1.2);
-    const baseSize = 500;  // Dimensione base
+    const baseSize = 500; 
     
-    // Aggiungi offset per la navbar
     const availableHeight = windowHeight - CONFIG.layout.navbarHeight - 100;
     const availableWidth = windowWidth * 0.35;
     
-    // Prendi il valore minore, ma assicurati che sia abbastanza grande
     const targetSize = min(availableHeight, availableWidth);
     
-    // Scala il grafico come in overview
+    //scale grafico 
     chartSize = constrain(
-        targetSize * 0.85,  // Riduci leggermente rispetto alla disponibilità
+        targetSize * 0.8, //scaling grafico 
         CONFIG.layout.minChartSize * graphScale,
         CONFIG.layout.maxChartSize * graphScale
     );
-    
-    // ---------- SCALING ALTRI ELEMENTI ----------
-    chartTitleSize = 28;        // FISSO
-    mainTextSize = 17;          // FISSO
-    chartLabelSize = 14;        // FISSO
-    chartTooltipTextSize = 15;  // FISSO
-    
-    // Debug
-    if (frameCount % 120 === 0) {
-        console.log("Layout aggiornato (detail):");
-        console.log("- Schermo:", windowWidth, "x", windowHeight);
-        console.log("- Chart position %:", chartXPercent, chartYPercent);
-        console.log("- Chart size:", chartSize);
-        console.log("- Scale factor:", scaleFactor);
-        console.log("- Center Y:", centerY, "windowHeight:", windowHeight);
-    }
-}
-// ============ FINE CONFIGURAZIONE RESPONSIVE ============
 
-// ---------- VARIABILI CONFIGURABILI ----------
+    
+    chartTitleSize = 28;        
+    mainTextSize = 17;         
+    chartLabelSize = 14;        
+    chartTooltipTextSize = 15;  
+    
+}
+
 let chartXPercent = 0.7;
 let chartYPercent = 0.5;
 let chartSize = 500;
 let chartLevels = 4;
 let chartMainColor = "#ff2b00";
-let chartOverlayAlpha = 200;
 let chartGapAngleDeg = 10;
 let chartGapRadial = 5;
 let chartTitleSize = 28;
@@ -129,7 +99,6 @@ let chartLabelSize = 14;
 let chartTooltipTextSize = 17;
 const INFLATION_FACTOR = 2.4;
 
-// ---------- VARIABILI GLOBALI ----------
 let data;
 let eruptions = [];
 let selectedName;
@@ -142,17 +111,17 @@ let state = {
   navLinks: null
 };
 
-// Variabili per animazione
+//animazione variabili 
 let animationStartTime = 0;
 let animationDuration = 1000;
 let isAnimating = false;
 let initialAnimationStarted = false;
 
-// Variabili per hover
-let hoveredArrow = null; // "left" o "right"
+//hover variabili 
+let hoveredArrow = null; 
 let hoveredLearnMore = false;
 
-// ---------- VARIABILI TRANSIZIONE ----------
+//transizione variabili 
 let transitionState = {
   active: false,
   startTime: 0,
@@ -163,25 +132,22 @@ let transitionState = {
   targetRadius: 0
 };
 
-// ---------- IMMAGINI ----------
+//img
 let worldMap;
 let bookIcon;
 let currentVolcanoImage = null;
 let imageCache = {};
 let imagesLoaded = false;
 
-// ---------- PRELOAD OTTIMIZZATO ----------
 function preload() {
   data = loadTable("../assets/data_impatto.csv", "csv", "header");
   worldMap = loadImage("../assets/Equirectangular_projection.jpg");
   bookIcon = loadImage("../assets/book_icon.png");
   
-  // Pre-carica SOLO le 3 immagini più comuni per velocità iniziale
   stratoImg = loadImage("../assets/stratovolcano.png");
   calderaImg = loadImage("../assets/caldera.png");
   shieldImg = loadImage("../assets/shield_volcano.png");
   
-  // Salva in cache
   imageCache.strato = stratoImg;
   imageCache.caldera = calderaImg;
   imageCache.shield = shieldImg;
@@ -213,7 +179,6 @@ function setup() {
   setTimeout(loadOtherImagesBackground, 2000);
 }
 
-// ---------- FUNZIONI OTTIMIZZATE ----------
 function processDataFast() {
   eruptions = [];
   
@@ -370,7 +335,6 @@ function loadOtherImagesBackground() {
   });
 }
 
-// ---------- DRAW OTTIMIZZATO ----------
 function draw() {
   background("#FFFFFF");
 
@@ -423,7 +387,6 @@ function drawFullContentOptimized() {
   }
 }
 
-// ---------- NAVBAR ----------
 function drawNavBar() {
   push();
   
@@ -501,7 +464,6 @@ function drawNavBar() {
   pop();
 }
 
-// ---------- FUNZIONI VISIVE OTTIMIZZATE ----------
 function drawVolcanoTypeBackgroundOptimized(typeRaw) {
   if (!currentVolcanoImage) return;
   
@@ -522,8 +484,8 @@ function drawMap(lat, lon, country) {
   let margin = 60;
   let mapW = 320;
   let mapH = 180;
-  let mapX = margin;
-  let mapY = height - mapH - margin;
+  let mapX = 40;
+  let mapY = height - mapH - 40;
   let cornerRadius = 10;
 
   let titleY = mapY - 30;
@@ -638,7 +600,6 @@ function findDataRowIndexFast() {
   return -1;
 }
 
-// ---------- FUNZIONI DEL GRAFICO ----------
 function getDetailText(value, descCode, type, chartData = null) {
   if (value !== "" && value !== 0 && !isNaN(value)) {
     return value;
@@ -741,7 +702,7 @@ function drawImpactChart(d) {
     }
   }
 
-  // Prima disegna le sezioni con dati disponibili
+  //sezioni con dati disponibili 
   for (let i = 0; i < 5; i++) {
     if (!isDataAvailable[i]) continue;
     
@@ -777,7 +738,7 @@ function drawImpactChart(d) {
     }
   }
 
-  // Poi disegna le sezioni SENZA dati disponibili
+  //sezioni in cui non ci sono i dati disponibili 
   for (let i = 0; i < 5; i++) {
     if (isDataAvailable[i]) continue;
     
@@ -864,8 +825,8 @@ function drawImpactChart(d) {
     textAlign(CENTER, CENTER);
 
     let ang = (start + end) / 2;
-    let lx = cos(ang) * (chartSize / 2 + 55);
-    let ly = sin(ang) * (chartSize / 2 + 55);
+    let lx = cos(ang) * (chartSize / 2 + 70);
+    let ly = sin(ang) * (chartSize / 2 + 70);
     
     textStyle(BOLD);
     text(labels[i], lx, ly - 20);
@@ -919,19 +880,18 @@ function drawImpactChart(d) {
     }
   }
 
-  pop(); // Fine del push() iniziale - ora le coordinate tornano a essere assolute
+  pop(); 
 
-  // TITOLO "Total impact level: " ANCORATO A DESTRA CON MARGINE 40px (come sinistra)
   push();
   noStroke();
   fill(245, 40, 0);
   textSize(chartTitleSize);
-  textAlign(RIGHT, CENTER); // Allineamento a destra
+  textAlign(RIGHT, CENTER);
   textStyle(BOLD);
 
   let totalImpactText = "Total impact level: " + d.impact;
-  let totalImpactX = width - CONFIG.layout.marginX; // Margine destro fisso di 40px
-  let totalImpactY = CONFIG.layout.navbarHeight + 30 * scaleFactor; // 60px sotto la navbar
+  let totalImpactX = width - CONFIG.layout.marginX; 
+  let totalImpactY = CONFIG.layout.navbarHeight + 30 * scaleFactor;
 
   text(totalImpactText, totalImpactX, totalImpactY);
 
@@ -971,7 +931,7 @@ function drawArcSegment(r1, r2, start, end) {
   endShape(CLOSE);
 }
 
-// ---------- FUNZIONI UTILITY ----------
+
 function getQueryParam(param) {
   let urlParams = new URLSearchParams(window.location.search);
   return urlParams.get(param);
@@ -1015,7 +975,6 @@ function formatDamageValue(damageValue) {
   
   let value = convertTo2026Dollars(damageValue);
   
-  // Usa le stesse fasce della funzione getDetailText()
   if (value < 2.4) {
     return `Less than $2.4 million (2026 dollars)`;
   } else if (value < 12) {
@@ -1103,7 +1062,6 @@ function drawChartPlaceholder() {
   pop();
 }
 
-// ---------- INTERFACCIA ----------
 function drawNoDataScreen() {
   fill(0);
   textSize(24);
@@ -1133,7 +1091,7 @@ function drawBackButton() {
 }
 
 function writeText() {
-  let margin = 60;
+  let margin = 40;
   
   fill(0);
   textAlign(LEFT, TOP);
@@ -1151,16 +1109,16 @@ function writeText() {
   text(" IN", margin + textWidth(volcanoName), y2);
 }
 
-// ---------- DESCRIZIONE ----------
+//descrizione vulcano
 function drawVolcanoDescription(typeRaw, y, mo, dy) {
-  let margin = 60;
+  let margin = 41;
   
-  let dateY = 340; 
-  let titleY = 365; 
-  let descriptionY = 410;
+  let dateY = 325; 
+  let titleY = 330; 
+  let descriptionY = 370;
 
   let mapW = 320;
-  let textWidthValue = mapW;
+  let textWidthValue = mapW + 150;
 
   let dayAvailable = (dy && dy !== "0" && dy !== "");
   let monthAvailable = (mo && mo !== "0" && mo !== "");
@@ -1205,7 +1163,7 @@ function drawVolcanoDescription(typeRaw, y, mo, dy) {
   fill(0);
   textSize(mainTextSize);
   textStyle(NORMAL);
-  textLeading(20);
+  textLeading(19);
   textAlign(LEFT, TOP);
   text(description, margin, descriptionY, textWidthValue);
   pop();
@@ -1273,14 +1231,14 @@ function getVolcanoDescription(type) {
   }
 }
 
-// ---------- YEAR NAVIGATOR (con "< anno >") ----------
+//bottone per cambiare da un'eruzione a quella successiva o precedente
 function drawYearNavigator(year) {
   let hasMultipleEruptions = eruptions.length > 1;
   let activeColor = color(chartMainColor);
   let inactiveColor = color(180);
   let arrowColor = hasMultipleEruptions ? activeColor : inactiveColor;
 
-  let margin = 82;
+  let margin = 62;
   let y = 230;
   let navigatorX = margin;
 
@@ -1301,12 +1259,12 @@ function drawYearNavigator(year) {
   textAlign(LEFT, CENTER);
   fill(0);
 
-  // FRECCIA SINISTRA
+  //freccia sx
   let leftArrowX = navigatorX;
   let leftFrameX = leftArrowX - framePadding;
   let leftFrameY = y - frameHeight/2;
 
-  // Controllo se la freccia è hoverata
+  //hover freccia 
   let isLeftArrowHovered = (hoveredArrow === "left") && hasMultipleEruptions;
   
   push();
@@ -1316,7 +1274,7 @@ function drawYearNavigator(year) {
     strokeWeight(1);
     rect(leftFrameX, leftFrameY, leftArrowWidth + framePadding*2, frameHeight, 10);
     
-    // Testo bianco su sfondo rosso
+    //testo bianco sfondo rosso 
     push();
     fill(255);
     textSize(48);
@@ -1324,15 +1282,13 @@ function drawYearNavigator(year) {
     text("<", leftArrowX, y);
     pop();
   } else {
-    // Disegno normale per frecce grigie o rosse
+    //frecce grigie o rosse
     if (hasMultipleEruptions) {
       stroke(arrowColor);
       strokeWeight(1);
       noFill();
       rect(leftFrameX, leftFrameY, leftArrowWidth + framePadding*2, frameHeight, 10);
     } else {
-      // Disegna pattern a linee diagonali per frecce disabilitate
-      // MODIFICA: linee da in basso a sinistra a in alto a destra
       drawingContext.save();
       drawingContext.beginPath();
       drawingContext.roundRect(leftFrameX, leftFrameY, leftArrowWidth + framePadding*2, frameHeight, 10);
@@ -1342,17 +1298,17 @@ function drawYearNavigator(year) {
       strokeWeight(1);
       noFill();
       
-      // Disegna linee diagonali nell'altro verso
+      //linee diagonali altro verso 
       let patternSpacing = 8;
       let frameWidth = leftArrowWidth + framePadding*2;
       
-      // Linee da in basso a sinistra a in alto a destra
+      //linee diagonali 
       for (let offset = -frameHeight; offset < frameWidth; offset += patternSpacing) {
-        // Punto di partenza: in basso a sinistra
+        //punto di partenza linee
         let startX = leftFrameX + offset;
         let startY = leftFrameY + frameHeight;
         
-        // Punto di arrivo: in alto a destra
+        //punto di arrivo linee
         let endX = leftFrameX + offset + frameHeight;
         let endY = leftFrameY;
         
@@ -1361,7 +1317,7 @@ function drawYearNavigator(year) {
       
       drawingContext.restore();
       
-      // Bordo grigio
+      //bordo grigio 
       stroke(150, 150, 150);
       strokeWeight(1);
       noFill();
@@ -1375,7 +1331,7 @@ function drawYearNavigator(year) {
   }
   pop();
 
-  // ANNO (tra le frecce)
+  //anno in mezzo ai bottoni freccia 
   push();
   fill(245, 40, 0);
   textSize(72);
@@ -1385,11 +1341,11 @@ function drawYearNavigator(year) {
   let rightArrowX = yearX + yearWidth + spaceBetween;
   pop();
 
-  // FRECCIA DESTRA
+  //freccia dx
   let rightFrameX = rightArrowX - framePadding;
   let rightFrameY = y - frameHeight/2;
 
-  // Controllo se la freccia è hoverata
+  //hover freccia dx
   let isRightArrowHovered = (hoveredArrow === "right") && hasMultipleEruptions;
   
   push();
@@ -1399,7 +1355,7 @@ function drawYearNavigator(year) {
     strokeWeight(1);
     rect(rightFrameX, rightFrameY, rightArrowWidth + framePadding*2, frameHeight, 10);
     
-    // Testo bianco su sfondo rosso
+    //testo bianco sfondo rosso 
     push();
     fill(255);
     textSize(48);
@@ -1407,15 +1363,14 @@ function drawYearNavigator(year) {
     text(">", rightArrowX, y);
     pop();
   } else {
-    // Disegno normale per frecce grigie o rosse
+    //frecce grigie o rosse
     if (hasMultipleEruptions) {
       stroke(arrowColor);
       strokeWeight(1);
       noFill();
       rect(rightFrameX, rightFrameY, rightArrowWidth + framePadding*2, frameHeight, 10);
     } else {
-      // Disegna pattern a linee diagonali per frecce disabilitate
-      // MODIFICA: linee da in basso a sinistra a in alto a destra
+      //pattern di linee per frecce disabilitate
       drawingContext.save();
       drawingContext.beginPath();
       drawingContext.roundRect(rightFrameX, rightFrameY, rightArrowWidth + framePadding*2, frameHeight, 10);
@@ -1425,17 +1380,17 @@ function drawYearNavigator(year) {
       strokeWeight(1);
       noFill();
       
-      // Disegna linee diagonali nell'altro verso
+      //linee diagonali verso opposto 
       let patternSpacing = 8;
       let frameWidth = rightArrowWidth + framePadding*2;
       
-      // Linee da in basso a sinistra a in alto a destra
+      //linee diagonali
       for (let offset = -frameHeight; offset < frameWidth; offset += patternSpacing) {
-        // Punto di partenza: in basso a sinistra
+        //partenza linee diagonali 
         let startX = rightFrameX + offset;
         let startY = rightFrameY + frameHeight;
         
-        // Punto di arrivo: in alto a destra
+        //fine linee diagonali
         let endX = rightFrameX + offset + frameHeight;
         let endY = rightFrameY;
         
@@ -1444,7 +1399,7 @@ function drawYearNavigator(year) {
       
       drawingContext.restore();
       
-      // Bordo grigio
+      //bordo grigio 
       stroke(150, 150, 150);
       strokeWeight(1);
       noFill();
@@ -1458,7 +1413,7 @@ function drawYearNavigator(year) {
   }
   pop();
 
-  // COUNTER
+  //counter numero di eruzione per vulcano 
   if (eruptions.length > 0) {
     push();
     noStroke();
@@ -1490,23 +1445,20 @@ function drawYearNavigator(year) {
   }
 }
 
-// ---------- LEARN MORE BUTTON ----------
+//learn more button
 function drawLearnMoreButton() {
     const buttonWidth = 160;
     const buttonHeight = 40;
   
+    const bottomMargin = 40; 
+    const buttonY = height - bottomMargin - 40; 
     
-    // Usa la stessa logica di posizionamento della pagina overview
-    const bottomMargin = 40; // Margine dal fondo (come in overview)
-    const buttonY = height - bottomMargin - 40; // Stesso posizionamento verticale
+    const buttonX = width - buttonWidth - 50; 
     
-    const buttonX = width - buttonWidth - 50; // Destra: 50px dal bordo
+    const minValidY = CONFIG.layout.navbarHeight + 200; 
+    const finalY = max(buttonY, minValidY); 
     
-    // Calcola se la posizione è valida (non sovrapposta ad altri elementi)
-    const minValidY = CONFIG.layout.navbarHeight + 200; // Almeno 200px sotto la navbar
-    const finalY = max(buttonY, minValidY); // Assicurati che non sia troppo in alto
-    
-    // Area cliccabile
+    //click area 
     state.learnMoreButtonArea = {
         x: buttonX,
         y: finalY,
@@ -1514,35 +1466,31 @@ function drawLearnMoreButton() {
         height: buttonHeight
     };
     
-    // Se il bottone si sovrappone alla mappa (in basso a sinistra), spostalo più in alto
     const mapMargin = 60;
     const mapW = 320;
     const mapH = 180;
     const mapX = mapMargin;
     const mapY = height - mapH - mapMargin;
-    
-    // Controlla sovrapposizione con la mappa
     const buttonRight = buttonX + buttonWidth;
     const buttonBottom = finalY + buttonHeight;
     const mapRight = mapX + mapW;
     const mapBottom = mapY + mapH;
     
-    // Se si sovrappone alla mappa, sposta il bottone più in alto
     let adjustedY = finalY;
     if (buttonX < mapRight && buttonRight > mapX && finalY < mapBottom && buttonBottom > mapY) {
         adjustedY = mapY - buttonHeight - 20; // 20px sopra la mappa
         state.learnMoreButtonArea.y = adjustedY;
     }
     
-    // Disegna il bordo del bottone
+    //bordo bottone 
     if (hoveredLearnMore) {
-        // Hover: riempimento rosso
+        //hover rosso 
         fill(chartMainColor);
         stroke(chartMainColor);
         strokeWeight(1);
         rect(buttonX, adjustedY, buttonWidth, buttonHeight, 5);
         
-        // Icona "i" bianca
+        //i
         push();
         translate(buttonX + 25, adjustedY + buttonHeight/2);
         stroke(255);
@@ -1556,20 +1504,20 @@ function drawLearnMoreButton() {
         text("i", 0, 0);
         pop();
         
-        // Testo bianco
+        //testo 
         fill(255);
         noStroke();
         textSize(16);
         textAlign(LEFT, CENTER);
         text("Learn More", buttonX + 50, adjustedY + buttonHeight/2);
     } else {
-        // Stato normale: bordo rosso, testo nero
+        //stato normale 
         stroke(245, 40, 0);
         strokeWeight(1);
         noFill();
         rect(buttonX, adjustedY, buttonWidth, buttonHeight, 5);
 
-        // Icona "i" rossa
+        //i rossa
         push();
         translate(buttonX + 25, adjustedY + buttonHeight/2);
         stroke(245, 40, 0);
@@ -1583,7 +1531,7 @@ function drawLearnMoreButton() {
         text("i", 0, 0);
         pop();
 
-        // Testo nero
+        //testo nero 
         fill(0);
         noStroke();
         textSize(16);
@@ -1592,7 +1540,7 @@ function drawLearnMoreButton() {
     }
 }
 
-// ---------- ANIMAZIONI ----------
+//animazioni 
 function startAnimation() {
   isAnimating = true;
   animationStartTime = millis();
@@ -1611,7 +1559,7 @@ function getAnimationProgress() {
   return progress;
 }
 
-// ---------- FUNZIONI DI CORREZIONE COORDINATE ----------
+//correzione coordinate per malla equirettangolare
 function fixAllCoordinates(coordStr, isLatitude = true) {
   if (!coordStr || coordStr === "" || coordStr === "0") {
     return isLatitude ? 0 : -30;
@@ -1736,7 +1684,7 @@ function getUniversalCoordinates(latStr, lonStr, name = "", country = "") {
   return fixed;
 }
 
-// ---------- TRANSIZIONE LEARN MORE ----------
+//transizione learn more
 function startTransitionToLearnMore() {
   const buttonRect = state.learnMoreButtonArea;
   
@@ -1805,17 +1753,17 @@ function drawTransition() {
   pop();
 }
 
-// ---------- INTERAZIONI ----------
+//interazioni mouse
 function mousePressed() {
   if (transitionState.active) return;
 
-  // BACK BUTTON
+  //bottone back 
   if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
     window.location.href = "overview.html";
     return;
   }
 
-  // NAVBAR LINKS 
+  //link navbar 
   if (state.navLinks) {
     for (let link of state.navLinks) {
       let textW = link.width;
@@ -1831,7 +1779,7 @@ function mousePressed() {
     }
   }
 
-  // LEARN MORE BUTTON
+  //learn more 
   if (state.learnMoreButtonArea &&
       mouseX > state.learnMoreButtonArea.x &&
       mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
@@ -1844,7 +1792,7 @@ function mousePressed() {
 
   if (eruptions.length <= 1) return;
 
-  // Navigazione anni con dimensioni 
+  //nav anni  
   let margin = 82;
   let y = 230;
   
@@ -1863,7 +1811,7 @@ function mousePressed() {
   let rightArrowWidth = textWidth(">");
   let rightFrameX = yearX + yearWidth + 40 - framePadding;
 
-  // Freccia sinistra
+  //freccia sx
   if (mouseX > leftFrameX &&
       mouseX < leftFrameX + leftArrowWidth + framePadding*2 &&
       mouseY > leftFrameY &&
@@ -1877,7 +1825,7 @@ function mousePressed() {
     return;
   }
 
-  // Freccia destra
+  //freccia dx
   if (mouseX > rightFrameX &&
       mouseX < rightFrameX + rightArrowWidth + framePadding*2 &&
       mouseY > leftFrameY &&
@@ -1910,12 +1858,12 @@ function updateCursor() {
     return;
   }
 
-  // Back button
+  //bottone back
   if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
     isOverButton = true;
   }
 
-  // Navbar links
+  //link navbar
   if (state.navLinks) {
     for (let link of state.navLinks) {
       let textW = link.width;
@@ -1931,7 +1879,7 @@ function updateCursor() {
     }
   }
 
-  // Learn More button
+  //learn more
   if (state.learnMoreButtonArea &&
       mouseX > state.learnMoreButtonArea.x &&
       mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
@@ -1941,7 +1889,7 @@ function updateCursor() {
     hoveredLearnMore = true;
   }
 
-  // Frecce navigazione
+  //navigazione frecce
   if (eruptions.length > 1) {
     let margin = 82;
     let y = 230;
@@ -1961,7 +1909,7 @@ function updateCursor() {
     let rightArrowWidth = textWidth(">");
     let rightFrameX = yearX + yearWidth + 40 - framePadding;
 
-    // Freccia sinistra
+    //freccia sx
     if (mouseX > leftFrameX &&
         mouseX < leftFrameX + leftArrowWidth + framePadding*2 &&
         mouseY > leftFrameY &&
@@ -1970,7 +1918,7 @@ function updateCursor() {
       hoveredArrow = "left";
     }
 
-    // Freccia destra
+    //freccia dx
     if (mouseX > rightFrameX &&
         mouseX < rightFrameX + rightArrowWidth + framePadding*2 &&
         mouseY > leftFrameY &&
@@ -1983,14 +1931,9 @@ function updateCursor() {
   cursor(isOverButton ? HAND : ARROW);
 }
 
-// ---------- RESIZE ----------
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
     
-    // Ricalcola tutto il layout responsive
     applyResponsiveScaling();
     
-    console.log("Window resized (detail):", windowWidth, "x", windowHeight);
-    console.log("- Chart position:", width * chartXPercent, height * chartYPercent);
-    console.log("- Chart size:", chartSize);
 }
