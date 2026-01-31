@@ -40,7 +40,7 @@ const CONFIG = {
     dotPopScale: 1.4,
     randomDelayMax: 600,
     waveDuration: 1000,
-    easingFunction: "easeOutBack",
+
     fastDotEntryDuration: 400,
     fastRandomDelayMax: 200,
     eruptionDuration: 1000,
@@ -92,12 +92,8 @@ let state = {
   continentCounts: {},
   volcanoPositions: new Map(),
   globalYearRange: { min: 0, max: 0 },
-  timelineButtons: [],
   currentCenturiesIndex: 0,
   isPlaying: false,
-  leftControlAreas: null,
-  rightControlAreas: null,
-  asiaLabelY: 0,
   animationTimer: 0,
   animationSpeed: TIMELINE_ANIMATION_SPEED_NORMAL,
   pauseBetweenCycles: TIMELINE_PAUSE_BETWEEN_CYCLES,
@@ -257,8 +253,6 @@ function applyScaleToConfig(scale) {
     CONFIG.layout.legendStartY - CONFIG.layout.titleStartY;
 
   if (spaceBetweenTitleAndLegend < 200) {
-    console.log("Schermo piccolo: compattazione elementi inferiori");
-
     CONFIG.layout.legendStartY = CONFIG.layout.titleStartY + 200;
     CONFIG.layout.timeframeStartY = CONFIG.layout.legendStartY + 150;
     CONFIG.layout.yearStartY = CONFIG.layout.timeframeStartY + 80;
@@ -293,16 +287,6 @@ function applyScaleToConfig(scale) {
     CONFIG.layout.titleStartY + 200,
     CONFIG.layout.legendStartY,
   );
-
-  console.log("Layout calcolato:");
-  console.log("- Titolo Y:", CONFIG.layout.titleStartY);
-  console.log("- Legenda Y:", CONFIG.layout.legendStartY);
-  console.log("- Timeframe Y:", CONFIG.layout.timeframeStartY);
-  console.log("- Year Y:", CONFIG.layout.yearStartY);
-  console.log("- Start button Y:", CONFIG.layout.startButtonY);
-  console.log("- Graph scale:", graphScale);
-  console.log("- Max radius:", CONFIG.layout.maxRadius);
-  console.log("- Min radius:", CONFIG.layout.minRadius);
 }
 
 const CONTINENT_MAP = {
@@ -428,7 +412,6 @@ function initializeData() {
   state.globalYearRange = getGlobalYearRange();
   calculateContinentData();
   calculateVolcanoPositions();
-  calculateTimelineButtons();
   updateAvailableYears();
 
   state.circleRevealStart = millis();
@@ -670,35 +653,6 @@ function drawImpactCircles() {
   }
 }
 
-function calculateTimelineButtons() {
-  state.timelineButtons = [];
-  const tlY = height - CONFIG.layout.bottomControlY;
-  const tlXStart = width * 0.2;
-  const tlXEnd = width * 0.8;
-  const tlW = tlXEnd - tlXStart;
-
-  state.timelineButtons.push({
-    label: "all centuries",
-    value: null,
-    x: tlXStart - 40,
-    y: tlY,
-    radius: 8,
-  });
-
-  CONCENTRIC_YEARS.forEach((year, i) => {
-    const normalized = i / (CONCENTRIC_YEARS.length - 1);
-    const xPos = tlXStart + normalized * tlW;
-
-    state.timelineButtons.push({
-      label: formatYearShort(year),
-      value: year,
-      x: xPos,
-      y: tlY,
-      radius: 8,
-    });
-  });
-}
-
 function applyFilters() {
   state.filteredData = state.volcanoData.filter((v) => {
     let centuryMatch = true;
@@ -890,8 +844,6 @@ function triggerWaveAnimation() {
 }
 
 function triggerVolcanoEruption(volcano, x, y) {
-  console.log("ANIMAZIONE STILIZZATA per:", volcano.name);
-
   const originalSize = map(volcano.impact, 1, 15, 5, 15);
 
   state.eruption = {
@@ -955,7 +907,6 @@ function updateEruptionAnimation() {
     if (implosionProgress >= 1) {
       state.eruption.phase = "pause";
       state.eruption.pauseStart = currentTime;
-      console.log("PAUSA");
     }
   } else if (state.eruption.phase === "pause") {
     const pauseElapsed = currentTime - state.eruption.pauseStart;
@@ -963,7 +914,6 @@ function updateEruptionAnimation() {
     if (pauseElapsed >= CONFIG.animation.pauseDuration) {
       state.eruption.phase = "exploding";
       state.eruption.explosionStart = currentTime;
-      console.log("ESPLOSIONE!");
 
       for (let wave of state.eruption.shockwaves) {
         wave.startTime = currentTime + wave.delay;
@@ -1003,12 +953,11 @@ function updateEruptionAnimation() {
 
     if (explosionProgress >= 1) {
       state.eruption.phase = "complete";
-      console.log("ANIMAZIONE COMPLETATA");
 
       setTimeout(() => {
         const v = state.eruption.volcano;
         const url = `detail.html?name=${encodeURIComponent(v.name)}&year=${v.year}&impact=${v.impact}`;
-        console.log("Reindirizzamento a:", url);
+
         window.location.href = url;
       }, 100);
     }
@@ -1141,16 +1090,6 @@ function drawEruption() {
   pop();
 }
 
-function easeOutBack(x) {
-  const c1 = 1.70158;
-  const c3 = c1 + 1;
-  return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
-}
-
-function easeOutExpo(x) {
-  return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
-}
-
 function easeOutCubic(t) {
   return 1 - Math.pow(1 - t, 3);
 }
@@ -1245,62 +1184,35 @@ function draw() {
 
   updateButtonHoverStates();
 
+  updateLayout();
+  updateAnimation();
+  updateDotAnimations();
+  updateEruptionAnimation();
+
+  drawTitle();
+  drawStartAnimationButton();
+  drawSearchButton();
+  drawLearnMoreButton();
+
+  drawLegend();
+
+  if (state.searchPanelOpen) {
+    drawSearchPanel();
+  }
+
+  drawTemporalRangeSelector();
+  drawYearSelector();
+
+  drawMainCircle();
+  drawContinentLabels();
+
+  drawEruption();
+
+  checkHover();
+  drawInfobox();
+
   if (transitionState.active) {
-    updateLayout();
-    updateAnimation();
-    updateDotAnimations();
-    updateEruptionAnimation();
-
-    drawTitle();
-    drawStartAnimationButton();
-    drawSearchButton();
-    drawLearnMoreButton();
-
-    drawLegend();
-
-    if (state.searchPanelOpen) {
-      drawSearchPanel();
-    }
-
-    drawTemporalRangeSelector();
-    drawYearSelector();
-
-    drawMainCircle();
-    drawContinentLabels();
-
-    drawEruption();
-
-    checkHover();
-    drawInfobox();
-
     drawTransition();
-  } else {
-    updateLayout();
-    updateAnimation();
-    updateDotAnimations();
-    updateEruptionAnimation();
-
-    drawTitle();
-    drawStartAnimationButton();
-    drawSearchButton();
-    drawLearnMoreButton();
-
-    drawLegend();
-
-    if (state.searchPanelOpen) {
-      drawSearchPanel();
-    }
-
-    drawTemporalRangeSelector();
-    drawYearSelector();
-
-    drawMainCircle();
-    drawContinentLabels();
-
-    drawEruption();
-
-    checkHover();
-    drawInfobox();
   }
 
   updateCursor();
@@ -1399,8 +1311,8 @@ function drawNavBar() {
   }
   state.navLinks = navLinks;
 
-  stroke(245, 40, 0); 
-  strokeWeight(1); 
+  stroke(245, 40, 0);
+  strokeWeight(1);
   line(0, navHeight - 5, width, navHeight - 5);
 
   pop();
@@ -1499,7 +1411,7 @@ function drawStartAnimationButton() {
   if (state.hoveredStartButton) {
     fill(255);
   } else {
-    fill(255, 43, 0); 
+    fill(255, 43, 0);
   }
   noStroke();
 
@@ -1518,9 +1430,9 @@ function drawStartAnimationButton() {
 
   //testo
   if (state.hoveredStartButton) {
-    fill(255); 
+    fill(255);
   } else {
-    fill(0); 
+    fill(0);
   }
   noStroke();
   textSize(CONFIG.layout.labelFontSize);
@@ -1549,8 +1461,8 @@ function drawSearchButton() {
   const buttonWidth = 190;
 
   //allineamento con bottone star animatino
-  const buttonY = height - 40 - buttonHeight; 
-  const buttonX = CONFIG.layout.marginX + 210; 
+  const buttonY = height - 40 - buttonHeight;
+  const buttonX = CONFIG.layout.marginX + 210;
 
   //hover
   if (state.hoveredSearchButton) {
@@ -1569,9 +1481,9 @@ function drawSearchButton() {
 
   //cerchio della lente
   if (state.hoveredSearchButton) {
-    stroke(255); 
+    stroke(255);
   } else {
-    stroke(245, 40, 0); 
+    stroke(245, 40, 0);
   }
   strokeWeight(1.5);
   noFill();
@@ -1593,9 +1505,9 @@ function drawSearchButton() {
 
   //testo
   if (state.hoveredSearchButton) {
-    fill(255); 
+    fill(255);
   } else {
-    fill(0); 
+    fill(0);
   }
   noStroke();
   textSize(CONFIG.layout.labelFontSize);
@@ -2207,8 +2119,8 @@ function drawLearnMoreButton() {
   push();
   translate(buttonX + 25, buttonY + buttonHeight / 2);
   if (state.hoveredLearnMoreButton) {
-    stroke(255); 
-    fill(255); 
+    stroke(255);
+    fill(255);
   } else {
     stroke(245, 40, 0);
     fill(245, 40, 0);
@@ -2217,7 +2129,7 @@ function drawLearnMoreButton() {
   noFill();
   circle(0, 0, 20);
   if (state.hoveredLearnMoreButton) {
-    fill(255); 
+    fill(255);
   } else {
     fill(245, 40, 0);
   }
@@ -2232,7 +2144,7 @@ function drawLearnMoreButton() {
   if (state.hoveredLearnMoreButton) {
     fill(255);
   } else {
-    fill(0); 
+    fill(0);
   }
   noStroke();
   textSize(CONFIG.layout.labelFontSize);
@@ -2476,17 +2388,17 @@ function drawYearSelector() {
 
 function drawDoubleArrowWithBox(x, y, w, h, arrows, isHovered) {
   if (isHovered) {
-    fill(255, 43, 0); 
+    fill(255, 43, 0);
     stroke(255, 43, 0);
   } else {
-    fill(255); 
+    fill(255);
     stroke(CONFIG.colors.text);
   }
   strokeWeight(1);
   rect(x, y, w, h, 5);
 
   if (isHovered) {
-    fill(255); 
+    fill(255);
   } else {
     fill(CONFIG.colors.text);
   }
@@ -2498,17 +2410,17 @@ function drawDoubleArrowWithBox(x, y, w, h, arrows, isHovered) {
 
 function drawSingleArrowWithBox(x, y, w, h, arrow, isHovered) {
   if (isHovered) {
-    fill(255, 43, 0); 
+    fill(255, 43, 0);
     stroke(255, 43, 0);
   } else {
-    fill(255); 
+    fill(255);
     stroke(CONFIG.colors.accent);
   }
   strokeWeight(1);
   rect(x, y, w, h, 5);
 
   if (isHovered) {
-    fill(255); 
+    fill(255);
   } else {
     fill(CONFIG.colors.accent);
   }
@@ -2868,7 +2780,7 @@ function checkHover() {
 }
 
 function updateLayout() {
-  //centro 
+  //centro
   let centerXRatio = CONFIG.layout.centerXRatio;
 
   if (width > 1920) {
@@ -3280,7 +3192,6 @@ function mousePressed() {
   }
 
   if (closestVolcano && closestVolcanoPos) {
-    console.log("AVVIO ANIMAZIONE per:", closestVolcano.name);
     triggerVolcanoEruption(
       closestVolcano,
       closestVolcanoPos.x,
@@ -3476,7 +3387,6 @@ function windowResized() {
   if (abs(constrainedScale - scaleFactor) > 0.01) {
     scaleFactor = constrainedScale;
     applyScaleToConfig(scaleFactor);
-    console.log("Scale factor updated to:", scaleFactor);
   }
 
   resizeCanvas(windowWidth, windowHeight);
