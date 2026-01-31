@@ -788,9 +788,9 @@ function drawBackButton() {
     const buttonWidth = 160;
     const buttonHeight = 40;
     
-    // POSIZIONE: width - buttonWidth - 50 (come il learn more button originale)
+    // POSIZIONE FISSA: allineato con gli altri bottoni
     const buttonX = width - buttonWidth - 50;
-    const buttonY = CONFIG.layout.startButtonY;
+    const buttonY = height - 40 - buttonHeight; // 40px dal fondo
     
     // NO FILL di default - solo su hover
     if (state.isBackButtonHovered) {

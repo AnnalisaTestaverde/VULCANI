@@ -1342,7 +1342,7 @@ function drawStartAnimationButton() {
     const buttonWidth = 200;
     const buttonHeight = 40;
     const buttonX = CONFIG.layout.marginX;
-    const buttonY = CONFIG.layout.startButtonY;
+    const buttonY = height - 40 - buttonHeight; 
 
     //hover
     if (state.hoveredStartButton) {
@@ -1399,10 +1399,12 @@ function drawSearchButton() {
     const learnMoreButtonLeft = state.learnMoreButtonArea ? state.learnMoreButtonArea.x : width - 160 - 50;
     const availableSpace = learnMoreButtonLeft - startButtonRight;
     
-    const buttonWidth = min(190, availableSpace - 40);
     const buttonHeight = 40;
-    const buttonX = startButtonRight + 10;
-    const buttonY = CONFIG.layout.startButtonY;
+    const buttonWidth = 190;
+    
+    // POSIZIONE FISSA: allineato con Start Animation
+    const buttonY = height - 40 - buttonHeight; // 40px dal fondo
+    const buttonX = CONFIG.layout.marginX + 210; // A destra di Start Animation
 
     //hover
     if (state.hoveredSearchButton) {
@@ -1958,8 +1960,9 @@ function drawLearnMoreButton() {
     const buttonWidth = 160;
     const buttonHeight = 40;
     
+    // POSIZIONE FISSA: allineato con gli altri bottoni
     const buttonX = width - buttonWidth - 50;
-    const buttonY = CONFIG.layout.startButtonY;
+    const buttonY = height - 40 - buttonHeight; // 40px dal fondo
     
     //bottone con hover
     if (state.hoveredLearnMoreButton) {

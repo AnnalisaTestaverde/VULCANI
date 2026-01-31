@@ -399,11 +399,11 @@ function drawNavBar() {
   noStroke();
   rect(0, navY, width, navHeight);
   
-  // AGGIUNGI: calcola se il mouse è sopra "Back"
+  //calcola se il mouse è sopra il tastino back
   let isOverNavBack = false;
   let navBackArea = null;
   
-  // Testo Back - MODIFICATO PER HOVER
+  //hover tastino back
   fill(0);
   textSize(15);
   textFont("Helvetica");
@@ -417,16 +417,16 @@ function drawNavBar() {
   let backHeight = 20;
   let backTextY = backY - backHeight/2;
   
-  // Controlla se il mouse è sopra "Back"
+  //controlla se il mouse è sopra il tasto back
   if (mouseX > backX && mouseX < backX + backWidth && 
       mouseY > backTextY && mouseY < backTextY + backHeight) {
     isOverNavBack = true;
-    fill("#FF2B00"); // Cambia colore su hover
+    fill("#FF2B00");
   }
   
   text(backText, backX, backY);
   
-  // Memorizza l'area per l'interazione
+  //area interazione
   navBackArea = {
     x: backX,
     y: backTextY,
@@ -489,7 +489,7 @@ function drawNavBar() {
     currentX += link.width + linkSpacing;
   }
   
-  // AGGIUNGI: salva l'area del back per l'interazione
+  //area back per interazione
   state.navBackArea = navBackArea;
   state.navLinks = navLinks;
 
