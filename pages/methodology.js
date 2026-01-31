@@ -189,9 +189,9 @@ function stopAllP5Animations() {
   if (window.p5 && window.p5.instance) {
     try {
       window.p5.instance.noLoop();
-      console.log("✅ Disabilitato loop istanza globale P5.js");
+      console.log("Disabilitato loop istanza globale P5.js");
     } catch (e) {
-      console.log("ℹ️  Nessuna istanza globale da disabilitare");
+      console.log("Nessuna istanza globale da disabilitare");
     }
   }
 
