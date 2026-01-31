@@ -1184,7 +1184,6 @@ function draw() {
 
   updateButtonHoverStates();
 
-  updateLayout();
   updateAnimation();
   updateDotAnimations();
   updateEruptionAnimation();
