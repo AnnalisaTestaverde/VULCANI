@@ -1331,7 +1331,7 @@ function checkScrollEnd() {
   } else {
     state.scrollHint.style.display = "block";
     state.isAtBottom = false;
-    state.showMethodologyButton = false; //non mostra bottone 
+    state.showMethodologyButton = false; //non mostra bottone
   }
 }
 

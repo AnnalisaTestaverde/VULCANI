@@ -1,8 +1,8 @@
 const CONFIG = {
   colors: {
-    background: "#FF2B00", 
+    background: "#FF2B00",
     text: "#000000ff",
-    accent: "#FFFFFF", 
+    accent: "#FFFFFF",
     circle: "#111010b3",
     infoBox: "#ffffffff",
     infoBoxText: "#000000ff",
@@ -306,7 +306,7 @@ function initializeData() {
   });
 
   state.disableDotEntryAnimation = false;
-  state.showMethodologyButton = false; 
+  state.showMethodologyButton = false;
 }
 
 //continenti calcolo dei dati
@@ -378,7 +378,7 @@ function calculateVolcanoPositions() {
   });
 }
 
-//anni disponibili 
+//anni disponibili
 function updateAvailableYears() {
   if (state.selectedCentury === null) {
     state.availableYears = [
@@ -451,7 +451,7 @@ function getRadiusForImpact(impact) {
   );
 }
 
-//disegno cerchi di impatto 
+//disegno cerchi di impatto
 function drawImpactCircles() {
   const specialIndices = [0, 4, 8, 12].filter(
     (index) => index < impactLevels.length,
@@ -519,7 +519,7 @@ function drawImpactCircles() {
   }
 }
 
-//range anni 
+//range anni
 function getGlobalYearRange() {
   const years = state.volcanoData.map((v) => v.year);
   return {
@@ -567,7 +567,7 @@ function updateAnimation() {
   state.displayedYear = state.availableYears[state.currentYearIndex];
 }
 
-//animazioni punti 
+//animazioni punti
 function updateDotAnimations() {
   if (state.isPlaying) {
     state.disableDotEntryAnimation = true;
