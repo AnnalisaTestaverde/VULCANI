@@ -187,8 +187,8 @@
     <script>
         // ===== CONFIGURAZIONE IDENTICA AL GRAFICO ORIGINALE =====
         const CONFIG = {
-            chartXPercent: 0.7,
-            chartYPercent: 0.5,
+            chartXPercent: 0.695,
+            chartYPercent: 0.51,
             chartSize: 400,
             chartLevels: 4,
             chartMainColor: "#FFFFF",
@@ -228,6 +228,7 @@
             // Per il back button - MODIFICATO PER INCLUIRE HOVER
             backButtonArea: null,
             isBackButtonHovered: false,
+            navBackArea: null,
             
             // Per il methodology button nel canvas (COME NEL CODICE 1)
             methodologyButtonArea: null,
@@ -331,6 +332,7 @@
             }
             
             background(CONFIG.colors.background);
+            drawNavBar();
             drawTitle();
             drawBackButton();
             
@@ -363,6 +365,115 @@
             text('DETAIL VIEW', CONFIG.layout.marginX, titleY + 75);
             
             textStyle(NORMAL);
+        }
+
+        // 6a - Navbar per la pagina learn more (COPIA ESATTA DA P5)
+        function drawNavBar() {
+            push();
+            
+            let navHeight = 60;
+            let navY = 0;
+            
+            // sfondo navbar
+            fill(255);
+            noStroke();
+            rect(-1, navY, width + 2, navHeight);
+            
+            // Calcola se il mouse è sopra "Back" nella navbar
+            let isOverNavBack = false;
+            
+            // Testo Back nella navbar
+            fill(0);
+            textSize(15);
+            textFont("Helvetica");
+            textStyle(BOLD);
+            textAlign(LEFT, CENTER);
+            
+            let backText = "<   Back";
+            let backX = 40;
+            let backY = navHeight/2;
+            let backWidth = textWidth(backText);
+            let backHeight = 20;
+            let backTextY = backY - backHeight/2;
+            
+            // Controlla se il mouse è sopra "Back" nella navbar
+            if (mouseX > backX && mouseX < backX + backWidth && 
+                mouseY > backTextY && mouseY < backTextY + backHeight) {
+                isOverNavBack = true;
+                fill("#FF2B00"); // Cambia colore su hover
+            }
+            
+            text(backText, backX, backY);
+            
+            // Memorizza l'area per l'interazione (solo per il back della navbar)
+            state.navBackArea = {
+                x: backX,
+                y: backTextY,
+                width: backWidth,
+                height: backHeight
+            };
+            
+            let navLinks = [
+                { name: "Homepage", href: "../index.html", x: 0 },
+                { name: "Team", href: "team.html", x: 0 },
+                { name: "Methodology", href: "methodology.html", x: 0 },
+                { name: "Explore", href: "overview.html", x: 0, isExplore: true }
+            ];
+            
+            let totalLinksWidth = 0;
+            let linkSpacing = 40;
+            let linkFontSize = 15;
+            
+            textSize(linkFontSize);
+            textStyle(NORMAL);
+            
+            for (let link of navLinks) {
+                link.width = textWidth(link.name);
+                totalLinksWidth += link.width;
+            }
+            totalLinksWidth += (navLinks.length - 1) * linkSpacing;
+            
+            let startX = width - totalLinksWidth - 40;
+            let currentX = startX;
+            
+            for (let i = 0; i < navLinks.length; i++) {
+                let link = navLinks[i];
+                link.x = currentX;
+                link.y = navHeight/2;
+                
+                if (link.isExplore) {
+                    fill("#FF2B00");
+                    textStyle(BOLD);
+                } else {
+                    fill(0);
+                    textStyle(NORMAL);
+                }
+                
+                text(link.name, link.x, link.y);
+                
+                let textW = link.width;
+                let textH = 20;
+                let textX = link.x;
+                let textY = link.y - textH/2;
+                
+                if (mouseX > textX && mouseX < textX + textW && 
+                    mouseY > textY && mouseY < textY + textH) {
+                    if (!link.isExplore) {
+                        fill("#FF2B00");
+                        text(link.name, link.x, link.y);
+                    }
+                }
+                
+                currentX += link.width + linkSpacing;
+            }
+            
+            state.navLinks = navLinks;
+
+            stroke(245, 40, 0);
+            strokeWeight(1);
+            line(0, navHeight, width, navHeight);
+            
+            pop();
         }
 
         // 6 - Back Button - MODIFICATO PER ESSERE IDENTICO AL CODICE 1
@@ -674,7 +785,7 @@
             
             let totalImpactText = "Total impact level: " + d.impact;
             let totalImpactX = 270;
-            let totalImpactY = -310;
+            let totalImpactY = -270;
             text(totalImpactText, totalImpactX, totalImpactY);
             
             textStyle(NORMAL);
@@ -774,7 +885,32 @@
         function updateCursor() {
             let isOverButton = false;
 
-            // Controlla hover sul back button (come nel codice 1)
+            // Controlla hover su "Back" nella navbar
+            if (state.navBackArea &&
+                mouseX > state.navBackArea.x &&
+                mouseX < state.navBackArea.x + state.navBackArea.width &&
+                mouseY > state.navBackArea.y &&
+                mouseY < state.navBackArea.y + state.navBackArea.height) {
+                isOverButton = true;
+            }
+
+            // Controlla hover sui link della navbar (escluso "Back")
+            if (state.navLinks) {
+                for (let link of state.navLinks) {
+                    let textW = link.width;
+                    let textH = 20;
+                    let textX = link.x;
+                    let textY = link.y - textH/2;
+                    
+                    if (mouseX > textX && mouseX < textX + textW && 
+                        mouseY > textY && mouseY < textY + textH) {
+                        isOverButton = true;
+                        break;
+                    }
+                }
+            }
+
+            // Controlla hover sul back button (quello grande in basso a destra)
             state.isBackButtonHovered = false;
             
             if (state.backButtonArea &&
@@ -786,7 +922,7 @@
                 state.isBackButtonHovered = true;
             }
             
-            // Controlla hover sul methodology button (COME NEL CODICE 1)
+            // Controlla hover sul methodology button
             state.isMethodologyButtonHovered = false;
             
             if (state.showMethodologyButton && state.methodologyButtonArea &&
@@ -817,7 +953,34 @@
 
         // 13 - Gestione click del mouse - AGGIORNATO PER IL BOTTONE METHODOLOGY COME NEL CODICE 1
         function mousePressed() {
-            // Controllo per il back button
+            // Controllo per "Back" nella navbar
+            if (state.navBackArea &&
+                mouseX > state.navBackArea.x &&
+                mouseX < state.navBackArea.x + state.navBackArea.width &&
+                mouseY > state.navBackArea.y &&
+                mouseY < state.navBackArea.y + state.navBackArea.height) {
+                
+                goBackToPreviousPage();
+                return;
+            }
+
+            // Controllo per i link della navbar
+            if (state.navLinks) {
+                for (let link of state.navLinks) {
+                    let textW = link.width;
+                    let textH = 20;
+                    let textX = link.x;
+                    let textY = link.y - textH/2;
+                    
+                    if (mouseX > textX && mouseX < textX + textW && 
+                        mouseY > textY && mouseY < textY + textH) {
+                        window.location.href = link.href;
+                        return;
+                    }
+                }
+            }
+
+            // Controllo per il back button (quello grande in basso a destra)
             if (state.backButtonArea &&
                 mouseX > state.backButtonArea.x &&
                 mouseX < state.backButtonArea.x + state.backButtonArea.width &&
@@ -828,14 +991,13 @@
                 return;
             }
             
-            // Controllo per il methodology button (COME NEL CODICE 1)
+            // Controllo per il methodology button
             if (state.showMethodologyButton && state.methodologyButtonArea &&
                 mouseX > state.methodologyButtonArea.x &&
                 mouseX < state.methodologyButtonArea.x + state.methodologyButtonArea.width &&
                 mouseY > state.methodologyButtonArea.y &&
                 mouseY < state.methodologyButtonArea.y + state.methodologyButtonArea.height) {
                 
-                // Vai alla pagina methodology.html (COME NEL CODICE 1)
                 window.location.href = "methodology.html";
                 return;
             }

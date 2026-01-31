@@ -109,7 +109,8 @@ let currentIndex = 0;
 
 let state = {
   learnMoreButtonArea: null,
-  navLinks: null
+  navLinks: null,
+  navBackArea: null
 };
 
 //animazione variabili 
@@ -391,20 +392,47 @@ function drawFullContentOptimized() {
 function drawNavBar() {
   push();
   
-  let navHeight = 60;  // Cambiato da 70 a 60 per allineare con overview
+  let navHeight = 60;
   let navY = 0;
   
   fill(255);
   noStroke();
   rect(0, navY, width, navHeight);
   
-  // Testo Back
+  // AGGIUNGI: calcola se il mouse è sopra "Back"
+  let isOverNavBack = false;
+  let navBackArea = null;
+  
+  // Testo Back - MODIFICATO PER HOVER
   fill(0);
-  textSize(15);  // Diminuisce la dimensione del testo per allineare meglio
+  textSize(15);
   textFont("Helvetica");
   textStyle(BOLD);
   textAlign(LEFT, CENTER);
-  text("<   Back", 40, navHeight/2);
+  
+  let backText = "<   Back";
+  let backX = 40;
+  let backY = navHeight/2;
+  let backWidth = textWidth(backText);
+  let backHeight = 20;
+  let backTextY = backY - backHeight/2;
+  
+  // Controlla se il mouse è sopra "Back"
+  if (mouseX > backX && mouseX < backX + backWidth && 
+      mouseY > backTextY && mouseY < backTextY + backHeight) {
+    isOverNavBack = true;
+    fill("#FF2B00"); // Cambia colore su hover
+  }
+  
+  text(backText, backX, backY);
+  
+  // Memorizza l'area per l'interazione
+  navBackArea = {
+    x: backX,
+    y: backTextY,
+    width: backWidth,
+    height: backHeight
+  };
   
   let navLinks = [
     { name: "Homepage", href: "../index.html", x: 0 },
@@ -461,10 +489,12 @@ function drawNavBar() {
     currentX += link.width + linkSpacing;
   }
   
+  // AGGIUNGI: salva l'area del back per l'interazione
+  state.navBackArea = navBackArea;
   state.navLinks = navLinks;
 
-  stroke(245, 40, 0); // Stesso colore del bottone Learn More
-  strokeWeight(1); // Stesso spessore del bordo del bottone Learn More
+  stroke(245, 40, 0);
+  strokeWeight(1);
   line(0, navHeight-5, width, navHeight-5);
   
   pop();
@@ -1763,13 +1793,23 @@ function drawTransition() {
 function mousePressed() {
   if (transitionState.active) return;
 
-  //bottone back 
+  // AGGIUNGI: bottone "Back" nella navbar
+  if (state.navBackArea &&
+      mouseX > state.navBackArea.x &&
+      mouseX < state.navBackArea.x + state.navBackArea.width &&
+      mouseY > state.navBackArea.y &&
+      mouseY < state.navBackArea.y + state.navBackArea.height) {
+    window.location.href = "overview.html";
+    return;
+  }
+
+  // bottone back (quello piccolo in alto) - MANTIENI ANCHE QUESTO
   if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
     window.location.href = "overview.html";
     return;
   }
 
-  //link navbar 
+  // link navbar 
   if (state.navLinks) {
     for (let link of state.navLinks) {
       let textW = link.width;
@@ -1785,7 +1825,7 @@ function mousePressed() {
     }
   }
 
-  //learn more 
+  // learn more 
   if (state.learnMoreButtonArea &&
       mouseX > state.learnMoreButtonArea.x &&
       mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
@@ -1798,7 +1838,7 @@ function mousePressed() {
 
   if (eruptions.length <= 1) return;
 
-  //nav anni  
+  // nav anni  
   let margin = 82;
   let y = 230;
   
@@ -1817,7 +1857,7 @@ function mousePressed() {
   let rightArrowWidth = textWidth(">");
   let rightFrameX = yearX + yearWidth + 40 - framePadding;
 
-  //freccia sx
+  // freccia sx
   if (mouseX > leftFrameX &&
       mouseX < leftFrameX + leftArrowWidth + framePadding*2 &&
       mouseY > leftFrameY &&
@@ -1831,7 +1871,7 @@ function mousePressed() {
     return;
   }
 
-  //freccia dx
+  // freccia dx
   if (mouseX > rightFrameX &&
       mouseX < rightFrameX + rightArrowWidth + framePadding*2 &&
       mouseY > leftFrameY &&
@@ -1864,12 +1904,21 @@ function updateCursor() {
     return;
   }
 
-  //bottone back
+  // AGGIUNGI: controlla hover sul "Back" della navbar
+  if (state.navBackArea &&
+      mouseX > state.navBackArea.x &&
+      mouseX < state.navBackArea.x + state.navBackArea.width &&
+      mouseY > state.navBackArea.y &&
+      mouseY < state.navBackArea.y + state.navBackArea.height) {
+    isOverButton = true;
+  }
+
+  // bottone back (quello piccolo in alto)
   if (mouseX > 15 && mouseX < 105 && mouseY > 15 && mouseY < 45) {
     isOverButton = true;
   }
 
-  //link navbar
+  // link navbar
   if (state.navLinks) {
     for (let link of state.navLinks) {
       let textW = link.width;
@@ -1885,7 +1934,7 @@ function updateCursor() {
     }
   }
 
-  //learn more
+  // learn more
   if (state.learnMoreButtonArea &&
       mouseX > state.learnMoreButtonArea.x &&
       mouseX < state.learnMoreButtonArea.x + state.learnMoreButtonArea.width &&
@@ -1895,7 +1944,7 @@ function updateCursor() {
     hoveredLearnMore = true;
   }
 
-  //navigazione frecce
+  // navigazione frecce
   if (eruptions.length > 1) {
     let margin = 82;
     let y = 230;
@@ -1915,7 +1964,7 @@ function updateCursor() {
     let rightArrowWidth = textWidth(">");
     let rightFrameX = yearX + yearWidth + 40 - framePadding;
 
-    //freccia sx
+    // freccia sx
     if (mouseX > leftFrameX &&
         mouseX < leftFrameX + leftArrowWidth + framePadding*2 &&
         mouseY > leftFrameY &&
@@ -1924,7 +1973,7 @@ function updateCursor() {
       hoveredArrow = "left";
     }
 
-    //freccia dx
+    // freccia dx
     if (mouseX > rightFrameX &&
         mouseX < rightFrameX + rightArrowWidth + framePadding*2 &&
         mouseY > leftFrameY &&
