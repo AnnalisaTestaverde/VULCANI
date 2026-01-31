@@ -29,6 +29,7 @@ const CONFIG = {
     marginX: 40,
     startButtonY: 720,
     labelFontSize: 16,
+    navbarHeight: 70,
   },
 };
 
@@ -148,6 +149,11 @@ function findDataRowIndexFast(name, number) {
   return -1;
 }
 
+function convertTo2026Dollars(damageValue) {
+  if (!damageValue || damageValue === 0 || isNaN(damageValue)) return 0;
+  return damageValue * INFLATION_FACTOR;
+}
+
 //trova demage
 function formatDamageValue(damageValue) {
   if (
@@ -159,6 +165,8 @@ function formatDamageValue(damageValue) {
     return "Details not available";
   }
 
+  // Usa la funzione globale o quella definita localmente se accessibile, 
+  // ma per sicurezza qui replichiamo il calcolo standard:
   let value = damageValue * INFLATION_FACTOR;
 
   if (value < 2.4) {
@@ -174,7 +182,12 @@ function formatDamageValue(damageValue) {
 
 //testo dettagliato (spiegazione range da 1 a 4)
 function getDetailText(value, descCode, type) {
-  if (value && value !== "" && value !== "0") {
+  // LOGICA DI SKETCH_DETAIL.JS:
+  // Se 'value' contiene testo (es. "$5 million"), isNaN è true.
+  // Quindi !isNaN è false, e il codice salta questo return e va alla tabella sotto.
+  // Questo garantisce che vengano mostrate le descrizioni generiche (es. "Severe...")
+  // invece di un calcolo puntuale potenzialmente errato.
+  if (value !== "" && value !== 0 && !isNaN(value)) {
     return value;
   }
 
@@ -235,9 +248,14 @@ function buildChartDataFromRow(i) {
   let missingVal = Number(data.getString(i, "Missing Description"));
   let impactVal = Number(data.getString(i, "Impact"));
 
+  // Logica identica a sketch_detail.js per il valore del grafico
   let dmgValForChart = 0;
   if (!isNaN(dmgVal) && dmgVal > 0) {
-    dmgValForChart = constrain(Math.round(dmgVal), 0, 4);
+    dmgValForChart = constrain(
+      Math.round(convertTo2026Dollars(dmgVal)), 
+      0,
+      CONFIG.chartLevels
+    );
   }
 
   deathVal = isNaN(deathVal) ? 0 : deathVal;
@@ -247,10 +265,10 @@ function buildChartDataFromRow(i) {
   missingVal = isNaN(missingVal) ? 0 : missingVal;
   impactVal = isNaN(impactVal) ? 0 : impactVal;
 
-  deathVal = constrain(Math.round(deathVal), 0, 4);
-  injVal = constrain(Math.round(injVal), 0, 4);
-  houseVal = constrain(Math.round(houseVal), 0, 4);
-  missingVal = constrain(Math.round(missingVal), 0, 4);
+  deathVal = constrain(Math.round(deathVal), 0, CONFIG.chartLevels);
+  injVal = constrain(Math.round(injVal), 0, CONFIG.chartLevels);
+  houseVal = constrain(Math.round(houseVal), 0, CONFIG.chartLevels);
+  missingVal = constrain(Math.round(missingVal), 0, CONFIG.chartLevels);
 
   let formattedDamage = "Details not available";
   if (strDmg && strDmg.trim() !== "") {
@@ -269,17 +287,13 @@ function buildChartDataFromRow(i) {
     house: houseVal,
     missing: missingVal,
     impact: impactVal,
-    rawDeath:
-      strDeath === "" ? getDetailText(strDeath, deathVal, "deaths") : strDeath,
-    rawInj: strInj === "" ? getDetailText(strInj, injVal, "injuries") : strInj,
+    rawDeath: strDeath === "" || strDeath === "Details not available" ? "Details not available" : strDeath,
+    rawInj: strInj === "" || strInj === "Details not available" ? "Details not available" : strInj,
     rawDmg: formattedDamage,
-    rawHouse:
-      strHouse === "" ? getDetailText(strHouse, houseVal, "houses") : strHouse,
-    rawMissing:
-      strMissing === ""
-        ? getDetailText(strMissing, missingVal, "missing")
-        : strMissing,
+    rawHouse: strHouse === "" || strHouse === "Details not available" ? "Details not available" : strHouse,
+    rawMissing: strMissing === "" || strMissing === "Details not available" ? "Details not available" : strMissing,
     originalDmgValue: dmgVal,
+    convertedDmgValue: convertTo2026Dollars(dmgVal),
   };
 }
 
@@ -414,16 +428,14 @@ function draw() {
 
 //grafico colori opposti di quello di detail
 function drawImpactChart(d) {
+  let tooltipText = "";
+
   push();
 
-  let chartSize = CONFIG.chartSize;
-  let chartXPercent = CONFIG.chartXPercent;
-  let chartYPercent = CONFIG.chartYPercent;
-
-  let panelW = chartSize + 60;
-  let panelH = chartSize + 60;
-  let px = width * chartXPercent - panelW / 2;
-  let py = height * chartYPercent - panelH / 2;
+  let panelW = CONFIG.chartSize + 40;
+  let panelH = CONFIG.chartSize + 40;
+  let px = width * CONFIG.chartXPercent - panelW / 2;
+  let py = height * CONFIG.chartYPercent - panelH / 2;
 
   noFill();
   noStroke();
@@ -447,13 +459,13 @@ function drawImpactChart(d) {
     "Missing",
   ];
 
-  //quali dati sono disponibili
+  // USA LA STESSA LOGICA DI sketch_detail.js
   const isDataAvailable = [
-    !(d.death === 0 && d.rawDeath.includes("not available")),
-    !(d.inj === 0 && d.rawInj.includes("not available")),
-    !(d.dmg === 0 && d.rawDmg.includes("not available")),
-    !(d.house === 0 && d.rawHouse.includes("not available")),
-    !(d.missing === 0 && d.rawMissing.includes("not available")),
+    !(d.death === 0 && d.rawDeath === "Details not available"),
+    !(d.inj === 0 && d.rawInj === "Details not available"),
+    !(d.dmg === 0 && d.rawDmg === "Details not available"),
+    !(d.house === 0 && d.rawHouse === "Details not available"),
+    !(d.missing === 0 && d.rawMissing === "Details not available"),
   ];
 
   let animationProgress = getAnimationProgress();
@@ -461,12 +473,13 @@ function drawImpactChart(d) {
   let mx = mouseX - cx;
   let my = mouseY - cy;
   let mDist = dist(0, 0, mx, my);
+
   let mAngle = atan2(my, mx);
   if (mAngle < 0) mAngle += TWO_PI;
 
   let sectionAngle = TWO_PI / 5;
-  let hoveredSection = -1;
 
+  let hoveredSection = -1;
   if (mDist < maxChartRadius && mDist > 20) {
     let sectionIndex = floor(mAngle / sectionAngle);
     let localAngle = mAngle % sectionAngle;
@@ -476,7 +489,7 @@ function drawImpactChart(d) {
     }
   }
 
-  //sezioni con dati disponibili
+  // SEZIONI CON DATI DISPONIBILI - COLORI INVERTITI: BIANCO invece di ROSSO
   for (let i = 0; i < 5; i++) {
     if (!isDataAvailable[i]) continue;
 
@@ -503,14 +516,14 @@ function drawImpactChart(d) {
           animatedOuterR = outerR;
         }
 
-        //dati disponibili bianchi
+        // COLORE INVERTITO: BIANCO invece di ROSSO
         fill(CONFIG.colors.chartAvailable);
         stroke(CONFIG.colors.chartAvailable);
         strokeWeight(1);
         drawArcSegment(innerR, animatedOuterR, start, end);
       } else {
         noFill();
-        //bordo dati disponibili
+        // COLORE INVERTITO: BIANCO invece di ROSSO
         stroke(CONFIG.colors.chartAvailable);
         strokeWeight(1);
         drawArcSegment(innerR, outerR, start, end);
@@ -518,7 +531,7 @@ function drawImpactChart(d) {
     }
   }
 
-  //dati non disponibili grigio scuro
+  // SEZIONI SENZA DATI DISPONIBILI - GRIGIO SCURO invece di GRIGIO CHIARO
   for (let i = 0; i < 5; i++) {
     if (isDataAvailable[i]) continue;
 
@@ -547,7 +560,7 @@ function drawImpactChart(d) {
       drawingContext.clip();
 
       let patternSpacing = 6;
-      //pattern linee grigio scuro
+      // COLORE GRIGIO SCURO
       let lineColor = color(CONFIG.colors.chartUnavailable);
       lineColor.setAlpha(150);
 
@@ -586,17 +599,16 @@ function drawImpactChart(d) {
       drawingContext.restore();
 
       noFill();
-      //bordo griglio scuro spicchio
+      // BORDO GRIGIO SCURO invece di GRIGIO CHIARO
       stroke(CONFIG.colors.chartUnavailable);
       strokeWeight(1);
       drawArcSegment(innerR, outerR, start, end);
     }
   }
 
-  let detailMaxWidth = 130;
-  let lineHeight = 16;
+  // ETICHETTE - USA LA STESSA LOGICA DI sketch_detail.js
+  let detailMaxWidth = 110; // Stessa larghezza di sketch_detail.js
 
-  //etichette intorno agli spicchi
   for (let i = 0; i < 5; i++) {
     let start = sectionAngle * i + gapAngle / 2;
     let end = sectionAngle * (i + 1) - gapAngle / 2;
@@ -604,44 +616,44 @@ function drawImpactChart(d) {
     textStyle(NORMAL);
     noStroke();
 
-    let ang = (start + end) / 2;
-    let lx = cos(ang) * (CONFIG.chartSize / 2 + 60);
-    let ly = sin(ang) * (CONFIG.chartSize / 2 + 55);
-
-    //titolo categoria spicchio
+    // Titolo categoria - COLORE INVERTITO
+    if (!isDataAvailable[i]) {
+      // Grigio scuro per dati non disponibili
+      fill(CONFIG.colors.labelUnavailableText);
+    } else {
+      // Nero per dati disponibili (in sketch_detail.js era nero)
+      fill(CONFIG.colors.labelAvailableText);
+    }
+    
     textSize(CONFIG.chartLabelSize);
     textAlign(CENTER, CENTER);
     textStyle(BOLD);
 
-    if (!isDataAvailable[i]) {
-      //etichette grigie per dati not available
-      fill(CONFIG.colors.labelUnavailableText);
-    } else {
-      //etichette nero per dati disponibili
-      fill(CONFIG.colors.labelAvailableText);
-    }
+    let ang = (start + end) / 2;
+    let lx = cos(ang) * (CONFIG.chartSize / 2 + 70);
+    let ly = sin(ang) * (CONFIG.chartSize / 2 + 70);
 
-    text(labels[i], lx, ly - 25);
+    text(labels[i], lx, ly - 20);
 
     if (isDataAvailable[i]) {
       let levelValue = values[i];
       let levelText = "Impact: " + levelValue;
 
-      //valore impact bianco
+      // Impact value - COLORE INVERTITO: BIANCO invece di ROSSO
       fill(CONFIG.colors.chartAvailable);
       textSize(CONFIG.chartLabelSize);
       textStyle(BOLD);
-      text(levelText, lx, ly - 5);
+      text(levelText, lx, ly - 3);
 
-      //testo descrizione dettagliata
+      // Testo dettagliato - USA getDetailText() come in sketch_detail.js
       let detailText = "";
-      if (i === 0) detailText = d.rawDeath;
-      else if (i === 1) detailText = d.rawInj;
-      else if (i === 2) detailText = d.rawDmg;
-      else if (i === 3) detailText = d.rawHouse;
-      else if (i === 4) detailText = d.rawMissing;
+      if (i === 0) detailText = getDetailText(d.rawDeath, d.death, "deaths");
+      else if (i === 1) detailText = getDetailText(d.rawInj, d.inj, "injuries");
+      else if (i === 2) detailText = getDetailText(d.rawDmg, d.dmg, "damage");
+      else if (i === 3) detailText = getDetailText(d.rawHouse, d.house, "houses");
+      else if (i === 4) detailText = getDetailText(d.rawMissing, d.missing, "missing");
 
-      //testo nero dettaglio se dati disponibili
+      // Testo dettaglio - COLORE INVERTITO: NERO invece di NERO (rimane uguale)
       fill(CONFIG.colors.labelAvailableText);
       textSize(CONFIG.chartLabelSize);
       textStyle(NORMAL);
@@ -650,7 +662,7 @@ function drawImpactChart(d) {
       let textY = ly + 7;
       text(detailText, lx - detailMaxWidth / 2, textY, detailMaxWidth);
     } else {
-      //titolo grigio per sezioni senza dati disponibili
+      // Testo "Details not available" per sezioni senza dati
       fill(CONFIG.colors.labelUnavailableText);
       textSize(CONFIG.chartLabelSize);
       textStyle(NORMAL);
@@ -668,51 +680,42 @@ function drawImpactChart(d) {
 
   pop();
 
-  push();
-  noStroke();
-  fill(CONFIG.colors.text);
-  textSize(CONFIG.chartTitleSize);
-  textAlign(RIGHT, CENTER);
-  textStyle(BOLD);
-
-  let totalImpactText = "Total impact level: " + d.impact;
-
-  //posizionamento grafico
-  let scaleFactor = calculateScaleFactor();
-  scaleFactor = constrain(scaleFactor, 0.7, 1.5);
-
-  //margine dx
-  let totalImpactX = width - CONFIG.layout.marginX;
-
-  //pos y sotto navbar
-  const navbarHeight = 70;
-  let totalImpactY = navbarHeight + 30 * scaleFactor;
-
-  //testo
-  text(totalImpactText, totalImpactX, totalImpactY);
-
-  textStyle(NORMAL);
-  pop();
-
-  //tooltip descrizione
-  let tooltipText = "";
+  // Tooltip hover - USA formatDamageValue() come in sketch_detail.js
   if (hoveredSection !== -1 && isDataAvailable[hoveredSection]) {
     if (hoveredSection === 0) {
-      tooltipText = d.rawDeath;
+      tooltipText = getDetailText(d.rawDeath, d.death, "deaths");
     } else if (hoveredSection === 1) {
-      tooltipText = d.rawInj;
+      tooltipText = getDetailText(d.rawInj, d.inj, "injuries");
     } else if (hoveredSection === 2) {
-      tooltipText = d.rawDmg;
+      // USA formatDamageValue() COME IN sketch_detail.js
+      tooltipText = formatDamageValue(d.originalDmgValue);
     } else if (hoveredSection === 3) {
-      tooltipText = d.rawHouse;
+      tooltipText = getDetailText(d.rawHouse, d.house, "houses");
     } else if (hoveredSection === 4) {
-      tooltipText = d.rawMissing;
+      tooltipText = getDetailText(d.rawMissing, d.missing, "missing");
     }
   }
 
   if (tooltipText !== "" && !tooltipText.includes("not available")) {
     drawTooltip(tooltipText);
   }
+
+  // Total impact level - COLORE INVERTITO: NERO invece di ROSSO
+  push();
+  noStroke();
+  fill(CONFIG.colors.text); // Nero invece di rosso
+  textSize(CONFIG.chartTitleSize);
+  textAlign(RIGHT, CENTER);
+  textStyle(BOLD);
+
+  let totalImpactText = "Total impact level: " + d.impact;
+  let totalImpactX = width - CONFIG.layout.marginX;
+  let totalImpactY = CONFIG.layout.navbarHeight + 30 * scaleFactor;
+
+  text(totalImpactText, totalImpactX, totalImpactY);
+
+  textStyle(NORMAL);
+  pop();
 }
 
 function drawArcSegment(r1, r2, start, end) {
@@ -1018,55 +1021,6 @@ function drawMethodologyButton() {
     width: buttonWidth,
     height: buttonHeight,
   };
-}
-
-//segmento ad arco
-function drawArcSegment(r1, r2, start, end) {
-  beginShape();
-  for (let a = start; a <= end; a += 0.01) {
-    vertex(cos(a) * r2, sin(a) * r2);
-  }
-  for (let a = end; a >= start; a -= 0.01) {
-    vertex(cos(a) * r1, sin(a) * r1);
-  }
-  endShape(CLOSE);
-}
-
-//tooltip
-function drawTooltip(txt) {
-  push();
-  textSize(CONFIG.chartTooltipTextSize);
-  let w = textWidth(txt) + 20;
-  let h = 34;
-
-  fill(255);
-  stroke(CONFIG.chartMainColor);
-  rect(mouseX + 15, mouseY - 10, w, h, 6);
-
-  fill(0);
-  noStroke();
-  textAlign(LEFT, CENTER);
-  text(txt, mouseX + 25, mouseY + 8);
-  pop();
-}
-
-//animazioni
-function startAnimation() {
-  state.isAnimating = true;
-  state.animationStartTime = millis();
-}
-
-function getAnimationProgress() {
-  if (!state.isAnimating) return 1.0;
-
-  let elapsed = millis() - state.animationStartTime;
-  let progress = constrain(elapsed / 1000, 0, 1);
-
-  if (progress >= 1.0) {
-    state.isAnimating = false;
-  }
-
-  return progress;
 }
 
 //cursore a manina per l'hober
