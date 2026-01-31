@@ -1,4 +1,4 @@
-// SEZIONI - configurazione per visualizzazione sezioni 
+//configurazione delle varie sezioni della pagina
 const sections = [
     {
         id: 1,
@@ -26,7 +26,7 @@ const sections = [
     }
 ];
 
-// VARIABILI GLOBALI
+//variabili globali 
 let currentSectionId = 1;
 let textScrollArea = null;
 let scrollHint = null;
@@ -34,53 +34,47 @@ let isScrolling = false;
 let scrollTimeout = null;
 let p5Sketch = null;
 
-// INIZIALIZZAZIONE - vari elementi
+//inizializza la pagina quando è pronta
 document.addEventListener('DOMContentLoaded', function() {
     console.log("=== INIZIALIZZAZIONE PAGINA METHODOLOGY ===");
     
-    // (!) PAGINA
-    initializePage();
-    
-    // (!!) P5.js IN MODALITÀ STATICA
+    initializePage();    
     setTimeout(initializeStaticP5, 100);
 });
 
-// (!)
+//funzione principale che prepara la pagina
 function initializePage() {
-    // Salvataggio riferimenti agli elementi
+    //trova gli elementi importanti della pagina
     textScrollArea = document.querySelector('.text-content');
     scrollHint = document.getElementById('text-scroll-hint');
     
-    // Setup event listeners
+    //attiva tutti i controlli della pagina
     setupEventListeners();
     
-    // Setup bottone
+    //configura il pulsante principale
     setupLearnMoreButton();
     
-    // Inizializzazione sezione corrente
+    //mostra la prima sezione
     updateSection(currentSectionId);
 }
 
-// (!!) P5.js - STATO DEFINITIVO
+//serve per creare lo sfondo animato con pallini fissi
 function initializeStaticP5() {
     if (typeof p5 === 'undefined') {
         console.error("P5.js non trovato");
         return;
     }
     
-    // a. BLOCCO - animazioni esistenti
+    //ferma eventuali animazioni precedenti
     stopAllP5Animations();
     
-    // b. CREAZIONE SKETCH STATICO
+    //crea una nuova animazione statica
     p5Sketch = new p5((p) => {
-        // Variabili con coordinate fisse
         let staticDots = [];
         let canvasElement = null;
         
-        // 1. FUNZIONE SETUP
+        //questo configura il canvas per l'animazione
         p.setup = function() {
-            
-            // Calcolo dimensioni
             const header = document.querySelector('header');
             const footer = document.getElementById('html-footer');
             
@@ -89,72 +83,58 @@ function initializeStaticP5() {
                 return;
             }
             
+            //calcola l'altezza corretta per il canvas
             const headerHeight = header.offsetHeight;
             const footerTop = footer.offsetTop;
             const canvasHeight = footerTop - headerHeight;
             
-            // Creaziine canvas
+            //crea il canvas con le dimensioni calcolate
             canvasElement = p.createCanvas(window.innerWidth, canvasHeight);
             
-            // APPLICAZIONE STILI CRITICI
+            //posiziona il canvas dietro il contenuto
             canvasElement.position(0, headerHeight);
             canvasElement.style('position', 'fixed');
             canvasElement.style('z-index', '-100');
             canvasElement.style('pointer-events', 'none');
             
-            // BLOCCO MOVIMENTI
-            canvasElement.style('transform', 'translate3d(0,0,0)');
-            canvasElement.style('will-change', 'auto');
-            canvasElement.style('backface-visibility', 'hidden');
-            
-            /* NAVIGAZIONE 
-            - creazione pallini con coordinate fisse */
+            //crea i pallini per lo sfondo
             createStaticDots(p);
             
-            // Disegna UNA VOLTA
+            //disegna l'animazione una sola volta
             drawOnce(p);
             
-            // FONDAMENTALE! DISABILITAZIONE LOOP
+            //ferma l'animazione automatica
             p.noLoop();
             
-            /* SOSTITUZIONE FUNZIONE DRAW 
-            - sovrascrittura del draw */
+            //impedisce che l'animazione riparta
             Object.defineProperty(p, 'draw', {
                 value: function() {
-                    // !! NON deve mai essere eseguita
                     console.error("ATTENZIONE: draw() è stata chiamata!");
                     return;
                 },
                 writable: false,
                 configurable: false
             });
-            
         };
         
-        // 2. CREAZIONE PALLINI NAV. FISSI
+        //questa funzione crea i pallini statici per lo sfondo
         function createStaticDots(p) {
             staticDots = [];
             const dotCount = 45;
             
             for (let i = 0; i < dotCount; i++) {
-                // Coordinate FISSE nella memoria - nessun movimento
                 staticDots.push({
                     x: p.random(p.width),
                     y: p.random(p.height),
                     size: p.random(1.5, 4),
-                    alpha: p.random(20, 35),
-                    // NESSUNA proprietà di movimento!
+                    alpha: p.random(20, 35)
                 });
             }
         }
         
-        // 3. DISEGNA UNA VOLTA
+        //questa funzione disegna i pallini sullo schermo
         function drawOnce(p) {
-            
-            // pulizia
             p.clear();
-            
-            // Disegno pallino con coordinate FISSE
             p.push();
             p.noStroke();
             
@@ -166,7 +146,7 @@ function initializeStaticP5() {
             p.pop();
         }
         
-        // 4. GESTIONE RESIZE
+        //ridimensiona il canvas quando cambia la finestra
         p.windowResized = function() {
             console.log("📐 Ridimensionamento finestra");
             
@@ -181,23 +161,18 @@ function initializeStaticP5() {
             const footerTop = footer.offsetTop;
             const canvasHeight = footerTop - headerHeight;
             
-            // Ridimensionamento
             p.resizeCanvas(window.innerWidth, canvasHeight);
             canvasElement.style('top', headerHeight + 'px');
             
-            // Ricreazione pallini per le nuove dimensioni
             createStaticDots(p);
-            
-            // Ridisegno UNA volta
             drawOnce(p);
         };
         
-        // 5. DEBUG: MONITORA LO SCROLL
+        //poi controlla che il canvas resti nella posizione corretta
         window.addEventListener('scroll', function() {
             if (canvasElement) {
                 const rect = canvasElement.elt.getBoundingClientRect();
                 
-                // Se il canvas si è mosso, riposizionamento corretto
                 if (rect.top !== parseInt(canvasElement.style('top'))) {
                     const header = document.querySelector('header');
                     if (header) {
@@ -206,13 +181,11 @@ function initializeStaticP5() {
                 }
             }
         });
-        
     });
 }
 
-// !! BLOCCO DI TUTTE LE ANIMAZIONI P5.JS
+//ferma tutte le animazioni precedenti
 function stopAllP5Animations() {
-    // (1): Disabilitazione istanze globali
     if (window.p5 && window.p5.instance) {
         try {
             window.p5.instance.noLoop();
@@ -222,18 +195,16 @@ function stopAllP5Animations() {
         }
     }
     
-    // (2): Disabilitazione funzioni requestAnimationFrame
     const originalRAF = window.requestAnimationFrame;
     window.requestAnimationFrame = function(callback) {
         console.warn("requestAnimationFrame BLOCCATA per prevenire animazioni");
-        return 0; // Restituisce ID invalido
+        return 0;
     };
     
-    // (3): Disabilitazione setInterval per animazioni
     const intervals = [];
     const originalSetInterval = window.setInterval;
     window.setInterval = function(callback, delay) {
-        if (delay < 1000) { // Blocca intervalli rapidi
+        if (delay < 1000) {
             console.warn(`setInterval(${delay}ms) BLOCCATO per prevenire animazioni`);
             return 0;
         }
@@ -241,11 +212,10 @@ function stopAllP5Animations() {
     };
 }
 
-// AGGIUNTA CSS CHE BLOCCA ANIMAZIONI
+//aggiunge stili CSS per bloccare animazioni indesiderate
 function addAnimationBlockingCSS() {
     const style = document.createElement('style');
     style.textContent = `
-        /* BLOCCA TUTTE LE ANIMAZIONI CANVAS */
         canvas {
             animation: none;
             transition: none;
@@ -253,7 +223,6 @@ function addAnimationBlockingCSS() {
             will-change: auto;
         }
         
-        /* ASSICURA CHE IL CANVAS P5 SIA FISSO */
         .p5Canvas {
             position: fixed;
             top: 90px;
@@ -263,7 +232,6 @@ function addAnimationBlockingCSS() {
             pointer-events: none;
         }
         
-        /* DISABILITA TRANSFORMAZIONI CSS */
         * {
             backface-visibility: hidden;
             perspective: 1000px;
@@ -272,19 +240,16 @@ function addAnimationBlockingCSS() {
     document.head.appendChild(style);
 }
 
-// EVENT LISTENER
+//attiva tutti i controlli interattivi della pagina
 function setupEventListeners() {
-    // Scroll del mouse sull'area di testo
     if (textScrollArea) {
         textScrollArea.addEventListener('scroll', handleTextScroll);
     }
     
-    // Click sulla freccia di scroll
     if (scrollHint) {
         scrollHint.addEventListener('click', handleScrollHintClick);
     }
     
-    // Click sui pallini FISSI di navigazione
     document.querySelectorAll('.fixed-dot').forEach(dot => {
         dot.addEventListener('click', function(e) {
             e.preventDefault();
@@ -299,10 +264,10 @@ function setupEventListeners() {
     
     document.addEventListener('keydown', handleKeyDown);
     
-    // CSS anti-animazione
     addAnimationBlockingCSS();
 }
 
+//configura il pulsante principale del learn more
 function setupLearnMoreButton() {
     const button = document.getElementById('learn-more-btn');
     if (!button) return;
@@ -323,7 +288,7 @@ function setupLearnMoreButton() {
     });
 }
 
-// GESTIONE SCROLL TESTO - scroll vari
+//questa funzione è per lo scroll nel pannello di testo
 function handleTextScroll() {
     if (!textScrollArea || isScrolling) return;
     
@@ -333,12 +298,9 @@ function handleTextScroll() {
         const scrollHeight = textScrollArea.scrollHeight;
         const clientHeight = textScrollArea.clientHeight;
         
-        // (1) Calcolo con OFFSET AUMENTATO!
         const sectionHeight = (scrollHeight - clientHeight) / 3;
         let newSectionId = currentSectionId;
         
-        /* OFFSET (correzioni varie + modifica da r.388)
-        - IMPOSTATO +150 per migliore funzionam. */
         if (scrollTop < sectionHeight + 150) {
             newSectionId = 1;
         } else if (scrollTop < (sectionHeight * 2) + 150) {
@@ -353,20 +315,18 @@ function handleTextScroll() {
     }, 100);
 }
 
-/* SCROLL - freccia */
+//questa gestisce il click sulla freccia di scroll
 function handleScrollHintClick() {
     if (isScrolling) return;
     
     if (currentSectionId === sections.length) {
-        // Se ultima sezione, torna alla prima
         scrollToSection(1);
     } else {
-        // Altrimenti prossima
         scrollToSection(currentSectionId + 1);
     }
 }
 
-/* SCROLL - alle diverse sezioni */
+//per scorrere alla sezione specificata
 function scrollToSection(sectionId) {
     if (!textScrollArea || sectionId < 1 || sectionId > sections.length) return;
     
@@ -378,7 +338,6 @@ function scrollToSection(sectionId) {
         return;
     }
     
-    // (2) Calcolo con OFFSET AUMENTATO!
     const scrollHeight = textScrollArea.scrollHeight;
     const clientHeight = textScrollArea.clientHeight;
     const maxScroll = scrollHeight - clientHeight;
@@ -386,43 +345,35 @@ function scrollToSection(sectionId) {
     
     let targetScroll;
     
-    // !! POSIZIONI AGGIORNATE CON OFFSET
     switch(sectionId) {
-        // (1) - leggera correzione
         case 1:
             targetScroll = 0 - 10;
             break;
-        // (2) - utile per evitare taglio titolo da parte della nav
         case 2:
-            targetScroll = sectionHeight - 90 ; 
+            targetScroll = sectionHeight - 90;
             break;
-        // (3) - correzione per minore spazio scroll
         case 3:
-            targetScroll = (sectionHeight * 2) + 155; //
+            targetScroll = (sectionHeight * 2) + 155;
             break;
         default:
             targetScroll = 0;
     }
     
-    // ! LIMITA AL MASSIMO SCROLL POSSIBILE
     targetScroll = Math.min(maxScroll, targetScroll);
     
-    // Aggiornamento immediato di sezione
     updateSection(sectionId);
     
-    // Scroll alla posizione calcolata
     textScrollArea.scrollTo({
         top: targetScroll,
         behavior: 'smooth'
     });
     
-    // Rilascio lock dopo lo scroll
     setTimeout(() => {
         isScrolling = false;
     }, 600);
 }
 
-// FUNZIONI DI AGGIORNAMENTO
+//aggiorna tutti gli elementi della sezione corrente
 function updateSection(sectionId) {
     currentSectionId = sectionId;
     const section = sections.find(s => s.id === sectionId);
@@ -436,6 +387,7 @@ function updateSection(sectionId) {
     updateScrollHint();
 }
 
+//cambia il titolo e sottotitolo della sezione
 function updateTitle(title, subtitle) {
     const titleElement = document.getElementById('dynamic-title');
     const subtitleElement = document.getElementById('dynamic-subtitle');
@@ -454,6 +406,7 @@ function updateTitle(title, subtitle) {
     }, 400);
 }
 
+//cambia l'immagine della sezione per mettere quella relativa
 function updateImage(imageId) {
     document.querySelectorAll('.methodology-image').forEach(img => {
         img.classList.remove('active');
@@ -465,6 +418,7 @@ function updateImage(imageId) {
     }
 }
 
+//aggiorna il pulsante con testo e link corretti
 function updateButton(buttonText, buttonLink) {
     const button = document.getElementById('learn-more-btn');
     if (!button) return;
@@ -484,6 +438,7 @@ function updateButton(buttonText, buttonLink) {
     });
 }
 
+//aggiorna i pallini di navigazione laterali
 function updateFixedDots(sectionId) {
     document.querySelectorAll('.fixed-dot').forEach(dot => {
         const dotSectionId = parseInt(dot.getAttribute('data-section'));
@@ -495,21 +450,20 @@ function updateFixedDots(sectionId) {
     });
 }
 
+//aggiorna la freccia di scroll in base alla sezione
 function updateScrollHint() {
     if (!scrollHint) return;
     
     if (currentSectionId === sections.length) {
-        // Ultima sezione: freccia ruotata (v specchiata)
         scrollHint.classList.add('flipped');
         scrollHint.title = "Torna all'inizio";
     } else {
-        // Altre sezioni: freccia normale
         scrollHint.classList.remove('flipped');
         scrollHint.title = "Vai alla prossima sezione";
     }
 }
 
-// GESTIONE TASTI
+//questa serve per gestire la navigazione da tastiera
 function handleKeyDown(e) {
     switch(e.key) {
         case 'ArrowDown':
@@ -579,7 +533,7 @@ function handleKeyDown(e) {
     }
 }
 
-// UTILITY DEBUG
+//funzione di debug per controllare lo stato dell'animazione
 window.debugP5 = function() {
     console.log("=== DEBUG P5.js ===");
     console.log("Sketch attivo:", p5Sketch ? "Sì" : "No");
@@ -596,12 +550,9 @@ window.debugP5 = function() {
     }
 };
 
-// ESPORTO FUNZIONI
+//espone le funzioni principali all'esterno
 window.methodology = {
-    // chiamata scroll to section
     scrollToSection,
-    // ritorno valore
     currentSection: () => currentSectionId,
-    // marcata disponibilità methodology
     debugP5: window.debugP5
 };

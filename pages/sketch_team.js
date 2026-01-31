@@ -1,5 +1,7 @@
+//array per immagini del team
 let imgs = [];
 
+//nostri nomi 
 let names = [
   "Alice Comini",
   "Matilde Curino", 
@@ -9,6 +11,7 @@ let names = [
   "Annalisa Testaverde"
 ];
 
+//ruoli e responsabilità di ogni membro
 let roles = [
   "Frontend Development, \nData Visualization & Map-making.",
   "Data Analysis & Visualization,\nIllustrations and Debugging.",
@@ -18,10 +21,10 @@ let roles = [
   "Web Support, Learn More \nand Call Management."
 ];
 
-/*IMMAGINI - array per regolare ogni immagine 
-all'interno del cerchio */
+//varie configurazioni per visualizzare correttamente ogni immagine
 let displayConfigs = [];
 
+//carica le immagini
 function preload() {
   imgs[0] = loadImage("../assets/alice.png");
   imgs[1] = loadImage("../assets/mati.png");
@@ -31,84 +34,88 @@ function preload() {
   imgs[5] = loadImage("../assets/annalisa.png");
 }
 
+//configura la pagina iniziale
 function setup() {
-  // calcolo dell'altezza del contenuto
+  //calcola quanto deve essere alta la pagina
   const contentHeight = calculateContentHeight();
   
-  // creazione canvas con altezza calcolata
+  //poi crea l'area di disegno con le dimensioni corrette
   let canvas = createCanvas(window.innerWidth, contentHeight);
   canvas.parent('sketch-container');
   
-  // stili per il canvas
+  //stili per posizionare correttamente l'area di disegno
   canvas.style('display', 'block');
   canvas.style('position', 'relative');
   canvas.style('width', '100%');
   canvas.style('height', contentHeight + 'px');
   
+  //imposta il font e l'allineamento del testo
   textFont("Helvetica");
   textAlign(CENTER);
   
-  // configurazione per ogni immagine!
+  //configura come mostrare ogni immagine
   setupImageConfigs();
 }
 
+//qui definiamo come mostrare ogni foto nel cerchio
 function setupImageConfigs() {
-  // IMMAGINI - aggiustamento dimensioni
   displayConfigs = [
-    { scale: 1.15, offsetY: -15, offsetX: 0 },   // alice
-    { scale: 1.00, offsetY: 0, offsetX: 0 },   // matilde
-    { scale: 1.15, offsetY: 0, offsetX: 0 },   // greta
-    { scale: 0.90, offsetY: 0, offsetX: 0 },   // carlo
-    { scale: 1.40, offsetY: 0, offsetX: 0 },   // ilaria
-    { scale: 1.15, offsetY: 0, offsetX: 0 }    // annalisa
+    { scale: 1.15, offsetY: -15, offsetX: 0 },   // Alice
+    { scale: 1.00, offsetY: 0, offsetX: 0 },     // Matilde
+    { scale: 1.15, offsetY: 0, offsetX: 0 },     // Greta
+    { scale: 0.90, offsetY: 0, offsetX: 0 },     // Carlo
+    { scale: 1.40, offsetY: 0, offsetX: 0 },     // Ilaria
+    { scale: 1.15, offsetY: 0, offsetX: 0 }      // Annalisa
   ];
 }
 
+//funzione che disegna tutto sullo schermo
 function draw() {
+  //sfondo bianco
   background(255);
-  
+  //titoli pagina
   drawTitles();
-  
+  //membri del team
   drawMembers();
 }
 
-/* TESTO - per titolo e testi */
-
+//disegna il titolo e la descrizione della pagina
 function drawTitles() {
   textAlign(CENTER);
 
+  //titolo principale
   fill(0);
   textSize(48);
   textStyle(BOLD);
   text("TEAM'S PROJECT", width / 2, 100);
 
+  //sottotitolo in rosso
   fill("#FF2B00");
   textSize(28);
   text("THE PEOPLE WHO MADE IT POSSIBLE.", width / 2, 150);
 
+  //descrizione del team (generale)
   fill(50);
   textSize(16);
   textStyle(NORMAL);
-
-  let t = "Hi! We are second-year students of Communication Design from Section C2\nof the Computer Graphics Laboratory course at Politecnico di Milano.";
-  
-  text(t, width / 2, 200);
+  let teamDescription = "Hi! We are second-year students of Communication Design from Section C2\nof the Computer Graphics Laboratory course at Politecnico di Milano.";
+  text(teamDescription, width / 2, 200);
 }
 
-/* GRIGLIA MEMBRI - per disposizione team */
-
+//disegnamo ora tutti i membri del team in una griglia
 function drawMembers() {
-  // layout fisso per desktop
+  //layout fisso per desktop
   let cols = 3;
   let colW = 320;
   let rowH = 380;
   let startY = 280;
   let circleRadius = 100;
   
-  // calcolo delle colonne (dimensione, posizionamento etc.)
+  //calcola dove iniziare a disegnare per centrare la griglia
   let totalW = cols * colW;
   let startX = (width - totalW) / 2;
 
+  //per disegnare ogni membro del team
   for (let i = 0; i < names.length; i++) {
     let col = i % cols;
     let row = floor(i / cols);
@@ -119,26 +126,23 @@ function drawMembers() {
     let centerX = x + colW / 2;
     let imgCenterY = y + circleRadius + 20;
 
-    /* 1. CREAZIONE CERCHIO
-    - rendo il cerchio bianco per inserimento immagine 
-    e coprire eventuali parti scoperte */
+    //ora disegna il cerchio bianco dove andrà la foto
     fill(255);
     noStroke();
     ellipse(centerX, imgCenterY, circleRadius * 2, circleRadius * 2);
 
-    /* 2. IMMAGINE
-    - riempimento del cerchio con le immagini */
+    //poi metti l'immagine del membro del team
     if (imgs[i]) {
       push();
       imageMode(CENTER);
       
-      // maschera circolare
+      //creiamo una maschera circolare per l'immagine
       drawingContext.save();
       drawingContext.beginPath();
       drawingContext.arc(centerX, imgCenterY, circleRadius, 0, TWO_PI);
       drawingContext.clip();
 
-      // calcolo delle dimensioni per riempimento
+      //poi calcoliamo le dimensioni per far entrare l'immagine nel cerchio
       let img = imgs[i];
       let config = displayConfigs[i] || { scale: 1.0, offsetY: 0, offsetX: 0 };
       
@@ -147,21 +151,16 @@ function drawMembers() {
       
       let displayW, displayH;
       
-      /* !! PATTERN - moltiplico per 1.1 in modo da
-        avere l'immagine leggermente più grande del cerchio
-        in entrambi i casi */
+      //e ora adattiamo l'immagine al cerchio
       if (imgRatio > 1) {
-        // se l'immagine è più larga, calcolo l'altezza
         displayW = targetDiameter * 1.1 * config.scale;
         displayH = displayW / imgRatio;
       } else {
-        // se l'immagine è più alta, calcolo la larghezza
         displayH = targetDiameter * 1.1 * config.scale;
         displayW = displayH * imgRatio;
       }
       
-      /* posizionamento dell'immagine al centro 
-      con eventuali offset */
+      //poi disegnamo l'immagine centrata nel cerchio
       image(img, 
             centerX + config.offsetX, 
             imgCenterY + config.offsetY, 
@@ -171,20 +170,21 @@ function drawMembers() {
       drawingContext.restore();
       pop();
       
-      // 3. CONTORNO: aggiunta per marcare leggermente il cerchio
+      //aggiunge un sottilissimo contorno al cerchio
       stroke(240);
       strokeWeight(0.5);
       noFill();
       ellipse(centerX, imgCenterY, circleRadius * 2, circleRadius * 2);
     }
 
-    // STILE - testi nomi e ruoli
+    //mettiamo il nome 
     fill(0);
     textSize(18);
     textStyle(BOLD);
     let nameY = y + circleRadius * 2 + 60;
     text(names[i], centerX, nameY);
     
+    //descriviamo il ruolo 
     fill(100);
     textSize(14);
     textStyle(NORMAL);
@@ -193,7 +193,7 @@ function drawMembers() {
   }
 }
 
-// ALTEZZA - calcolo dell'altezza del contenuto
+//funzione che calcola quanto deve essere alta tutta la pagina
 function calculateContentHeight() {
   const titleHeight = 250;
   const membersHeight = calculateMembersHeight();
@@ -202,7 +202,7 @@ function calculateContentHeight() {
   return titleHeight + membersHeight + footerSpace;
 }
 
-// ALTEZZA - calcolo altezza membri
+//e poi calcola quanto spazio serve per mostrare tutti i membri
 function calculateMembersHeight() {
   let cols = 3;
   let rowH = 380;
