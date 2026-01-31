@@ -7,8 +7,8 @@ let typingSpeed = 1.5;
 let frameCounter = 0;
 
 //animazione frecce
-let upBounds = { x: 0, y: 0, w: 0, h: 0 };    //freccia su
-let downBounds = { x: 0, y: 0, w: 0, h: 0 };  //freccia giù
+let upBounds = { x: 0, y: 0, w: 0, h: 0 }; //freccia su
+let downBounds = { x: 0, y: 0, w: 0, h: 0 }; //freccia giù
 
 //hover
 let isHovering = false;
@@ -16,12 +16,26 @@ let isHovering = false;
 //array per parole bianche
 let slides = [
   {
-    lines: ["Volcanic eruptions in our dataset are", "described through an impact score."],
-    highlightedWords: ["impact score"]
+    lines: [
+      "Volcanic eruptions in our dataset are",
+      "described through an impact score.",
+    ],
+    highlightedWords: ["impact score"],
   },
   {
-    lines: ["Each eruption's impact is based on five", "factors: deaths, injuries, missing, houses", "destroyed, and economic damage."],
-    highlightedWords: ["deaths", "injuries", "missing", "houses", "destroyed", "economic damage"]
+    lines: [
+      "Each eruption's impact is based on five",
+      "factors: deaths, injuries, missing, houses",
+      "destroyed, and economic damage.",
+    ],
+    highlightedWords: [
+      "deaths",
+      "injuries",
+      "missing",
+      "houses",
+      "destroyed",
+      "economic damage",
+    ],
   },
   {
     lines: [
@@ -31,48 +45,53 @@ let slides = [
       "houses destroyed, and economic damage).",
       "The score ranges from 1 to 16, with higher",
       "values representing eruptions with greater",
-      "overall severity."
+      "overall severity.",
     ],
-    highlightedWords: ["total impact score", "five factor levels", "score ranges", "1 to 16"]
-  }
+    highlightedWords: [
+      "total impact score",
+      "five factor levels",
+      "score ranges",
+      "1 to 16",
+    ],
+  },
 ];
 
 function addHTMLStructure() {
   //indicatori schermata pallini
-  const indicatorContainer = document.createElement('div');
-  indicatorContainer.className = 'screen-indicator';
+  const indicatorContainer = document.createElement("div");
+  indicatorContainer.className = "screen-indicator";
   indicatorContainer.innerHTML = `
     <div class="screen-dot active" data-screen="0"></div>
     <div class="screen-dot" data-screen="1"></div>
     <div class="screen-dot" data-screen="2"></div>
   `;
   document.body.appendChild(indicatorContainer);
-  
+
   //contenitore frecce
-  const arrowsContainer = document.createElement('div');
-  arrowsContainer.className = 'arrows-container';
+  const arrowsContainer = document.createElement("div");
+  arrowsContainer.className = "arrows-container";
   document.body.appendChild(arrowsContainer);
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  
+
   //prima inizializza le frecce
   updateArrowsVisibility();
-  
+
   //poi inizia la digitazione
   startTyping();
-  
+
   addHTMLStructure();
-  
+
   setupEventListeners();
 }
 
 function draw() {
-  background(255, 43, 0); 
+  background(255, 43, 0);
 
   let current = slides[currentSlide];
-  let fullMain = current.lines.join('\n');
+  let fullMain = current.lines.join("\n");
   let fullCaption = current.caption || "";
 
   if (isTyping) {
@@ -105,7 +124,7 @@ function draw() {
   let displayCaption = fullCaption.substring(0, typedCaption);
   drawMultilineText(displayMain, displayCaption, width / 2);
 
-  //bottone alla fine "Explore all eruptions"
+  //bottone alla fine explore all eruptions
   if (currentSlide === slides.length - 1 && !isTyping) {
     drawExploreButton();
   }
@@ -113,7 +132,7 @@ function draw() {
 
 function drawMultilineText(displayMain, displayCaption, xCenter) {
   let current = slides[currentSlide];
-  let displayedMainLines = displayMain.split('\n');
+  let displayedMainLines = displayMain.split("\n");
   let fullLines = current.lines;
   let highlightedWords = current.highlightedWords || [];
 
@@ -125,7 +144,7 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
 
   textSize(mainSize);
   textStyle(BOLD);
-  
+
   //larghezza max del testo
   let maxWidthMain = 0;
   for (let line of fullLines) {
@@ -145,65 +164,73 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
 
   let totalMainHeight = fullLines.length * mainLineHeight;
   let hasCaption = !!current.caption;
-  let totalHeight = totalMainHeight + (hasCaption ? captionSpacing + captionLineHeight : 0);
+  let totalHeight =
+    totalMainHeight + (hasCaption ? captionSpacing + captionLineHeight : 0);
   let startY = height / 2 - totalHeight / 2;
 
   textAlign(LEFT, TOP);
   textSize(mainSize);
   textStyle(BOLD);
-  
-  //digita ogni riga 
+
+  //digita ogni riga
   for (let i = 0; i < fullLines.length; i++) {
     let lineToShow = i < displayedMainLines.length ? displayedMainLines[i] : "";
     let lineText = fullLines[i];
     let lineY = startY + i * mainLineHeight;
     let currentX = xStart;
-    
-    // Controlla quali parole sono già state digitate in questa linea
+
+    //controlla le parole digitate
     let typedInThisLine = displayedMainLines[i] || "";
-    
+
     //testo processato carattere x carattere
     for (let charIndex = 0; charIndex < lineText.length; charIndex++) {
       let char = lineText[charIndex];
-      let typedChar = charIndex < typedInThisLine.length ? typedInThisLine[charIndex] : "";
-      
+      let typedChar =
+        charIndex < typedInThisLine.length ? typedInThisLine[charIndex] : "";
+
       if (typedChar === "") break; //non disegnare caratteri non digitati
-      
+
       //controllo se il carattere va evidenziato
       let shouldHighlight = false;
-      
+
       if (currentSlide === 1 && (i === 1 || i === 2)) {
         if (i === 1 && lineText.includes("destroyed")) {
           let destroyedPos = lineText.indexOf("destroyed");
-          if (charIndex >= destroyedPos && charIndex < destroyedPos + "destroyed".length) {
+          if (
+            charIndex >= destroyedPos &&
+            charIndex < destroyedPos + "destroyed".length
+          ) {
             if (typedInThisLine.length > destroyedPos) {
               shouldHighlight = true;
             }
           }
         } else if (i === 2 && lineText.includes("houses")) {
           let housesPos = lineText.indexOf("houses");
-          if (charIndex >= housesPos && charIndex < housesPos + "houses".length) {
+          if (
+            charIndex >= housesPos &&
+            charIndex < housesPos + "houses".length
+          ) {
             if (typedInThisLine.length > housesPos) {
               shouldHighlight = true;
             }
           }
         }
       }
-      
+
       if (!shouldHighlight) {
         //cerca tutte le parole evidenziate per vedere se il carattere ne fa parte
         for (let hw of highlightedWords) {
           if (hw === "houses destroyed" && currentSlide === 1) continue;
-          
+
           let hwLower = hw.toLowerCase();
           let lineLower = lineText.toLowerCase();
-          
+
           //trova tutte le occorrenze di questa parola nella linea
           let startIndex = 0;
           while (true) {
             let pos = lineLower.indexOf(hwLower, startIndex);
             if (pos === -1) break;
-            
+
             //se il carattere corrente è dentro questa occorrenza
             if (charIndex >= pos && charIndex < pos + hw.length) {
               //controlla se abbiamo digitato abbastanza caratteri
@@ -217,13 +244,13 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
           if (shouldHighlight) break;
         }
       }
-      
+
       if (shouldHighlight) {
         fill(255); //testo bianco parole evidenziate
       } else {
         fill(0); //testo nero parole normali
       }
-      
+
       //disegna il carattere
       text(typedChar, currentX, lineY);
       currentX += textWidth(typedChar);
@@ -239,48 +266,48 @@ function drawMultilineText(displayMain, displayCaption, xCenter) {
   }
 }
 
-//bottone "Explore all eruptions"
+//bottone explore all eruptions
 function drawExploreButton() {
   const buttonWidth = 220;
   const buttonHeight = 40;
   const buttonX = width / 2 - buttonWidth / 2;
   const buttonY = height - 100;
-  
+
   //scala hover
   const scale = isHovering ? 1.05 : 1.0;
   const scaledW = buttonWidth * scale;
   const scaledH = buttonHeight * scale;
   const scaledX = buttonX - (scaledW - buttonWidth) / 2;
   const scaledY = buttonY - (scaledH - buttonHeight) / 2;
-  
+
   if (isHovering) {
-    //stato hover: sfondo bianco, testo e contorno rosso
+    //stato hover: sfondo bianco testo e contorno rosso
     fill(255); //sfondo bIANCO
-    stroke(255, 43, 0); //stroke rosso 
+    stroke(255, 43, 0); //stroke rosso
     strokeWeight(1);
     rect(scaledX, scaledY, scaledW, scaledH, 5);
 
-    //testo "Explore all eruptions" 
+    //testo explore all eruptions
     fill(255, 43, 0);
     noStroke();
     textSize(18);
     textStyle(BOLD);
     textAlign(CENTER, CENTER);
-    text("Explore all eruptions", scaledX + scaledW/2, scaledY + scaledH/2);
+    text("Explore all eruptions", scaledX + scaledW / 2, scaledY + scaledH / 2);
   } else {
-    //stato normale: contorno bianco, sfondo trasparente, testo bianco
+    //stato normale: contorno bianco sfondo trasparente testo bianco
     noFill();
     stroke(255);
     strokeWeight(1);
     rect(scaledX, scaledY, scaledW, scaledH, 5);
 
-    //testo "Explore all eruptions" in bianco
+    //testo explore all eruptions in bianco
     fill(255);
     noStroke();
     textSize(18);
     textStyle(BOLD);
     textAlign(CENTER, CENTER);
-    text("Explore all eruptions", scaledX + scaledW/2, scaledY + scaledH/2);
+    text("Explore all eruptions", scaledX + scaledW / 2, scaledY + scaledH / 2);
   }
 
   //aggiorna animazione freccia con il click
@@ -292,16 +319,16 @@ function drawExploreButton() {
 
 //event listener
 function setupEventListeners() {
-  // Scroll del mouse
-  window.addEventListener('wheel', handleScroll, { passive: false });
-  
+  //scroll mouse
+  window.addEventListener("wheel", handleScroll, { passive: false });
+
   //tasti frecce
-  document.addEventListener('keydown', handleKeyDown);
-  
-  //click 
-  document.querySelectorAll('.screen-dot').forEach(dot => {
-    dot.addEventListener('click', function() {
-      const slideIndex = parseInt(this.getAttribute('data-screen'));
+  document.addEventListener("keydown", handleKeyDown);
+
+  //click
+  document.querySelectorAll(".screen-dot").forEach((dot) => {
+    dot.addEventListener("click", function () {
+      const slideIndex = parseInt(this.getAttribute("data-screen"));
       if (slideIndex !== currentSlide) {
         goToSlide(slideIndex);
       }
@@ -313,20 +340,20 @@ function setupEventListeners() {
 function completeTyping() {
   if (isTyping) {
     let current = slides[currentSlide];
-    typedMain = current.lines.join('\n').length;
+    typedMain = current.lines.join("\n").length;
     typedCaption = (current.caption || "").length;
     isTyping = false;
     frameCounter = 0;
-    //aggiorna frecce 
+    //aggiorna frecce
     updateArrowsVisibility();
   }
 }
 
 //tasti freccia gestione
 function handleKeyDown(e) {
-  switch(e.key) {
-    case 'ArrowDown':
-    case 'PageDown':
+  switch (e.key) {
+    case "ArrowDown":
+    case "PageDown":
       e.preventDefault();
       if (isTyping) {
         completeTyping();
@@ -334,9 +361,9 @@ function handleKeyDown(e) {
         goToSlide(currentSlide + 1);
       }
       break;
-      
-    case 'ArrowUp':
-    case 'PageUp':
+
+    case "ArrowUp":
+    case "PageUp":
       e.preventDefault();
       if (isTyping) {
         completeTyping();
@@ -344,8 +371,8 @@ function handleKeyDown(e) {
         goToSlide(currentSlide - 1);
       }
       break;
-      
-    case 'ArrowRight':
+
+    case "ArrowRight":
       e.preventDefault();
       if (isTyping) {
         completeTyping();
@@ -353,8 +380,8 @@ function handleKeyDown(e) {
         goToSlide(currentSlide + 1);
       }
       break;
-      
-    case 'ArrowLeft':
+
+    case "ArrowLeft":
       e.preventDefault();
       if (isTyping) {
         completeTyping();
@@ -362,9 +389,9 @@ function handleKeyDown(e) {
         goToSlide(currentSlide - 1);
       }
       break;
-      
-    case ' ':
-    case 'Enter':
+
+    case " ":
+    case "Enter":
       e.preventDefault();
       if (isTyping) {
         completeTyping();
@@ -372,13 +399,17 @@ function handleKeyDown(e) {
         goToSlide(currentSlide + 1);
       }
       break;
-      
-    case '1':
-    case '2':
-    case '3':
+
+    case "1":
+    case "2":
+    case "3":
       e.preventDefault();
       const slideIndex = parseInt(e.key) - 1;
-      if (slideIndex >= 0 && slideIndex < slides.length && slideIndex !== currentSlide) {
+      if (
+        slideIndex >= 0 &&
+        slideIndex < slides.length &&
+        slideIndex !== currentSlide
+      ) {
         if (isTyping) {
           completeTyping();
         }
@@ -390,8 +421,13 @@ function handleKeyDown(e) {
 
 //andare alla slide specifica
 function goToSlide(slideIndex) {
-  if (slideIndex < 0 || slideIndex >= slides.length || slideIndex === currentSlide) return;
-  
+  if (
+    slideIndex < 0 ||
+    slideIndex >= slides.length ||
+    slideIndex === currentSlide
+  )
+    return;
+
   currentSlide = slideIndex;
   startTyping();
   updateScreenIndicator();
@@ -401,9 +437,9 @@ function goToSlide(slideIndex) {
 //scrolling del mouse
 function handleScroll(e) {
   e.preventDefault();
-  
+
   const delta = e.deltaY;
-  
+
   if (delta > 0 && currentSlide < slides.length - 1) {
     if (!isTyping) {
       goToSlide(currentSlide + 1);
@@ -421,7 +457,7 @@ function mousePressed() {
     completeTyping();
     return;
   }
-  
+
   //click bottone finale
   if (currentSlide === slides.length - 1) {
     if (
@@ -447,50 +483,50 @@ function mouseMoved() {
     ) {
       if (!isHovering) {
         isHovering = true;
-        document.body.style.cursor = 'pointer';
+        document.body.style.cursor = "pointer";
         redraw();
       }
       return;
     } else {
       if (isHovering) {
         isHovering = false;
-        document.body.style.cursor = 'default';
+        document.body.style.cursor = "default";
         redraw();
       }
     }
   }
 
   if (!isHovering) {
-    document.body.style.cursor = 'default';
+    document.body.style.cursor = "default";
   }
 }
 
 //aggiorna i pallini per in numero di pagina corrente
 function updateScreenIndicator() {
-  const dots = document.querySelectorAll('.screen-dot');
+  const dots = document.querySelectorAll(".screen-dot");
   dots.forEach((dot, index) => {
     if (index === currentSlide) {
-      dot.classList.add('active');
+      dot.classList.add("active");
     } else {
-      dot.classList.remove('active');
+      dot.classList.remove("active");
     }
   });
 }
 
 function updateArrowsVisibility() {
-  const arrows = document.querySelector('.arrows-container');
+  const arrows = document.querySelector(".arrows-container");
   if (arrows) {
-    arrows.innerHTML = '';
-    
+    arrows.innerHTML = "";
+
     //si vedono le frecce sono le non si sta digitando il testo o se siamo all'ultima slide
     if (!isTyping || currentSlide === slides.length - 1) {
       //freccia su solo se non siamo nella prima slide
       if (currentSlide > 0) {
-        const upArrow = document.createElement('div');
-        upArrow.className = 'scroll-hint up-arrow';
-        upArrow.innerHTML = 'V';
+        const upArrow = document.createElement("div");
+        upArrow.className = "scroll-hint up-arrow";
+        upArrow.innerHTML = "V";
         //event listener al click
-        upArrow.addEventListener('click', function(e) {
+        upArrow.addEventListener("click", function (e) {
           e.preventDefault();
           e.stopPropagation();
           if (currentSlide > 0) {
@@ -502,14 +538,14 @@ function updateArrowsVisibility() {
         });
         arrows.appendChild(upArrow);
       }
-      
+
       //freccia giù solo se non siamo nell'ultima slide
       if (currentSlide < slides.length - 1) {
-        const downArrow = document.createElement('div');
-        downArrow.className = 'scroll-hint down-arrow';
-        downArrow.innerHTML = 'V';
+        const downArrow = document.createElement("div");
+        downArrow.className = "scroll-hint down-arrow";
+        downArrow.innerHTML = "V";
         //event listener al click
-        downArrow.addEventListener('click', function(e) {
+        downArrow.addEventListener("click", function (e) {
           e.preventDefault();
           e.stopPropagation();
           if (currentSlide < slides.length - 1) {
@@ -540,7 +576,7 @@ function windowResized() {
 }
 
 function addInlineStyles() {
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = `
     .screen-indicator {
       position: fixed;
