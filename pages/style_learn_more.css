@@ -1,418 +1,272 @@
-/* 
- * ============================================
- * STILE PER "ABOUT THE GRAPHIC"
- * ============================================
- * Autore: [Nome Autore]
- * Data: [Data]
- * Versione: 1.1
- * Descrizione: Stile per la pagina informativa
- *               sul grafico delle eruzioni vulcaniche
- *               con testo formattato senza box e scrollbar nascosta
- * ============================================
- */
-
-/* 
- * ===== RESET E STILI BASE =====
- * Rimuove margini e padding predefiniti del browser
- * Imposta il font di base e lo sfondo arancione
- * Nasconde le scrollbar globali
- */
-body, html {
-    margin: 0;                     /* Rimuove margini predefiniti */
-    padding: 0;                    /* Rimuove padding predefiniti */
-    overflow: hidden;              /* Nasconde le scrollbar globali */
-    font-family: 'Helvetica', Arial, sans-serif; /* Font principale */
-    background-color: #FF2B00;     /* Sfondo arancione fisso */
+body,
+html {
+  margin: 0; 
+  padding: 0; 
+  overflow: hidden; 
+  font-family: "Helvetica", Arial, sans-serif; 
+  background-color: #ff2b00; 
 }
 
-/* 
- * ===== CANVAS P5.JS =====
- * Posiziona il canvas in background, sotto tutto
- * Imposta posizione assoluta e z-index basso
- */
 canvas {
-    display: block;                /* Rimuove spazi bianchi sotto il canvas */
-    position: absolute;            /* Posizionamento assoluto */
-    top: 0;                        /* Allineato alla cima */
-    left: 0;                       /* Allineato a sinistra */
-    z-index: 1;                    /* Sotto il contenuto testuale */
+  display: block; 
+  position: absolute; 
+  top: 0; 
+  left: 0; 
+  z-index: 1; 
 }
 
-/* 
- * ===== CONTAINER TESTO A SINISTRA =====
- * Contenitore principale per il testo a sinistra
- * Posizionato a sinistra con dimensioni fisse
- * Altezza ridotta per accorciare il box
- */
 #text-container {
-    position: absolute;            /* Posizionamento assoluto */
-    top: 250px;                    /* Distanza dal bordo superiore */
-    left: 40px;                    /* Distanza dal bordo sinistro */
-    width: 600px;                  /* Larghezza fissa */
-    height: 450px;                 /* Altezza ridotta (prima era 550px) */
-    z-index: 2;                    /* Sopra il canvas */
-    pointer-events: auto;          /* Permette interazioni */
-    background-color: transparent; /* Sfondo trasparente */
+  position: absolute; 
+  top: 250px; 
+  left: 40px; 
+  width: 600px; 
+  height: 450px; 
+  z-index: 2; 
+  pointer-events: auto; 
+  background-color: transparent; 
 }
 
-/* 
- * ===== AREA DI SCROLL =====
- * Area scrollabile per il testo
- * Scrollbar nascosta per estetica
- * Margine inferiore ridotto per accorciare il box
- */
 #text-scroll-area {
-    position: relative;            /* Posizione relativa */
-    width: 100%;                   /* Larghezza completa */
-    height: 95%;                  /* Altezza completa */
-    overflow-y: auto;              /* Abilita scroll verticale */
-    padding-right: 8px;            /* Spazio per evitare sovrapposizioni */
-    margin-bottom: 40px;           /* Spazio per la freccia in basso */
-    
-    /* Nasconde la scrollbar in tutti i browser */
-    scrollbar-width: none;         /* Per Firefox */
-    -ms-overflow-style: none;      /* Per Internet Explorer e Edge */
+  position: relative; 
+  width: 100%; 
+  height: 95%; 
+  overflow-y: auto; 
+  padding-right: 8px; 
+  margin-bottom: 40px; 
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* Nasconde la scrollbar in WebKit (Chrome, Safari, Edge) */
 #text-scroll-area::-webkit-scrollbar {
-    display: none;                 /* Nasconde completamente la scrollbar */
+  display: none; 
 }
 
-/* 
- * ===== CONTENUTO TESTO =====
- * Area principale per il testo
- * Testo nero con interlinea leggibile
- * Padding ridotto in basso (box accorciato)
- */
 #text-content {
-    width: 100%;                   /* Larghezza completa */
-    color: #000000;                /* Testo nero (come richiesto) */
-    font-size: 16px;               /* Dimensione font leggibile */
-    font-weight: bold;
-    line-height: 1.6;              /* Interlinea più leggibile */
-    padding-bottom: 80px;          /* Spazio finale ridotto (prima era 100px) */
+  width: 100%; 
+  color: #000000; 
+  font-size: 16px; 
+  font-weight: bold;
+  line-height: 1.6; 
+  padding-bottom: 80px; 
 }
 
-/* 
- * ===== SEZIONI E TITOLI =====
- * Stile per i titoli delle sezioni
- * Testo bianco in grassetto come nell'originale
- */
 .section-title {
-    font-size: 24px;               /* Dimensione media */
-    color: #FFFFFF;                /* Titoli in bianco */
-    margin-top: 40px;              /* Spaziatura superiore maggiore */
-    margin-bottom: 20px;           /* Spaziatura inferiore */
+  font-size: 24px; 
+  color: #ffffff; 
+  margin-top: 40px;
+  margin-bottom: 20px; 
 }
 
-/* 
- * ===== PRIMA SEZIONE SENZA MARGINE SUPERIORE =====
- * Il primo titolo non ha margine superiore
- */
 .section-title:first-child {
-    margin-top: 0;                 /* Nessun margine sopra il primo titolo */
+  margin-top: 0; 
 }
 
-/* 
- * ===== TESTO NORMALE =====
- * Stile per il testo normale dei paragrafi
- * Testo nero con spaziatura tra paragrafi
- */
 .section-text {
-    margin-bottom: 20px;           /* Spaziatura tra paragrafi */
-    color: #000000;                /* Testo nero (come richiesto) */
+  margin-bottom: 20px; 
+  color: #000000; 
 }
 
-/* 
- * ===== EVIDENZIAZIONI TESTO =====
- * Testo in grassetto bianco per termini importanti
- * Sostituisce i box per evidenziare i termini
- */
 .bold-white {
-    font-weight: bold;             /* Grassetto */
-    color: #FFFFFF;                /* Bianco per evidenziare */
+  font-weight: bold; 
+  color: #ffffff; 
 }
 
-/* 
- * ===== TESTO IN GRASSETTO NERO =====
- * Per enfatizzare parti specifiche in nero
- */
 .bold-black {
-    font-weight: bold;             /* Grassetto */
-    color: #000000;                /* Nero */
+  font-weight: bold; 
+  color: #000000; 
 }
 
-/* 
- * ===== LISTA INDICATORI IMPATTO =====
- * Elenco puntato degli indicatori (sostituisce i box)
- * Nessun box, solo elenco pulito
- */
 .impact-list {
-    margin: 25px 0;                /* Margini verticali */
-    padding-left: 40px;            /* Indentazione standard per liste */
-    color: #000000;                /* Testo nero */
+  margin: 25px 0; 
+  padding-left: 40px; 
+  color: #000000; 
 }
 
-/* 
- * ===== ELEMENTI LISTA IMPATTO =====
- * Singoli elementi della lista indicatori
- * Margine inferiore per separazione
- */
 .impact-list li {
-    margin-bottom: 15px;           /* Spazio tra elementi della lista */
-    line-height: 1.6;              /* Interlinea coerente con il testo */
+  margin-bottom: 15px; 
+  line-height: 1.6; 
 }
 
-/* 
- * ===== LISTA CONTROLLI =====
- * Elenco puntato dei controlli (sostituisce i box)
- * Stile coerente con la lista indicatori
- */
 .controls-list {
-    margin: 25px 0;                /* Margini verticali */
-    padding-left: 20px;            /* Indentazione standard per liste */
-    list-style-type: disc;         /* Puntini per lista */
-    color: #000000;                /* Testo nero */
+  margin: 25px 0; 
+  padding-left: 20px; 
+  list-style-type: disc; 
+  color: #000000; 
 }
 
-/* 
- * ===== ELEMENTI LISTA CONTROLLI =====
- * Singoli elementi della lista controlli
- * Margine inferiore per separazione
- */
 .controls-list li {
-    margin-bottom: 20px;           /* Spazio tra elementi della lista */
-    line-height: 1.6;              /* Interlinea coerente con il testo */
+  margin-bottom: 20px; 
+  line-height: 1.6; 
 }
 
-/* 
- * ===== CANVAS PER RAPPRESENTAZIONI P5.JS =====
- * Container per i canvas p5.js che disegnano le rappresentazioni
- * Mantiene lo sfondo semi-trasparente per visibilità
- */
 .p5-representation {
-    position: relative;            /* Posizione relativa per contenere il canvas */
-    width: 100%;                   /* Larghezza completa */
-    height: 80px;                  /* Altezza fissa */
-    margin: 25px 0;                /* Margini verticali */
-    background-color: rgba(255, 255, 255, 0.1); /* Sfondo semi-trasparente */
-    border-radius: 8px;            /* Angoli arrotondati leggeri */
-    overflow: hidden;              /* Contiene il canvas */
+  position: relative;
+  width: 100%; 
+  height: 80px; 
+  margin: 25px 0; 
+  background-color: rgba(255, 255, 255, 0.1); 
+  border-radius: 8px;
+  overflow: hidden; 
 }
 
-/* 
- * ===== CONTAINER LEGGENDA =====
- * Stile per il container della leggenda
- * Margini ridotti per avvicinare al testo
- */
 #legend-container {
-    margin: 1px auto !important;    /* Margine ridotto sopra/sotto */
-    width: 400px;                     /* Larghezza fissa */
-    height: 200px;                    /* Altezza fissa */
-    position: relative;               /* Posizione relativa */
-    background-color: transparent;    /* Sfondo trasparente */
-    display: block;                   /* Elemento di blocco */
+  margin: 1px auto !important; 
+  width: 400px; 
+  height: 200px;
+  position: relative; 
+  background-color: transparent; 
+  display: block; 
 }
 
-/* 
- * ===== CANVAS DELLA LEGGENDA =====
- * Assicura che il canvas non abbia margini extra
- */
 #legend-container canvas {
-    margin: 0;                       /* Rimuove margini */
-    padding: 0;                      /* Rimuove padding */
-    display: block;                  /* Elemento di blocco */
+  margin: 0; 
+  padding: 0;
+  display: block; 
 }
 
-/* 
- * ===== FRECCIA PER INDICARE LO SCROLL =====
- * Freccia al centro in basso del container del testo
- * Sostituisce la freccia precedente che era dentro l'area di scroll
- */
 #scroll-hint {
-    position: absolute;            /* Posizionamento assoluto */
-    bottom: -30px;                  /* Distanza dal fondo del container */
-    left: 50%;                     /* Centrato orizzontalmente */
-    transform: translateX(-50%);   /* Compensa il 50% per centrare */
-    color: #FFFFFF;                /* Bianco */
-    font-size: 28px;               /* Dimensione grande per visibilità */
-    animation: bounce 2s infinite; /* Animazione di rimbalzo */
-    pointer-events: none;          /* Non interferisce con interazioni */
-    z-index: 3;                    /* Sopra il contenuto */
+  position: absolute; 
+  bottom: -30px; 
+  left: 50%; 
+  transform: translateX(-50%); 
+  color: #ffffff; 
+  font-size: 28px; 
+  animation: bounce 2s infinite;
+  pointer-events: none; 
+  z-index: 3; 
 }
 
-/* 
- * ===== FRECCIA PER INDICARE LO SCROLL =====
- * Freccia nera con animazione di rimbalzo (stile del codice fornito)
- */
 #scroll-hint {
-    position: absolute;            /* Posizionamento assoluto */
-    bottom: -40px;                  /* Distanza dal fondo del container (aumentata) */
-    left: 50%;                     /* Centrato orizzontalmente */
-    transform: translateX(-50%);   /* Compensa il 50% per centrare */
-    color: #000000;                /* NERO (come nel codice fornito) */
-    font-size: 40px;               /* Dimensione grande (40px come nel codice) */
-    font-weight: bold;             /* Grassetto (come nel codice) */
-    text-align: center;            /* Testo centrato */
-    cursor: pointer;               /* Cursore a mano (interattivo) */
-    z-index: 3;                    /* Sopra il contenuto */
-    width: 40px;                   /* Larghezza fissa (per il click area) */
-    height: 40px;                  /* Altezza fissa (per il click area) */
-    animation: bounce 2s infinite; /* Animazione di rimbalzo identica */
-    pointer-events: auto;          /* Permette interazioni (differente dal codice fornito) */
+  position: absolute;
+  bottom: -40px; 
+  left: 50%; 
+  transform: translateX(-50%); 
+  color: #000000; 
+  font-size: 40px; 
+  font-weight: bold; 
+  text-align: center; 
+  cursor: pointer; 
+  z-index: 3; 
+  width: 40px; 
+  height: 40px; 
+  animation: bounce 2s infinite; 
+  pointer-events: auto; 
 }
 
-/* 
- * ===== ANIMAZIONE DELLA FRECCIA =====
- * Animazione di rimbalzo identica a quella del codice fornito
- */
 @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateX(-50%) translateY(0); /* Posizione normale */
-    }
-    40% {
-        transform: translateX(-50%) translateY(-15px); /* Sollevamento identico */
-    }
-    60% {
-        transform: translateX(-50%) translateY(-7px);  /* Mezzo sollevamento identico */
-    }
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateX(-50%) translateY(0); 
+  }
+  40% {
+    transform: translateX(-50%) translateY(-15px); 
+  }
+  60% {
+    transform: translateX(-50%) translateY(-7px); 
+  }
 }
 
-/* 
- * ===== BOTTONI FINALI =====
- * Container per i bottoni che appare alla fine dello scroll
- * Stile simile al bottone "Go to the map" del codice fornito
- */
 #buttons-container {
-    position: absolute;            /* Posizionamento assoluto */
-    bottom: 100px;                 /* Distanza dal fondo della pagina (come "Go to the map") */
-    left: 20%;                     /* Centrato orizzontalmente */
-    transform: translateX(-50%);   /* Centra il container */
-    width: auto;                   /* Larghezza automatica */
-    z-index: 3;                    /* Sopra tutto */
-    display: none;                 /* Nascosto inizialmente */
-    flex-direction: column;        /* Disposizione verticale */
-    align-items: center;           /* Centra orizzontalmente */
-    pointer-events: auto;          /* Permette interazioni */
-    background-color: transparent; /* Sfondo trasparente */
-    padding: 0;                    /* Nessun padding */
+  position: absolute;
+  bottom: 100px;
+  left: 20%; 
+  transform: translateX(-50%); 
+  width: auto; 
+  z-index: 3; 
+  display: none; 
+  flex-direction: column; 
+  align-items: center; 
+  pointer-events: auto;
+  background-color: transparent; 
+  padding: 0; 
 }
 
-/* 
- * ===== RIGA BOTTONI =====
- * Container per i bottoni affiancati
- */
 .buttons-row {
-    display: flex;                 /* Disposizione orizzontale */
-    flex-direction: row;           /* Bottoni in riga */
-    align-items: center;           /* Centra verticalmente */
-    justify-content: center;       /* Centra orizzontalmente */
-    gap: 0;                        /* No gap diretto (usiamo spacer) */
+  display: flex; 
+  flex-direction: row; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 0; 
 }
 
-/* 
- * ===== SPAZIO TRA BOTTONI =====
- * Separatore tra i due bottoni
- */
 .button-spacer {
-    width: 40px;                   /* Spazio di 40px tra i bottoni */
-    height: 50px;                  /* Altezza uguale ai bottoni */
-    flex-shrink: 0;                /* Non si riduce */
+  width: 40px;
+  height: 50px;
+  flex-shrink: 0; 
 }
 
-/* 
- * ===== STILE BOTTONI =====
- * Bottoni neri con testo bianco e ombra diffusa (stile del codice fornito)
- */
 .bottom-button {
-    width: 200px;                  /* Larghezza fissa (200px come "Go to the map") */
-    height: 50px;                  /* Altezza fissa (50px come "Go to the map") */
-    background-color: #000000;     /* Sfondo NERO (come "Go to the map") */
-    color: #FFFFFF;                /* Testo BIANCO (come "Go to the map") */
-    border: none;                  /* Nessun bordo */
-    border-radius: 25px;           /* Angoli molto arrotondati */
-    font-size: 20px;               /* Testo grande */
-    font-weight: bold;             /* Grassetto */
-    cursor: pointer;               /* Cursore a mano */
-    display: flex;                 /* Flexbox per centrare */
-    align-items: center;           /* Centra verticalmente */
-    justify-content: center;       /* Centra orizzontalmente */
-    transition: all 0.3s ease;     /* Transizione fluida */
-    font-family: 'Helvetica', Arial, sans-serif; /* Font coerente */
-    position: relative;            /* Per posizionare l'ombra */
-    overflow: hidden;              /* Per contenere l'ombra */
-    flex-shrink: 0;                /* Non si riduce */
+  width: 200px;
+  height: 50px;
+  background-color: #000000;
+  color: #ffffff;
+  border: none;
+  border-radius: 25px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-family: "Helvetica", Arial, sans-serif;
+  position: relative; 
+  overflow: hidden; 
+  flex-shrink: 0; 
 }
 
-/* 
- * ===== OMBRA DIFFUSA PER BOTTONI =====
- * Ombra diffusa simile a quella del codice fornito
- */
 .bottom-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .bottom-button:hover::before {
-    opacity: 1;
+  opacity: 1;
 }
 
-/* 
- * ===== EFFETTO HOVER SUI BOTTONI =====
- * Leggero ingrandimento e ombra più evidente
- */
 .bottom-button:hover {
-    transform: scale(1.05);        /* Leggero ingrandimento */
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4); /* Ombra più evidente */
+  transform: scale(1.05);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4); 
 }
 
-/* 
- * ===== EFFETTO ATTIVO SUI BOTTONI =====
- * Leggera compressione al click
- */
 .bottom-button:active {
-    transform: scale(0.98);        /* Leggera compressione al click */
+  transform: scale(0.98); 
 }
 
-/* 
- * ===== RESPONSIVE DESIGN - BOTTONI AFFIANCATI =====
- * Adattamento per schermi più piccoli
- */
-
-/* Tablet e schermi medi (fino a 1200px) */
 @media (max-width: 1200px) {
-    #buttons-container {
-        left: 50%;                 /* Sempre centrato */
-        transform: translateX(-50%);
-    }
-    
-    .buttons-row {
-        gap: 20px;                 /* Riduce lo spazio tra bottoni */
-    }
-    
-    .button-spacer {
-        width: 20px;               /* Spazio ridotto */
-    }
+  #buttons-container {
+    left: 50%; 
+    transform: translateX(-50%);
+  }
+
+  .buttons-row {
+    gap: 20px; 
+  }
+
+  .button-spacer {
+    width: 20px; 
+  }
 }
 
-/* Schermi piccoli (fino a 900px) */
 @media (max-width: 900px) {
-    .bottom-button {
-        width: 180px;              /* Bottoni leggermente più stretti */
-        font-size: 18px;           /* Testo leggermente più piccolo */
-    }
-    
-    .button-spacer {
-        width: 15px;               /* Spazio ulteriormente ridotto */
-    }
+  .bottom-button {
+    width: 180px;
+    font-size: 18px; 
+  }
+
+  .button-spacer {
+    width: 15px;
+  }
 }
