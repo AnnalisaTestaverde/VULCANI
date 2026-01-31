@@ -36,8 +36,6 @@ let p5Sketch = null;
 
 //inizializza la pagina quando è pronta
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("=== INIZIALIZZAZIONE PAGINA METHODOLOGY ===");
-
   initializePage();
   setTimeout(initializeStaticP5, 100);
 });
@@ -61,7 +59,6 @@ function initializePage() {
 //serve per creare lo sfondo animato con pallini fissi
 function initializeStaticP5() {
   if (typeof p5 === "undefined") {
-    console.error("P5.js non trovato");
     return;
   }
 
@@ -79,7 +76,6 @@ function initializeStaticP5() {
       const footer = document.getElementById("html-footer");
 
       if (!header || !footer) {
-        console.error("Elementi DOM mancanti");
         return;
       }
 
@@ -109,7 +105,6 @@ function initializeStaticP5() {
       //impedisce che l'animazione riparta
       Object.defineProperty(p, "draw", {
         value: function () {
-          console.error("ATTENZIONE: draw() è stata chiamata!");
           return;
         },
         writable: false,
@@ -148,8 +143,6 @@ function initializeStaticP5() {
 
     //ridimensiona il canvas quando cambia la finestra
     p.windowResized = function () {
-      console.log("📐 Ridimensionamento finestra");
-
       if (!canvasElement) return;
 
       const header = document.querySelector("header");
@@ -189,15 +182,11 @@ function stopAllP5Animations() {
   if (window.p5 && window.p5.instance) {
     try {
       window.p5.instance.noLoop();
-      console.log("Disabilitato loop istanza globale P5.js");
-    } catch (e) {
-      console.log("Nessuna istanza globale da disabilitare");
-    }
+    } catch (e) {}
   }
 
   const originalRAF = window.requestAnimationFrame;
   window.requestAnimationFrame = function (callback) {
-    console.warn("requestAnimationFrame BLOCCATA per prevenire animazioni");
     return 0;
   };
 
@@ -205,7 +194,6 @@ function stopAllP5Animations() {
   const originalSetInterval = window.setInterval;
   window.setInterval = function (callback, delay) {
     if (delay < 1000) {
-      console.warn(`setInterval(${delay}ms) BLOCCATO per prevenire animazioni`);
       return 0;
     }
     return originalSetInterval.apply(this, arguments);
@@ -533,29 +521,8 @@ function handleKeyDown(e) {
   }
 }
 
-//funzione di debug per controllare lo stato dell'animazione
-window.debugP5 = function () {
-  console.log("=== DEBUG P5.js ===");
-  console.log("Sketch attivo:", p5Sketch ? "Sì" : "No");
-
-  if (p5Sketch) {
-    const canvas = document.querySelector(".p5Canvas");
-    if (canvas) {
-      const rect = canvas.getBoundingClientRect();
-      console.log("Canvas position:", canvas.style.position);
-      console.log("Canvas top:", canvas.style.top);
-      console.log("Bounding rect top:", rect.top);
-      console.log(
-        "Canvas si muove?",
-        rect.top !== parseInt(canvas.style.top || 0),
-      );
-    }
-  }
-};
-
 //espone le funzioni principali all'esterno
 window.methodology = {
   scrollToSection,
   currentSection: () => currentSectionId,
-  debugP5: window.debugP5,
 };
