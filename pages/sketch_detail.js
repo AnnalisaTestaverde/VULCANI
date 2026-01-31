@@ -133,7 +133,6 @@ let transitionState = {
 
 //img
 let worldMap;
-let bookIcon;
 let currentVolcanoImage = null;
 let imageCache = {};
 let imagesLoaded = false;
@@ -141,7 +140,6 @@ let imagesLoaded = false;
 function preload() {
   data = loadTable("../assets/data_impatto.csv", "csv", "header");
   worldMap = loadImage("../assets/Equirectangular_projection.jpg");
-  bookIcon = loadImage("../assets/book_icon.png");
 
   stratoImg = loadImage("../assets/stratovolcano.png");
   calderaImg = loadImage("../assets/caldera.png");
