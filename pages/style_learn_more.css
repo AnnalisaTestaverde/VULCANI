@@ -416,36 +416,3 @@ canvas {
         width: 15px;               /* Spazio ulteriormente ridotto */
     }
 }
-
-/* Mobile (fino a 600px) */
-@media (max-width: 600px) {
-    .buttons-row {
-        flex-direction: column;    /* Disposizione verticale su mobile */
-        gap: 15px;                 /* Spazio verticale tra bottoni */
-    }
-    
-    .button-spacer {
-        display: none;             /* Nasconde lo spacer su mobile */
-    }
-    
-    .bottom-button {
-        width: 250px;              /* Bottoni più larghi su mobile */
-        height: 45px;              /* Altezza leggermente ridotta */
-        font-size: 18px;           /* Testo più piccolo */
-    }
-    
-    #buttons-container {
-        bottom: 80px;              /* Più vicino al fondo su mobile */
-        width: 100%;               /* Larghezza completa */
-        padding: 0 20px;           /* Padding laterale */
-    }
-}
-
-/* Mobile molto piccolo (fino a 400px) */
-@media (max-width: 400px) {
-    .bottom-button {
-        width: 100%;               /* Bottoni a larghezza completa */
-        max-width: 280px;          /* Massimo 280px */
-        font-size: 16px;           /* Testo ancora più piccolo */
-    }
-}

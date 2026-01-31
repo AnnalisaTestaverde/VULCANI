@@ -29,6 +29,84 @@ const CONFIG = {
     }
 };
 
+// ===== SISTEMA RESPONSIVE IDENTICO A sketch_detail.js =====
+let scaleFactor = 1.0;
+
+// Calcolo del fattore di scala
+function calculateScaleFactor() {
+    const referenceWidth = 1920;
+    const referenceHeight = 1080;
+    
+    const widthRatio = windowWidth / referenceWidth;
+    const heightRatio = windowHeight / referenceHeight;
+    
+    return min(widthRatio, heightRatio);
+}
+
+// Applica scaling responsive
+function applyResponsiveScaling() {
+    const availableHeight = windowHeight - 70; // navbar height simile
+    const referenceAvailableHeight = 1080 - 70;
+    
+    scaleFactor = availableHeight / referenceAvailableHeight;
+    scaleFactor = constrain(scaleFactor, 0.7, 1.2);
+    
+    updateResponsiveDimensions();
+}
+
+// Aggiorna dimensioni responsive
+function updateResponsiveDimensions() {
+    // Posizione grafico (identica a sketch_detail.js)
+    let centerXRatio = 0.695;
+    
+    if (windowWidth > 1920) {
+        centerXRatio = 0.75;
+    } else if (windowWidth < 1366) {
+        centerXRatio = 0.65;
+    }
+    
+    // Centro Y grafico (identica a sketch_detail.js)
+    const centerYPercentage = 0.48;
+    let centerY;
+    
+    if (windowHeight > 1200) {
+        centerY = windowHeight * 0.46 + 25;
+    } else if (windowHeight < 800) {
+        centerY = windowHeight * 0.50 + 25;
+    } else {
+        centerY = windowHeight * centerYPercentage + 25;
+    }
+    
+    // Aggiorna posizione grafico in CONFIG
+    CONFIG.chartXPercent = centerXRatio; 
+    CONFIG.chartYPercent = centerY / windowHeight;
+    
+    // Scaling del grafico (identica a sketch_detail.js)
+    const graphScale = min(scaleFactor * 1.3, 1.2);
+    const baseSize = 400;
+    
+    const availableHeight = windowHeight - 70 - 100;
+    const availableWidth = windowWidth * 0.35;
+    
+    const targetSize = min(availableHeight, availableWidth);
+    
+    // Scale grafico 
+    CONFIG.chartSize = constrain(
+        targetSize * 0.8,
+        300 * graphScale, // min
+        500 * graphScale   // max
+    );
+    
+    // Mantieni dimensioni testo FISSE (non scalate)
+    CONFIG.chartTitleSize = 28;
+    CONFIG.chartLabelSize = 14;
+    CONFIG.chartTooltipTextSize = 17;
+    CONFIG.layout.labelFontSize = 16;
+    
+    // Aggiorna posizione del bottone Back
+    CONFIG.layout.startButtonY = windowHeight - 100; // 100px dal fondo
+}
+
 // ===== STATO APPLICAZIONE =====
 let state = {
     // Dati fissi per Merapi 1961 (presi dal dataset reale)
@@ -121,6 +199,9 @@ function initializeData() {
 
 // 3 - Setup iniziale
 function setup() {
+    // Calcola e applica lo scaling iniziale
+    applyResponsiveScaling();
+    
     let canvas = createCanvas(windowWidth, windowHeight);
     canvas.parent('main-sketch-container');
     frameRate(60);
@@ -169,7 +250,8 @@ function drawTitle() {
     textStyle(BOLD);
     textAlign(LEFT, TOP);
     
-    const titleY = CONFIG.layout.titleStartY + CONFIG.layout.topOffset;
+    // Usa margine fisso (non scalato)
+    const titleY = 95 - 20; // topOffset incluso
     
     fill(CONFIG.colors.text);
     text('ABOUT THE', CONFIG.layout.marginX, titleY);
@@ -181,22 +263,24 @@ function drawTitle() {
 }
 
 // 6a - Navbar per la pagina learn more (COPIA ESATTA DA P5)
+// 14 - Navbar per la pagina learn more - MODIFICATA SENZA SFONDO BIANCO
 function drawNavBar() {
     push();
     
+    // navbar fissa in alto - SENZA SFONDO BIANCO
     let navHeight = 60;
     let navY = 0;
     
-    // sfondo navbar
-    fill(255);
-    noStroke();
-    rect(-1, navY, width + 2, navHeight);
+    // NESSUNO sfondo navbar (rimuovi il rettangolo bianco)
+    // fill(255); <- RIMOSSO
+    // noStroke(); <- RIMOSSO
+    // rect(0, navY, width, navHeight); <- RIMOSSO
     
-    // Calcola se il mouse è sopra "Back" nella navbar
+    // AGGIUNGI: calcola se il mouse è sopra "Back"
     let isOverNavBack = false;
     
-    // Testo Back nella navbar
-    fill(0);
+    // Testo Back - BIANCO di default, NERO su hover
+    fill(CONFIG.colors.accent); // Bianco
     textSize(15);
     textFont("Helvetica");
     textStyle(BOLD);
@@ -209,16 +293,16 @@ function drawNavBar() {
     let backHeight = 20;
     let backTextY = backY - backHeight/2;
     
-    // Controlla se il mouse è sopra "Back" nella navbar
+    // Controlla se il mouse è sopra "Back"
     if (mouseX > backX && mouseX < backX + backWidth && 
         mouseY > backTextY && mouseY < backTextY + backHeight) {
         isOverNavBack = true;
-        fill("#FF2B00"); // Cambia colore su hover
+        fill(CONFIG.colors.text); // Nero su hover
     }
     
     text(backText, backX, backY);
     
-    // Memorizza l'area per l'interazione (solo per il back della navbar)
+    // Memorizza l'area per l'interazione
     state.navBackArea = {
         x: backX,
         y: backTextY,
@@ -226,19 +310,36 @@ function drawNavBar() {
         height: backHeight
     };
     
+    // LOGO RIMOSSO - non serve più la scritta "Significant Volcanic Eruptions"
+    // let logoText = "Significant Volcanic Eruptions"; <- RIMOSSO
+    // fill(0); <- RIMOSSO
+    // textSize(15); <- RIMOSSO
+    // textStyle(BOLD); <- RIMOSSO
+    // textAlign(LEFT, CENTER); <- RIMOSSO
+    // text(logoText, 200, navHeight/2); <- RIMOSSO
+    
+    // area logo per click - RIMOSSO
+    // let logoWidth = textWidth(logoText); <- RIMOSSO
+    // state.logoArea = { <- RIMOSSO
+    //     x: 200 - 11,  <- RIMOSSO
+    //     y: navY, <- RIMOSSO
+    //     width: logoWidth + 20, <- RIMOSSO
+    //     height: navHeight <- RIMOSSO
+    // }; <- RIMOSSO
+    
+    // link - modificati i colori
     let navLinks = [
         { name: "Homepage", href: "../index.html", x: 0 },
         { name: "Team", href: "team.html", x: 0 },
         { name: "Methodology", href: "methodology.html", x: 0 },
         { name: "Explore", href: "overview.html", x: 0, isExplore: true }
     ];
-    
+
     let totalLinksWidth = 0;
     let linkSpacing = 40;
     let linkFontSize = 15;
     
     textSize(linkFontSize);
-    textStyle(NORMAL);
     
     for (let link of navLinks) {
         link.width = textWidth(link.name);
@@ -246,6 +347,7 @@ function drawNavBar() {
     }
     totalLinksWidth += (navLinks.length - 1) * linkSpacing;
     
+    // posizione link
     let startX = width - totalLinksWidth - 40;
     let currentX = startX;
     
@@ -254,16 +356,18 @@ function drawNavBar() {
         link.x = currentX;
         link.y = navHeight/2;
         
+        // Colori di default
         if (link.isExplore) {
-            fill("#FF2B00");
+            fill(CONFIG.colors.accent); // Explore BIANCO di default
             textStyle(BOLD);
         } else {
-            fill(0);
+            fill(CONFIG.colors.text); // Homepage, Team, Methodology NERE di default
             textStyle(NORMAL);
         }
         
         text(link.name, link.x, link.y);
         
+        // hover
         let textW = link.width;
         let textH = 20;
         let textX = link.x;
@@ -271,20 +375,26 @@ function drawNavBar() {
         
         if (mouseX > textX && mouseX < textX + textW && 
             mouseY > textY && mouseY < textY + textH) {
-            if (!link.isExplore) {
-                fill("#FF2B00");
-                text(link.name, link.x, link.y);
+            
+            if (link.isExplore) {
+                // Explore: su hover diventa NERO
+                fill(CONFIG.colors.text); // Nero
+            } else {
+                // Homepage, Team, Methodology: su hover diventano BIANCHE
+                fill(CONFIG.colors.accent); // Bianco
             }
+            
+            text(link.name, link.x, link.y);
         }
         
         currentX += link.width + linkSpacing;
     }
-    
     state.navLinks = navLinks;
 
-    stroke(245, 40, 0);
+    // Aggiungi linea sotto la navbar - BIANCA invece che rossa
+    stroke(CONFIG.colors.accent); // Bianco
     strokeWeight(1);
-    line(0, navHeight, width, navHeight);
+    line(0, navHeight-5, width, navHeight-5); // Spostata leggermente più in alto (-5)
     
     pop();
 }
@@ -294,8 +404,9 @@ function drawBackButton() {
     const buttonWidth = 160;
     const buttonHeight = 40;
     
+    // Usa la posizione Y dal CONFIG (che viene aggiornata da applyResponsiveScaling)
     const buttonX = width - buttonWidth - 50;
-    const buttonY = CONFIG.layout.startButtonY;
+    const buttonY = CONFIG.layout.startButtonY; // ← Questo viene aggiornato nello scaling
     
     // NO FILL di default - solo su hover (come nel codice 1)
     if (state.isBackButtonHovered) {
@@ -340,12 +451,12 @@ function drawBackButton() {
 
 // 7 - Methodology Button - ESATTAMENTE COME NEL CODICE 1
 function drawMethodologyButton() {
-    const buttonWidth = 200; // Leggermente più largo per il testo più lungo
+    const buttonWidth = 200;
     const buttonHeight = 40;
     
-    // POSIZIONE: a sinistra, stessa altezza del back button (COME NEL CODICE 1)
-    const buttonX = 50; // Margine sinistro
-    const buttonY = CONFIG.layout.startButtonY; // Stessa altezza del back button
+    // POSIZIONE: a sinistra, stessa altezza del back button
+    const buttonX = 50;
+    const buttonY = CONFIG.layout.startButtonY; // ← Usa la stessa Y del back button
     
     // NO FILL di default - solo su hover (COME NEL CODICE 1)
     if (state.isMethodologyButtonHovered) {
@@ -864,7 +975,11 @@ function goBackToPreviousPage() {
 
 // 14 - Ridimensionamento finestra
 function windowResized() {
+    // Applica scaling responsive
+    applyResponsiveScaling();
+    
     resizeCanvas(windowWidth, windowHeight);
+    
     // Forza un ridisegno dopo il ridimensionamento
     if (typeof redraw === 'function') {
         redraw();
