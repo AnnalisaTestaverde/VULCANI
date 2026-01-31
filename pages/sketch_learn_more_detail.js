@@ -165,7 +165,7 @@ function formatDamageValue(damageValue) {
     return "Details not available";
   }
 
-  // Usa la funzione globale o quella definita localmente se accessibile, 
+  // Usa la funzione globale o quella definita localmente se accessibile,
   // ma per sicurezza qui replichiamo il calcolo standard:
   let value = damageValue * INFLATION_FACTOR;
 
@@ -182,11 +182,8 @@ function formatDamageValue(damageValue) {
 
 //testo dettagliato (spiegazione range da 1 a 4)
 function getDetailText(value, descCode, type) {
-  // LOGICA DI SKETCH_DETAIL.JS:
-  // Se 'value' contiene testo (es. "$5 million"), isNaN è true.
-  // Quindi !isNaN è false, e il codice salta questo return e va alla tabella sotto.
-  // Questo garantisce che vengano mostrate le descrizioni generiche (es. "Severe...")
-  // invece di un calcolo puntuale potenzialmente errato.
+  //se è true riposta il valore corretto
+  //se è false riporta la descrizione del range
   if (value !== "" && value !== 0 && !isNaN(value)) {
     return value;
   }
@@ -248,13 +245,12 @@ function buildChartDataFromRow(i) {
   let missingVal = Number(data.getString(i, "Missing Description"));
   let impactVal = Number(data.getString(i, "Impact"));
 
-  // Logica identica a sketch_detail.js per il valore del grafico
   let dmgValForChart = 0;
   if (!isNaN(dmgVal) && dmgVal > 0) {
     dmgValForChart = constrain(
-      Math.round(convertTo2026Dollars(dmgVal)), 
+      Math.round(convertTo2026Dollars(dmgVal)),
       0,
-      CONFIG.chartLevels
+      CONFIG.chartLevels,
     );
   }
 
@@ -287,11 +283,23 @@ function buildChartDataFromRow(i) {
     house: houseVal,
     missing: missingVal,
     impact: impactVal,
-    rawDeath: strDeath === "" || strDeath === "Details not available" ? "Details not available" : strDeath,
-    rawInj: strInj === "" || strInj === "Details not available" ? "Details not available" : strInj,
+    rawDeath:
+      strDeath === "" || strDeath === "Details not available"
+        ? "Details not available"
+        : strDeath,
+    rawInj:
+      strInj === "" || strInj === "Details not available"
+        ? "Details not available"
+        : strInj,
     rawDmg: formattedDamage,
-    rawHouse: strHouse === "" || strHouse === "Details not available" ? "Details not available" : strHouse,
-    rawMissing: strMissing === "" || strMissing === "Details not available" ? "Details not available" : strMissing,
+    rawHouse:
+      strHouse === "" || strHouse === "Details not available"
+        ? "Details not available"
+        : strHouse,
+    rawMissing:
+      strMissing === "" || strMissing === "Details not available"
+        ? "Details not available"
+        : strMissing,
     originalDmgValue: dmgVal,
     convertedDmgValue: convertTo2026Dollars(dmgVal),
   };
@@ -459,7 +467,6 @@ function drawImpactChart(d) {
     "Missing",
   ];
 
-  // USA LA STESSA LOGICA DI sketch_detail.js
   const isDataAvailable = [
     !(d.death === 0 && d.rawDeath === "Details not available"),
     !(d.inj === 0 && d.rawInj === "Details not available"),
@@ -489,7 +496,6 @@ function drawImpactChart(d) {
     }
   }
 
-  // SEZIONI CON DATI DISPONIBILI - COLORI INVERTITI: BIANCO invece di ROSSO
   for (let i = 0; i < 5; i++) {
     if (!isDataAvailable[i]) continue;
 
@@ -516,14 +522,13 @@ function drawImpactChart(d) {
           animatedOuterR = outerR;
         }
 
-        // COLORE INVERTITO: BIANCO invece di ROSSO
         fill(CONFIG.colors.chartAvailable);
         stroke(CONFIG.colors.chartAvailable);
         strokeWeight(1);
         drawArcSegment(innerR, animatedOuterR, start, end);
       } else {
         noFill();
-        // COLORE INVERTITO: BIANCO invece di ROSSO
+
         stroke(CONFIG.colors.chartAvailable);
         strokeWeight(1);
         drawArcSegment(innerR, outerR, start, end);
@@ -531,7 +536,7 @@ function drawImpactChart(d) {
     }
   }
 
-  // SEZIONI SENZA DATI DISPONIBILI - GRIGIO SCURO invece di GRIGIO CHIARO
+  //sez grigia scura x dati non disponibili
   for (let i = 0; i < 5; i++) {
     if (isDataAvailable[i]) continue;
 
@@ -560,7 +565,7 @@ function drawImpactChart(d) {
       drawingContext.clip();
 
       let patternSpacing = 6;
-      // COLORE GRIGIO SCURO
+
       let lineColor = color(CONFIG.colors.chartUnavailable);
       lineColor.setAlpha(150);
 
@@ -599,15 +604,14 @@ function drawImpactChart(d) {
       drawingContext.restore();
 
       noFill();
-      // BORDO GRIGIO SCURO invece di GRIGIO CHIARO
+
       stroke(CONFIG.colors.chartUnavailable);
       strokeWeight(1);
       drawArcSegment(innerR, outerR, start, end);
     }
   }
 
-  // ETICHETTE - USA LA STESSA LOGICA DI sketch_detail.js
-  let detailMaxWidth = 110; // Stessa larghezza di sketch_detail.js
+  let detailMaxWidth = 110;
 
   for (let i = 0; i < 5; i++) {
     let start = sectionAngle * i + gapAngle / 2;
@@ -616,15 +620,12 @@ function drawImpactChart(d) {
     textStyle(NORMAL);
     noStroke();
 
-    // Titolo categoria - COLORE INVERTITO
     if (!isDataAvailable[i]) {
-      // Grigio scuro per dati non disponibili
       fill(CONFIG.colors.labelUnavailableText);
     } else {
-      // Nero per dati disponibili (in sketch_detail.js era nero)
       fill(CONFIG.colors.labelAvailableText);
     }
-    
+
     textSize(CONFIG.chartLabelSize);
     textAlign(CENTER, CENTER);
     textStyle(BOLD);
@@ -639,21 +640,21 @@ function drawImpactChart(d) {
       let levelValue = values[i];
       let levelText = "Impact: " + levelValue;
 
-      // Impact value - COLORE INVERTITO: BIANCO invece di ROSSO
+      //val impatto
       fill(CONFIG.colors.chartAvailable);
       textSize(CONFIG.chartLabelSize);
       textStyle(BOLD);
       text(levelText, lx, ly - 3);
 
-      // Testo dettagliato - USA getDetailText() come in sketch_detail.js
       let detailText = "";
       if (i === 0) detailText = getDetailText(d.rawDeath, d.death, "deaths");
       else if (i === 1) detailText = getDetailText(d.rawInj, d.inj, "injuries");
       else if (i === 2) detailText = getDetailText(d.rawDmg, d.dmg, "damage");
-      else if (i === 3) detailText = getDetailText(d.rawHouse, d.house, "houses");
-      else if (i === 4) detailText = getDetailText(d.rawMissing, d.missing, "missing");
+      else if (i === 3)
+        detailText = getDetailText(d.rawHouse, d.house, "houses");
+      else if (i === 4)
+        detailText = getDetailText(d.rawMissing, d.missing, "missing");
 
-      // Testo dettaglio - COLORE INVERTITO: NERO invece di NERO (rimane uguale)
       fill(CONFIG.colors.labelAvailableText);
       textSize(CONFIG.chartLabelSize);
       textStyle(NORMAL);
@@ -662,7 +663,7 @@ function drawImpactChart(d) {
       let textY = ly + 7;
       text(detailText, lx - detailMaxWidth / 2, textY, detailMaxWidth);
     } else {
-      // Testo "Details not available" per sezioni senza dati
+      //details not available x sezioni senza dati
       fill(CONFIG.colors.labelUnavailableText);
       textSize(CONFIG.chartLabelSize);
       textStyle(NORMAL);
@@ -680,14 +681,13 @@ function drawImpactChart(d) {
 
   pop();
 
-  // Tooltip hover - USA formatDamageValue() come in sketch_detail.js
+  //tooltip hover
   if (hoveredSection !== -1 && isDataAvailable[hoveredSection]) {
     if (hoveredSection === 0) {
       tooltipText = getDetailText(d.rawDeath, d.death, "deaths");
     } else if (hoveredSection === 1) {
       tooltipText = getDetailText(d.rawInj, d.inj, "injuries");
     } else if (hoveredSection === 2) {
-      // USA formatDamageValue() COME IN sketch_detail.js
       tooltipText = formatDamageValue(d.originalDmgValue);
     } else if (hoveredSection === 3) {
       tooltipText = getDetailText(d.rawHouse, d.house, "houses");
@@ -700,10 +700,9 @@ function drawImpactChart(d) {
     drawTooltip(tooltipText);
   }
 
-  // Total impact level - COLORE INVERTITO: NERO invece di ROSSO
   push();
   noStroke();
-  fill(CONFIG.colors.text); // Nero invece di rosso
+  fill(CONFIG.colors.text);
   textSize(CONFIG.chartTitleSize);
   textAlign(RIGHT, CENTER);
   textStyle(BOLD);
@@ -1166,48 +1165,29 @@ function mousePressed() {
 
 //torna alla pagina precedente
 function goBackToPreviousPage() {
-  //URL memorizzato nel localStorage
-  if (state.previousPageUrl) {
-    console.log("Navigating back to previous page:", state.previousPageUrl);
-    window.location.href = state.previousPageUrl;
+  let volcanoName = getQueryParam("name");
+  let volcanoYear = getQueryParam("year");
+  let volcanoNumber = getQueryParam("number");
+
+  if (volcanoName) {
+    let backUrl = "detail.html?name=" + encodeURIComponent(volcanoName);
+
+    if (volcanoYear) backUrl += "&year=" + volcanoYear;
+    if (volcanoNumber) backUrl += "&number=" + volcanoNumber;
+
+    console.log("Navigating back to detail with specific params:", backUrl);
+    window.location.href = backUrl;
     return;
   }
 
-  //se URL non memorizzato usa il referrer del browser
   if (
     document.referrer &&
     document.referrer !== "" &&
     document.referrer !== window.location.href
   ) {
-    console.log("Using browser referrer:", document.referrer);
     window.location.href = document.referrer;
-    return;
-  }
-
-  //in alternativa usa un url di default
-  let volcanoName = getQueryParam("name");
-  let volcanoYear = getQueryParam("year");
-  let volcanoNumber = getQueryParam("number");
-
-  //se siamo arrivati alla pagine da detail
-  if (volcanoName || volcanoYear || volcanoNumber) {
-    // Probabilmente veniamo da detail.html
-    let backUrl = "detail.html";
-    let params = [];
-
-    if (volcanoName) params.push("name=" + encodeURIComponent(volcanoName));
-    if (volcanoYear) params.push("year=" + volcanoYear);
-    if (volcanoNumber) params.push("number=" + volcanoNumber);
-
-    if (params.length > 0) {
-      backUrl += "?" + params.join("&");
-    }
-
-    console.log("Fallback navigation to:", backUrl);
-    window.location.href = backUrl;
   } else {
-    //torna alla mappa
-    console.log("Default navigation to overview.html");
+    //torna alla mappa generale se tutto fallisce
     window.location.href = "overview.html";
   }
 }
