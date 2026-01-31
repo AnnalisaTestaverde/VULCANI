@@ -1331,7 +1331,7 @@ function checkScrollEnd() {
   } else {
     state.scrollHint.style.display = "block";
     state.isAtBottom = false;
-    state.showMethodologyButton = false; //non mostra bottone
+    state.showMethodologyButton = false; //non mostra bottone 
   }
 }
 
@@ -1349,6 +1349,7 @@ document.addEventListener("DOMContentLoaded", function () {
   setTimeout(function () {
     if (typeof setup === "function" && !state.initialized) {
       initializeData();
+
       if (typeof redraw === "function") {
         redraw();
       }

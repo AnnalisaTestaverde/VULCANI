@@ -73,7 +73,7 @@ function updateResponsiveDimensions() {
 
   //scale grafico
   chartSize = constrain(
-    targetSize * 0.8, 
+    targetSize * 0.8,
     CONFIG.layout.minChartSize * graphScale,
     CONFIG.layout.maxChartSize * graphScale,
   );
