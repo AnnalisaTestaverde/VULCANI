@@ -22,7 +22,7 @@ const sections = [
     subtitle: "HOW WE INTERPRET AND PRESENT DATA.",
     imageId: "methodology-image-3",
     buttonText: "Explore the detail graphs",
-    buttonLink: "learn_more_detail.html",
+    buttonLink: "detail.html?name=Vesuvius&year=1631&impact=12",
   },
 ];
 
