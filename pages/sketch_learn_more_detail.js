@@ -323,10 +323,7 @@ function initializeData() {
     state.previousPageUrl = localStorage.getItem(
       "previousPageBeforeDetailView",
     );
-    console.log("Previous page URL from localStorage:", state.previousPageUrl);
-  } catch (e) {
-    console.log("Could not read previous page URL from localStorage:", e);
-  }
+  } catch (e) {}
 
   //carica i dati del grafico
   if (state.volcanoName && state.volcanoNumber && data) {
@@ -337,7 +334,6 @@ function initializeData() {
 
     if (rowIndex !== -1) {
       state.chartData = buildChartDataFromRow(rowIndex);
-      console.log("Chart data loaded:", state.chartData);
     } else {
       console.warn(
         "No data found for:",
@@ -362,7 +358,6 @@ function initializeData() {
       };
     }
   } else {
-    console.error("Missing parameters or data not loaded");
     state.chartData = {
       name: state.volcanoName || "Volcano",
       year: state.volcanoYear || "Unknown",
@@ -1175,7 +1170,6 @@ function goBackToPreviousPage() {
     if (volcanoYear) backUrl += "&year=" + volcanoYear;
     if (volcanoNumber) backUrl += "&number=" + volcanoNumber;
 
-    console.log("Navigating back to detail with specific params:", backUrl);
     window.location.href = backUrl;
     return;
   }

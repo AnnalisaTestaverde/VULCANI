@@ -13,6 +13,7 @@ const CONFIG = {
 };
 
 let scaleFactor = 1.0;
+let currentChartData = null;
 
 //scaling
 function calculateScaleFactor() {
@@ -167,6 +168,7 @@ function setup() {
   if (!selectedName) return;
 
   processDataFast();
+  updateChartData();
 
   startAnimation();
   initialAnimationStarted = true;
@@ -218,6 +220,15 @@ function processDataFast() {
   if (eruptions.length > 0 && currentIndex === 0) {
     selectedYear = eruptions[0].year;
     selectedNumber = eruptions[0].number;
+  }
+}
+
+function updateChartData() {
+  let dataRowIndex = findDataRowIndexFast();
+  if (dataRowIndex !== -1) {
+    currentChartData = buildChartDataFromRow(dataRowIndex);
+  } else {
+    currentChartData = null;
   }
 }
 
@@ -392,10 +403,8 @@ function drawFullContentOptimized() {
     selected.dy,
   );
 
-  let dataRowIndex = findDataRowIndexFast();
-  if (dataRowIndex !== -1) {
-    let chartDatum = buildChartDataFromRow(dataRowIndex);
-    drawImpactChart(chartDatum);
+  if (currentChartData) {
+    drawImpactChart(currentChartData);
   } else {
     drawChartPlaceholder();
   }
@@ -2047,6 +2056,7 @@ function updateCurrentEruption() {
   startAnimation();
 
   loadVolcanoImageAsync();
+  updateChartData();
 }
 
 function updateCursor() {
